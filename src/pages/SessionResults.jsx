@@ -2,19 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
-import SessionHeader from "../components/pronosticos/SessionHeader"; // Importamos el componente
+import SessionHeader from "../components/pronosticos/SessionHeader";
+import { getResultsOrderedByPosition } from "../api/results";
 
 const SessionResult = () => {
-  const { sessionId } = useParams(); // Obtenemos el sessionId de la URL
+  const { sessionId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // Para obtener los datos pasados en el state
+  const location = useLocation();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sessionData, setSessionData] = useState(null); // Almacenamos los datos de la sesión
+  const [sessionData, setSessionData] = useState(null);
 
   useEffect(() => {
-    // Obtenemos los datos de la sesión desde location.state
     if (location.state) {
       setSessionData(location.state);
     }
@@ -22,14 +22,8 @@ const SessionResult = () => {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        // Aquí iría la llamada a una API, por ejemplo: await getSessionResults(sessionId)
-        // Por ahora, usamos datos ficticios
-        const dummyResults = Array.from({ length: 20 }, (_, index) => ({
-          position: index < 18 ? index + 1 : "DNF",
-          driver: `Driver ${index + 1}`,
-          team: `Team ${Math.ceil((index + 1) / 2)}`,
-        }));
-        setResults(dummyResults);
+        const data = await getResultsOrderedByPosition(sessionId);
+        setResults(data);
       } catch (err) {
         setError("Error al cargar los resultados: " + err.message);
       } finally {
@@ -56,7 +50,6 @@ const SessionResult = () => {
     );
   }
 
-  // Si no hay datos de la sesión, mostramos un fallback
   if (!sessionData) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -69,14 +62,14 @@ const SessionResult = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-24 px-4 mb-4">
+      <main className="flex-grow pt-24 px-4">
         <div className="mt-12">
           <SessionHeader
             countryName={sessionData.countryName}
             flagUrl={sessionData.flagUrl}
             sessionName={sessionData.sessionName}
             sessionType={sessionData.sessionType}
-            className="mb-4" // Margen inferior para separar del contenido
+            className="mb-4"
           />
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200">
@@ -88,11 +81,19 @@ const SessionResult = () => {
                 </tr>
               </thead>
               <tbody>
-                {results.map((result, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="py-2 px-4 border-b">{result.position}</td>
-                    <td className="py-2 px-4 border-b">{result.driver}</td>
-                    <td className="py-2 px-4 border-b">{result.team}</td>
+                {results.map((result) => (
+                  <tr key={result.id} className="hover:bg-gray-50">
+                    <td className="py-2 px-4 border-b">
+                      {result.status === "" || result.status === "FINISHED"
+                        ? result.position
+                        : result.status}
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      {result.driver.last_name}
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      {result.driver.team_name}
+                    </td>
                   </tr>
                 ))}
               </tbody>
