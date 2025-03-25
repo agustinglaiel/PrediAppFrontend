@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
-import PastResultsEvents from "../components/results/PastResultsEvents";
-import { getPastSessions } from "../api/sessions"; // Usamos sesiones pasadas
+import PastResultsEvents from "../components/results/PastResultsEvents"; // Ruta ajustada según tu estructura
+import { getPastSessions } from "../api/sessions";
 
 const ResultsPage = () => {
   const [events, setEvents] = useState([]);
@@ -17,7 +17,7 @@ const ResultsPage = () => {
       try {
         setLoading(true);
         setEvents([]);
-        const data = await getPastSessions(); // Obtenemos sesiones pasadas
+        const data = await getPastSessions();
         const groupedEvents = processSessions(data);
         setEvents(groupedEvents);
       } catch (err) {
@@ -106,8 +106,7 @@ const ResultsPage = () => {
         sessionType: session.session_type || "Unknown Type",
         startTime: `${startTime}:00`,
         endTime: `${endTime}:00`,
-        date_start: session.date_start, // Para ordenamiento
-        // No necesitamos hasPronostico, prodeSession ni prodeRace
+        date_start: session.date_start,
       });
     });
 
@@ -119,12 +118,7 @@ const ResultsPage = () => {
   };
 
   const handleResultClick = (sessionData) => {
-    const isRace =
-      sessionData.sessionType === "Race" && sessionData.sessionName === "Race";
-    const path = isRace
-      ? `/pronosticos/result/race/${sessionData.id}`
-      : `/pronosticos/result/${sessionData.id}`;
-    navigate(path, { state: sessionData });
+    navigate(`/resultados/${sessionData.id}`, { state: sessionData });
   };
 
   if (loading) {
@@ -148,10 +142,7 @@ const ResultsPage = () => {
       <Header />
       <NavigationBar />
       <main className="flex-grow pt-24">
-        <PastResultsEvents
-          events={events}
-          onResultClick={handleResultClick} // Maneja la navegación a la página de resultados
-        />
+        <PastResultsEvents events={events} onResultClick={handleResultClick} />
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>

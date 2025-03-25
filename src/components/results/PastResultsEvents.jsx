@@ -1,11 +1,11 @@
-// src/components/PastResultsEvents.jsx
+// src/components/results/PastResultsEvents.jsx
 import React from "react";
 import EventCard from "../EventCard";
 
 const PastResultsEvents = ({ events, onResultClick }) => {
   return (
     <div className="px-4 mt-12">
-      <h2 className="text-2xl font-bold mb-4">Resultados</h2>
+      <h2 className="text-2xl font-bold mb-4 mt-4">Resultados</h2>
       {events.length === 0 ? (
         <p className="text-gray-500 text-sm italic">
           No hay resultados disponibles aún.
@@ -19,8 +19,8 @@ const PastResultsEvents = ({ events, onResultClick }) => {
             sessions={event.sessions}
             flagUrl={event.flagUrl}
             circuitLayoutUrl={event.circuitLayoutUrl}
-            onPronosticoClick={onResultClick} // Usamos esto para "Ver resultados"
-            isPastEvent={true} // Forzamos eventos pasados
+            onPronosticoClick={onResultClick}
+            isPastEvent={true}
           />
         ))
       )}
