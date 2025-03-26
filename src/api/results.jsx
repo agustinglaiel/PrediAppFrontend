@@ -66,3 +66,39 @@ export const getTopNDriversInSession = async (sessionID, n) => {
     );
   }
 };
+
+// Función para guardar resultados
+export const saveSessionResults = async (sessionId, results) => {
+  try {
+    // Formateamos el payload según lo que espera el backend
+    const payload = {
+      session_id: parseInt(sessionId), // Aseguramos que sea un entero
+      results: results.map((result) => ({
+        driver_id: result.driver_id,
+        position: result.status === "FINISHED" ? result.position : null, // null si no es "FINISHED"
+        status: result.status,
+        fastest_lap_time: result.fastest_lap_time || 0, // Por defecto 0 si no se proporciona
+      })),
+    };
+
+    const response = await axios.post(
+      `${API_URL}/results/session/${sessionId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(`Results saved for session ${sessionId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error saving results for session ${sessionId}:`, {
+      message: error.message,
+      response: error.response?.data,
+    });
+    throw new Error(
+      error.response?.data?.message || "Error saving results for the session."
+    );
+  }
+};

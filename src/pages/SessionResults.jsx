@@ -62,7 +62,7 @@ const SessionResult = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-24 px-4">
+      <main className="flex-grow pt-24 px-4 mb-4">
         <div className="mt-12">
           <SessionHeader
             countryName={sessionData.countryName}

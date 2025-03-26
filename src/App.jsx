@@ -10,6 +10,7 @@ import ProdeSessionResultPage from "./pages/ProdeSessionResultPage";
 import ProdeRaceResultPage from "./pages/ProdeRaceResultPage";
 import ResultsPage from "./pages/ResultsPage";
 import SessionResult from "./pages/SessionResults";
+import AdminSessionResults from "./pages/AdminSessionResults";
 
 function App() {
   return (
@@ -29,6 +30,10 @@ function App() {
         />
         <Route path="/resultados" element={<ResultsPage />} />
         <Route path="/resultados/:sessionId" element={<SessionResult />} />
+        <Route
+          path="/admin/resultados/:sessionId"
+          element={<AdminSessionResults />}
+        />{" "}
         {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </Router>
