@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 import { login } from "../api/users";
 
-const LoginForm = ({ onLoginSuccess }) => {
+const LoginForm = () => {
+  const { login: authLogin } = useContext(AuthContext); // Obtenemos la función login del contexto
+  const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -15,11 +17,15 @@ const LoginForm = ({ onLoginSuccess }) => {
     e.preventDefault();
     try {
       setError(null);
-      const response = await login(credentials);
-      if (onLoginSuccess) {
-        onLoginSuccess(); // Llamamos al callback si se proporciona
+      const response = await login(credentials); // Llama al backend
+      authLogin(response); // Pasa los datos al AuthContext para manejar la autenticación
+
+      // Redirección basada en el rol
+      if (response.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true }); // Opcional: ajusta según tu lógica
       }
-      navigate("/", { replace: true });
     } catch (err) {
       setError(
         err.message ||
@@ -55,7 +61,7 @@ const LoginForm = ({ onLoginSuccess }) => {
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
             placeholder="tu@email.com"
             required
-            autoComplete="email" // Añadimos autocomplete para el campo de email
+            autoComplete="email"
           />
         </div>
         <div>
@@ -74,7 +80,7 @@ const LoginForm = ({ onLoginSuccess }) => {
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200"
             placeholder="••••••••"
             required
-            autoComplete="current-password" // Añadimos autocomplete para el campo de contraseña
+            autoComplete="current-password"
           />
         </div>
         <button

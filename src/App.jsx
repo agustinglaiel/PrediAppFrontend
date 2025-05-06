@@ -9,8 +9,11 @@ import PronosticosPage from "./pages/PronosticosPage";
 import ProdeSessionResultPage from "./pages/ProdeSessionResultPage";
 import ProdeRaceResultPage from "./pages/ProdeRaceResultPage";
 import ResultsPage from "./pages/ResultsPage";
-import SessionResult from "./pages/SessionResults";
-import AdminSessionResults from "./pages/AdminSessionResults";
+// import SessionResult from "./pages/SessionResults";
+// import AdminSessionResults from "./pages/AdminSessionResults";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import UserManagementPage from "./pages/UserManagementPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -29,11 +32,22 @@ function App() {
           element={<ProdeRaceResultPage />}
         />
         <Route path="/resultados" element={<ResultsPage />} />
-        <Route path="/resultados/:sessionId" element={<SessionResult />} />
         <Route
-          path="/admin/resultados/:sessionId"
-          element={<AdminSessionResults />}
-        />{" "}
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <UserManagementPage />
+            </ProtectedRoute>
+          }
+        />
         {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </Router>

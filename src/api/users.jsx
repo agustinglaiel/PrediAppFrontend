@@ -42,20 +42,21 @@ export const login = async (userData) => {
       throw new Error("Respuesta del servidor inválida.");
     }
 
-    // Extraemos token, refresh_token e id de la respuesta
-    const { token, refresh_token, id: userId } = data;
+    // Extraemos token, refresh_token, id y role de la respuesta
+    const { token, refresh_token, id: userId, role } = data;
 
     // Verificamos si los campos necesarios existen
-    if (!token || !refresh_token || !userId) {
+    if (!token || !refresh_token || !userId || !role) {
       throw new Error(
-        "Faltan datos necesarios en la respuesta del servidor. Verifica que el backend devuelva 'token', 'refresh_token' e 'id'."
+        "Faltan datos necesarios en la respuesta del servidor. Verifica que el backend devuelva 'token', 'refresh_token', 'id' y 'role'."
       );
     }
 
-    // Almacenar ambos tokens y el userId
+    // Almacenar tokens, userId y role
     localStorage.setItem("jwtToken", token);
     localStorage.setItem("refreshToken", refresh_token);
     localStorage.setItem("userId", userId);
+    localStorage.setItem("userRole", role); // Almacenar el rol
     setAuthToken(token);
 
     return data;
@@ -113,6 +114,7 @@ export const logout = async () => {
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("userRole"); // Eliminar el rol
     setAuthToken(null);
   } catch (error) {
     console.error("Logout error:", error.response?.data || error.message);
