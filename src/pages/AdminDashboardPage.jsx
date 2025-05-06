@@ -25,7 +25,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/sessions"
-              className="block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-indigo-700 text-center w-full"
+              className="block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center w-full"
             >
               Gestionar Sesiones
             </a>
@@ -33,7 +33,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/results"
-              className="block px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-indigo-700 text-center w-full"
+              className="block px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 text-center w-full"
             >
               Gestionar Resultados
             </a>
@@ -41,7 +41,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/results"
-              className="block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-indigo-700 text-center w-full"
+              className="block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-center w-full"
             >
               Gestionar Pilotos
             </a>
