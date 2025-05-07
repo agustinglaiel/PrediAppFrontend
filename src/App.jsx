@@ -14,6 +14,7 @@ import ResultsPage from "./pages/ResultsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 
 function App() {
   return (
@@ -45,6 +46,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/sessions"
+          element={
+            <ProtectedRoute>
+              <AdminSessionManagementPage />
             </ProtectedRoute>
           }
         />

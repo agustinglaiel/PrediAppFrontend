@@ -13,6 +13,8 @@ const EventCard = ({
   onCloseModal,
   onContinueToLogin,
   isPastEvent = false,
+  isAdmin = false,
+  onEditClick, // Nueva prop
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -38,7 +40,7 @@ const EventCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden max-w-full">
       <div className="p-4 flex items-center">
         <div className="bg-gray-100 w-16 h-12 rounded-lg flex items-center justify-center overflow-hidden">
           {flagUrl && (
@@ -49,7 +51,7 @@ const EventCard = ({
             />
           )}
         </div>
-        <div className="ml-4">
+        <div className="ml-4 flex-grow">
           <h3 className="font-bold text-xl">{country}</h3>
           <p className="text-gray-600">{circuit}</p>
         </div>
@@ -84,6 +86,8 @@ const EventCard = ({
             isPastEvent={isPastEvent}
             score={session.score}
             onPronosticoClick={() => handlePronosticoClickLocal(session)}
+            isAdmin={isAdmin}
+            onEditClick={() => onEditClick && onEditClick(session)} // Pasamos onEditClick
           />
         ))}
       </div>

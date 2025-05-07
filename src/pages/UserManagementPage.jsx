@@ -66,7 +66,6 @@ const UserManagementPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <NavigationBar />
       <main className="flex-grow pt-24 px-4">
         <h1 className="text-3xl font-bold mb-6">Gestión de Usuarios</h1>
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -77,11 +76,11 @@ const UserManagementPage = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Nombre de Usuario</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Rol</th>
-                  <th className="p-3 text-left">Acciones</th>
+                  <th className="p-3 text-left w-1/5">ID</th>
+                  <th className="p-3 text-left w-1/5">Nombre de Usuario</th>
+                  <th className="p-3 text-left w-1/5">Email</th>
+                  <th className="p-3 text-left w-1/5">Rol</th>
+                  <th className="p-3 text-left w-1/5">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,6 +113,10 @@ const UserManagementPage = () => {
               </tbody>
             </table>
           )}
+        </div>
+        <div className="mt-6 ml-0 text-left w-1/3 bg-gray-200 p-4 rounded">
+          <h3 className="text-lg font-semibold mb-2">Estadísticas</h3>
+          <p>Cantidad de usuarios: {users.length}</p>
         </div>
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">

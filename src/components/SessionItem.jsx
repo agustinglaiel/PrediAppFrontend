@@ -20,6 +20,8 @@ const SessionItem = ({
   prodeRace,
   isPastEvent = false,
   score,
+  isAdmin = false,
+  onEditClick, // Nueva prop para manejar el clic en "Editar"
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -36,7 +38,7 @@ const SessionItem = ({
         </div>
       </div>
 
-      {isPastEvent ? (
+      {!isAdmin && isPastEvent ? (
         <button
           onClick={onPronosticoClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -45,26 +47,33 @@ const SessionItem = ({
             ? `${score} Puntos`
             : "Ver resultados"}
         </button>
-      ) : (
-        hasPronostico !== undefined && (
-          <button
-            onClick={onPronosticoClick}
-            className={`
-              px-4 py-1
-              rounded-full
-              text-sm font-medium
-              transition-colors duration-200
-              whitespace-nowrap
-              ${
-                hasProde
-                  ? "bg-white text-green-500 border border-green-500 hover:bg-green-50"
-                  : "bg-orange-300 text-white hover:bg-orange-400"
-              }
-            `}
-          >
-            {hasProde ? "Actualizar pronóstico" : "Completar pronóstico"}
-          </button>
-        )
+      ) : !isAdmin && hasPronostico !== undefined ? (
+        <button
+          onClick={onPronosticoClick}
+          className={`
+            px-4 py-1
+            rounded-full
+            text-sm font-medium
+            transition-colors duration-200
+            whitespace-nowrap
+            ${
+              hasProde
+                ? "bg-white text-green-500 border border-green-500 hover:bg-green-50"
+                : "bg-orange-300 text-white hover:bg-orange-400"
+            }
+          `}
+        >
+          {hasProde ? "Actualizar pronóstico" : "Completar pronóstico"}
+        </button>
+      ) : null}
+
+      {isAdmin && onEditClick && (
+        <button
+          onClick={onEditClick}
+          className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
+        >
+          Editar
+        </button>
       )}
 
       <AuthModal

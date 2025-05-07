@@ -37,3 +37,43 @@ export const getSessionById = async (sessionId) => {
     throw new Error("Error fetching session by ID: " + error.message);
   }
 };
+
+export const createSession = async (sessionData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/sessions`, sessionData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`, // Asegúrate de incluir el token si es necesario
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating session:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Error al crear la sesión. Contacta al soporte."
+    );
+  }
+};
+
+export const updateSession = async (sessionId, sessionData) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URL}/sessions/${sessionId}`,
+      sessionData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      }
+    );
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    console.error("Error updating session:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Error al actualizar la sesión. Contacta al soporte."
+    );
+  }
+};

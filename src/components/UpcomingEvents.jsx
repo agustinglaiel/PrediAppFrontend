@@ -8,6 +8,7 @@ const UpcomingEvents = ({
   isModalOpen,
   onCloseModal,
   onContinueToLogin,
+  isAdmin = false,
 }) => {
   return (
     <div className="px-4 mt-12">
@@ -24,6 +25,7 @@ const UpcomingEvents = ({
           isModalOpen={isModalOpen}
           onCloseModal={onCloseModal}
           onContinueToLogin={onContinueToLogin}
+          isAdmin={isAdmin}
         />
       ))}
     </div>
