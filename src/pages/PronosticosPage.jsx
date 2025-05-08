@@ -7,7 +7,7 @@ import NavigationBar from "../components/NavigationBar";
 import UpcomingEvents from "../components/UpcomingEvents";
 import PastEvents from "../components/PastEvents";
 
-import { getUpcomingSessions, getPastSessions } from "../api/sessions";
+import { getUpcomingSessions, getPastSessionsByYear } from "../api/sessions";
 import { getProdeByUserAndSession } from "../api/prodes";
 
 const PronosticosPage = () => {
@@ -110,9 +110,10 @@ const PronosticosPage = () => {
         setLoading(true);
         setError(null);
 
+        const currentYear = new Date().getFullYear(); // Obtenemos el año actual
         const [upcomingRaw, pastRaw] = await Promise.all([
           getUpcomingSessions(),
-          getPastSessions(),
+          getPastSessionsByYear(currentYear), // Pasamos el año actual
         ]);
 
         console.log("Sesiones pasadas crudas:", pastRaw);

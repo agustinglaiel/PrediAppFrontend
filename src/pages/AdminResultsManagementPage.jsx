@@ -1,69 +1,47 @@
-// src/pages/ResultsPage.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import NavigationBar from "../components/NavigationBar";
-import PastResultsEvents from "../components/results/PastResultsEvents"; // Ruta ajustada según tu estructura
+import EventCard from "../components/EventCard";
 import { getPastSessionsByYear } from "../api/sessions";
 
-const ResultsPage = () => {
+const AdminResultsManagementPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Año actual por defecto
 
   useEffect(() => {
-    const fetchPastSessions = async () => {
+    const fetchSessions = async () => {
       try {
         setLoading(true);
-        setEvents([]);
-        const currentYear = new Date().getFullYear(); // Obtenemos el año actual
-        const data = await getPastSessionsByYear(currentYear); // Pasamos el año actual
+        const data = await getPastSessionsByYear(selectedYear);
         const groupedEvents = processSessions(data);
         setEvents(groupedEvents);
       } catch (err) {
-        if (err.response && err.response.status === 403) {
-          setError(
-            "Acceso denegado (403). Verifica los permisos o contacta al soporte."
-          );
-        } else if (err.response && err.response.status === 401) {
-          setError(
-            "No autorizado (401). Verifica los permisos o contacta al soporte."
-          );
-        } else {
-          setError(`No se pudieron cargar los resultados: ${err.message}`);
-        }
-        console.error("Error fetching past sessions:", err);
+        setError(err.message || "Error al cargar sesiones pasadas.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchPastSessions();
-  }, []);
+    fetchSessions();
+  }, [selectedYear]); // Re-fetch cuando cambie el año seleccionado
 
   const processSessions = (sessions) => {
-    if (!sessions || !Array.isArray(sessions)) {
-      return [];
-    }
-
     const eventsMap = {};
     sessions.forEach((session) => {
-      const weekendId = session.weekend_id || "unknown";
+      const weekendId = session.weekend_id;
       if (!eventsMap[weekendId]) {
         eventsMap[weekendId] = {
-          country: session.country_name || "Unknown",
-          circuit: session.circuit_short_name || "Unknown Circuit",
+          country: session.country_name,
+          circuit: session.circuit_short_name,
           flagUrl: session.country_name
             ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
             : "/images/flags/default.jpg",
           circuitLayoutUrl: session.country_name
-            ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
+            ? `/images/circuitLayouts/${session.country_name.toLowerCase()}.png`
             : "/images/circuitLayouts/default.png",
           sessions: [],
         };
       }
-
       let day = "1";
       let month = "JAN";
       if (session.date_start && typeof session.date_start === "string") {
@@ -92,40 +70,44 @@ const ResultsPage = () => {
           console.error("Error parsing date_start:", session.date_start, error);
         }
       }
-
       const [startTime] = session.date_start
         .split("T")[1]
         .split("-")[0]
         .split(":");
       const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
-
       eventsMap[weekendId].sessions.push({
-        id: session.id || Math.random(),
+        id: session.id,
         date: day,
         month: month,
-        sessionName: session.session_name || "Unknown Session",
-        sessionType: session.session_type || "Unknown Type",
+        sessionName: session.session_name,
+        sessionType: session.session_type,
         startTime: `${startTime}:00`,
         endTime: `${endTime}:00`,
         date_start: session.date_start,
+        weekend_id: session.weekend_id,
+        circuit_key: session.circuit_key,
+        circuit_short_name: session.circuit_short_name,
+        country_code: session.country_code,
+        country_name: session.country_name,
+        location: session.location,
+        year: session.year,
       });
     });
-
     return Object.values(eventsMap).sort((a, b) => {
       const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
       const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
-      return dateB - dateA; // Ordenamos de más reciente a más antiguo
+      return dateA - dateB;
     });
   };
 
-  const handleResultClick = (sessionData) => {
-    navigate(`/resultados/${sessionData.id}`, { state: sessionData });
+  const handleYearChange = (e) => {
+    setSelectedYear(parseInt(e.target.value, 10));
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600">Cargando resultados...</p>
+        <p className="text-gray-600">Cargando...</p>
       </div>
     );
   }
@@ -141,9 +123,50 @@ const ResultsPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <NavigationBar />
-      <main className="flex-grow pt-24">
-        <PastResultsEvents events={events} onResultClick={handleResultClick} />
+      <main className="flex-grow pt-24 px-4">
+        <h1 className="text-3xl font-bold mb-6">Gestión de Resultados</h1>
+        <div className="mb-4">
+          <label className="mr-2 text-gray-700">Seleccionar Año:</label>
+          <select
+            value={selectedYear}
+            onChange={handleYearChange}
+            className="p-2 border rounded"
+          >
+            {[...Array(10).keys()].map((i) => {
+              const year = new Date().getFullYear() - i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div className="px-4 mt-12">
+          <h2 className="text-2xl font-bold mb-4">
+            Sesiones Pasadas: {selectedYear}
+          </h2>
+          {events.length === 0 ? (
+            <p className="text-gray-600">
+              No hay sesiones pasadas para este año.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {events.map((event, index) => (
+                <EventCard
+                  key={index}
+                  country={event.country}
+                  circuit={event.circuit}
+                  sessions={event.sessions}
+                  flagUrl={event.flagUrl}
+                  circuitLayoutUrl={event.circuitLayoutUrl}
+                  isAdmin={true}
+                  // onEditClick={handleEditClick} // Por ahora no permitimos edición desde aquí
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
@@ -152,4 +175,4 @@ const ResultsPage = () => {
   );
 };
 
-export default ResultsPage;
+export default AdminResultsManagementPage;

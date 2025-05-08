@@ -18,13 +18,12 @@ export const getUpcomingSessions = async () => {
   }
 };
 
-export const getPastSessions = async () => {
+export const getPastSessionsByYear = async (year) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/sessions/lasts`);
+    const response = await axios.get(`${API_BASE_URL}/sessions/lasts/${year}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching past sessions:", error);
-    throw error;
+    throw new Error("Error fetching past sessions: " + error.message);
   }
 };
 
