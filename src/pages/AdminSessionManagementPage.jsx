@@ -5,6 +5,7 @@ import {
   getUpcomingSessions,
   getSessionById,
   updateSession,
+  createSession,
 } from "../api/sessions";
 import SessionForm from "../components/admin/SessionForm";
 
@@ -44,7 +45,7 @@ const AdminSessionManagementPage = () => {
             ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
             : "/images/flags/default.jpg",
           circuitLayoutUrl: session.country_name
-            ? `/images/circuitLayouts/${session.country_name.toLowerCase()}.png`
+            ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
             : "/images/circuitLayouts/default.png",
           sessions: [],
         };
@@ -109,25 +110,36 @@ const AdminSessionManagementPage = () => {
 
   const handleCreateSession = async (sessionData) => {
     try {
-      const response = await createSession(sessionData);
-      const data = await getUpcomingSessions();
-      const groupedEvents = processSessions(data);
-      setEvents(groupedEvents);
-      setIsModalOpen(false);
+      setLoading(true);
+      console.log("Enviando datos a createSession:", sessionData); // Depuración
+      const { data, status } = await createSession(sessionData);
+      console.log("Respuesta de createSession:", { data, status }); // Depuración
+      if (status === 201) {
+        // StatusCreated
+        const updatedData = await getUpcomingSessions();
+        const groupedEvents = processSessions(updatedData);
+        setEvents(groupedEvents);
+        setIsModalOpen(false);
+      } else {
+        setError(`La creación no fue exitosa. Estado: ${status}`);
+      }
     } catch (err) {
-      setError(err.message);
+      console.error("Error en handleCreateSession:", err);
+      setError(err.message || "Error al crear la sesión.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdateSession = async (sessionData) => {
     try {
       setLoading(true);
-      console.log("Enviando datos a updateSession:", sessionData); // Depuración
+      console.log("Enviando datos a updateSession:", sessionData);
       const { data, status } = await updateSession(
         selectedSession.id,
         sessionData
       );
-      console.log("Respuesta de updateSession:", { data, status }); // Depuración
+      console.log("Respuesta de updateSession:", { data, status });
       if (status === 200) {
         const updatedData = await getUpcomingSessions();
         const groupedEvents = processSessions(updatedData);

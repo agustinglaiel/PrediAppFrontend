@@ -43,10 +43,10 @@ export const createSession = async (sessionData) => {
     const response = await axios.post(`${API_BASE_URL}/sessions`, sessionData, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`, // Asegúrate de incluir el token si es necesario
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
     });
-    return response.data;
+    return { data: response.data, status: response.status }; // Devolvemos datos y estado
   } catch (error) {
     console.error("Error creating session:", error);
     throw new Error(

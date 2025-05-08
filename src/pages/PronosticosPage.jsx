@@ -31,7 +31,7 @@ const PronosticosPage = () => {
             ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
             : "/images/flags/default.jpg",
           circuitLayoutUrl: session.country_name
-            ? `/images/circuitLayouts/${session.country_name.toLowerCase()}.png`
+            ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
             : "/images/circuitLayouts/default.png",
           sessions: [],
         };
