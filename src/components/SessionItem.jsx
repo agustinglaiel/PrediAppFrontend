@@ -1,4 +1,3 @@
-// frontendnuevo/src/components/SessionItem.jsx
 import React from "react";
 import DateDisplay from "./DateDisplay";
 import AuthModal from "./AuthModal";
@@ -21,7 +20,8 @@ const SessionItem = ({
   isPastEvent = false,
   score,
   isAdmin = false,
-  onEditClick, // Nueva prop para manejar el clic en "Editar"
+  onEditClick, // Prop existente
+  editButtonText, // Nuevo prop opcional
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -72,7 +72,8 @@ const SessionItem = ({
           onClick={onEditClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
         >
-          Editar
+          {editButtonText || "Editar"}{" "}
+          {/* Usamos el prop si existe, sino "Editar" */}
         </button>
       )}
 

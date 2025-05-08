@@ -1,4 +1,3 @@
-// frontendnuevo/src/components/EventCard.jsx
 import React from "react";
 import SessionItem from "./SessionItem";
 
@@ -14,7 +13,8 @@ const EventCard = ({
   onContinueToLogin,
   isPastEvent = false,
   isAdmin = false,
-  onEditClick, // Nueva prop
+  onEditClick, // Prop existente
+  editButtonText, // Nuevo prop opcional para el texto del botón
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -88,6 +88,7 @@ const EventCard = ({
             onPronosticoClick={() => handlePronosticoClickLocal(session)}
             isAdmin={isAdmin}
             onEditClick={() => onEditClick && onEditClick(session)} // Pasamos onEditClick
+            editButtonText={editButtonText} // Pasamos el prop a SessionItem
           />
         ))}
       </div>

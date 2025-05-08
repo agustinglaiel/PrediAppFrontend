@@ -1,29 +1,39 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import EventCard from "../components/EventCard";
+import UpdateResults from "../components/admin/UpdateResults"; // Corrección aquí
 import { getPastSessionsByYear } from "../api/sessions";
+import { getAllDrivers } from "../api/drivers";
+import { saveSessionResultsAdmin } from "../api/results";
 
 const AdminResultsManagementPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Año actual por defecto
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
-    const fetchSessions = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getPastSessionsByYear(selectedYear);
-        const groupedEvents = processSessions(data);
+        const [sessionsData, driversData] = await Promise.all([
+          getPastSessionsByYear(selectedYear),
+          getAllDrivers(),
+        ]);
+        const groupedEvents = processSessions(sessionsData);
         setEvents(groupedEvents);
+        setDrivers(driversData);
       } catch (err) {
-        setError(err.message || "Error al cargar sesiones pasadas.");
+        setError(err.message || "Error al cargar datos.");
       } finally {
         setLoading(false);
       }
     };
-    fetchSessions();
-  }, [selectedYear]); // Re-fetch cuando cambie el año seleccionado
+    fetchData();
+  }, [selectedYear]);
 
   const processSessions = (sessions) => {
     const eventsMap = {};
@@ -104,6 +114,33 @@ const AdminResultsManagementPage = () => {
     setSelectedYear(parseInt(e.target.value, 10));
   };
 
+  const handleEditClick = (session) => {
+    setSelectedSession(session);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveResults = async (results) => {
+    try {
+      setLoading(true);
+      await saveSessionResultsAdmin(selectedSession.id, results);
+      setIsModalOpen(false);
+      setSelectedSession(null);
+      // Refetch sessions to update the UI
+      const data = await getPastSessionsByYear(selectedYear);
+      const groupedEvents = processSessions(data);
+      setEvents(groupedEvents);
+    } catch (err) {
+      setError(err.message || "Error al guardar los resultados.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setSelectedSession(null);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -161,13 +198,22 @@ const AdminResultsManagementPage = () => {
                   flagUrl={event.flagUrl}
                   circuitLayoutUrl={event.circuitLayoutUrl}
                   isAdmin={true}
-                  // onEditClick={handleEditClick} // Por ahora no permitimos edición desde aquí
+                  onEditClick={handleEditClick}
+                  editButtonText="Actualizar resultado"
                 />
               ))}
             </div>
           )}
         </div>
       </main>
+      {isModalOpen && selectedSession && (
+        <UpdateResults
+          session={selectedSession}
+          drivers={drivers}
+          onSave={handleSaveResults}
+          onCancel={handleCancel}
+        />
+      )}
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
       </footer>
