@@ -45,3 +45,22 @@ export const getDriverById = async (driverId) => {
     );
   }
 };
+
+export const createDriver = async (driverData) => {
+  try {
+    const response = await api.post("/drivers", driverData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("Piloto creado con éxito:", response.data); // Log para depuración
+    return response.data; // Retorna el ResponseDriverDTO
+  } catch (error) {
+    console.error("Error creating driver - Detalle:", {
+      message: error.message,
+      response: error.response,
+    });
+    throw new Error(error.response?.data?.message || "Error creating driver."); // Lanza un error personalizado
+  }
+};
