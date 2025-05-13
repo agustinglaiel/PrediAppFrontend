@@ -10,7 +10,7 @@ const SessionItem = ({
   sessionType,
   startTime,
   endTime,
-  date_end, // Nueva prop
+  date_end,
   hasPronostico,
   onPronosticoClick,
   isModalOpen,
@@ -31,6 +31,7 @@ const SessionItem = ({
   // Validar si la sesión ha finalizado
   const isSessionEnded = date_end ? new Date() > new Date(date_end) : false;
 
+  // Lógica de renderizado priorizando resultados para eventos pasados terminados
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
       <DateDisplay date={date} month={month} />
@@ -51,7 +52,7 @@ const SessionItem = ({
             ? `${score} Puntos`
             : "Ver resultados"}
         </button>
-      ) : !isAdmin && hasPronostico !== undefined ? (
+      ) : !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
         <button
           onClick={onPronosticoClick}
           className={`

@@ -62,6 +62,7 @@ const PronosticosPage = () => {
         startTime,
         endTime,
         date_start: session.date_start,
+        date_end: session.date_end,
         hasPronostico: true,
         prodeSession: null,
         prodeRace: null,
