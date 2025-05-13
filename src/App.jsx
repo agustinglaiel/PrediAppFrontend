@@ -16,6 +16,7 @@ import UserManagementPage from "./pages/UserManagementPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 import AdminResultsManagementPage from "./pages/AdminResultsManagementPage";
+import SessionResultPage from "./pages/SessionResultPage";
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/resultados/:sessionId" element={<SessionResultPage />} />
         {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </Router>
