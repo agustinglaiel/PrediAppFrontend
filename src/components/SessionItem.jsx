@@ -10,6 +10,7 @@ const SessionItem = ({
   sessionType,
   startTime,
   endTime,
+  date_end, // Nueva prop
   hasPronostico,
   onPronosticoClick,
   isModalOpen,
@@ -20,12 +21,15 @@ const SessionItem = ({
   isPastEvent = false,
   score,
   isAdmin = false,
-  onEditClick, // Prop existente
-  editButtonText, // Nuevo prop opcional
+  onEditClick,
+  editButtonText,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
     (sessionType === "Race" && prodeRace);
+
+  // Validar si la sesión ha finalizado
+  const isSessionEnded = date_end ? new Date() > new Date(date_end) : false;
 
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
@@ -38,7 +42,7 @@ const SessionItem = ({
         </div>
       </div>
 
-      {!isAdmin && isPastEvent ? (
+      {!isAdmin && isPastEvent && isSessionEnded ? (
         <button
           onClick={onPronosticoClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -72,8 +76,7 @@ const SessionItem = ({
           onClick={onEditClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
         >
-          {editButtonText || "Editar"}{" "}
-          {/* Usamos el prop si existe, sino "Editar" */}
+          {editButtonText || "Editar"}
         </button>
       )}
 

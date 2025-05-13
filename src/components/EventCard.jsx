@@ -13,8 +13,8 @@ const EventCard = ({
   onContinueToLogin,
   isPastEvent = false,
   isAdmin = false,
-  onEditClick, // Prop existente
-  editButtonText, // Nuevo prop opcional para el texto del botón
+  onEditClick,
+  editButtonText,
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -77,6 +77,7 @@ const EventCard = ({
             sessionType={session.sessionType}
             startTime={session.startTime}
             endTime={session.endTime}
+            date_end={session.date_end} // Añadimos date_end
             hasPronostico={session.hasPronostico}
             isModalOpen={isModalOpen}
             onCloseModal={onCloseModal}
@@ -87,8 +88,8 @@ const EventCard = ({
             score={session.score}
             onPronosticoClick={() => handlePronosticoClickLocal(session)}
             isAdmin={isAdmin}
-            onEditClick={() => onEditClick && onEditClick(session)} // Pasamos onEditClick
-            editButtonText={editButtonText} // Pasamos el prop a SessionItem
+            onEditClick={() => onEditClick && onEditClick(session)}
+            editButtonText={editButtonText}
           />
         ))}
       </div>

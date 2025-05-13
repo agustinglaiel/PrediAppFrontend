@@ -13,11 +13,11 @@ const ResultGrid = ({ results }) => {
     <div className="overflow-x-auto">
       <table className="min-w-full bg-white border border-gray-200">
         <thead>
-          <tr className="bg-gray-100">
+          <tr className="bg-gray-300">
             <th className="py-2 px-4 border-b text-center">POS</th>
             <th className="py-2 px-4 border-b text-center">NO</th>
             <th className="py-2 px-4 border-b text-center">DRIVER</th>
-            <th className="py-2 px-4 border-b text-center">CAR</th>
+            <th className="py-2 px-4 border-b text-center">TEAM</th>
             <th className="py-2 px-4 border-b text-center">PTS</th>
           </tr>
         </thead>

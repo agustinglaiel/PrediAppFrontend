@@ -46,7 +46,7 @@ const ResultsPage = () => {
     if (!sessions || !Array.isArray(sessions)) {
       return [];
     }
-
+  
     const eventsMap = {};
     sessions.forEach((session) => {
       const weekendId = session.weekend_id || "unknown";
@@ -63,7 +63,7 @@ const ResultsPage = () => {
           sessions: [],
         };
       }
-
+  
       let day = "1";
       let month = "JAN";
       if (session.date_start && typeof session.date_start === "string") {
@@ -92,13 +92,13 @@ const ResultsPage = () => {
           console.error("Error parsing date_start:", session.date_start, error);
         }
       }
-
+  
       const [startTime] = session.date_start
         .split("T")[1]
         .split("-")[0]
         .split(":");
       const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
-
+  
       eventsMap[weekendId].sessions.push({
         id: session.id || Math.random(),
         date: day,
@@ -108,9 +108,10 @@ const ResultsPage = () => {
         startTime: `${startTime}:00`,
         endTime: `${endTime}:00`,
         date_start: session.date_start,
+        date_end: session.date_end, // Añadimos date_end
       });
     });
-
+  
     return Object.values(eventsMap).sort((a, b) => {
       const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
       const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
