@@ -1,10 +1,10 @@
-// src/pages/SessionResultPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import SessionHeader from "../components/pronosticos/SessionHeader";
 import ResultGrid from "../components/results/ResultGrid";
+import MissingResults from "../components/results/MissingResults";
 import { getResultsOrderedByPosition } from "../api/results";
 
 const SessionResultPage = () => {
@@ -14,6 +14,7 @@ const SessionResultPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sessionData, setSessionData] = useState(null);
+  const [isMissingResultsOpen, setIsMissingResultsOpen] = useState(false);
 
   useEffect(() => {
     const fetchSessionResults = async () => {
@@ -21,18 +22,24 @@ const SessionResultPage = () => {
         setLoading(true);
         setError(null);
 
-        // Obtener datos de la sesión desde location.state (pasados desde ResultsPage)
         if (location.state) {
           setSessionData(location.state);
         } else {
           throw new Error("No se encontraron datos de la sesión.");
         }
 
-        // Obtener resultados de la sesión
         const data = await getResultsOrderedByPosition(sessionId);
         setResults(data);
       } catch (err) {
-        setError("Error al cargar los resultados: " + err.message);
+        if (
+          err.message?.includes("No results found") ||
+          err.status === 404 ||
+          err.message?.includes("No results found for this session")
+        ) {
+          setIsMissingResultsOpen(true);
+        } else {
+          setError("Error al cargar los resultados: " + err.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -41,6 +48,17 @@ const SessionResultPage = () => {
     fetchSessionResults();
   }, [sessionId, location.state]);
 
+  // Si el modal está abierto, solo renderizamos el modal
+  if (isMissingResultsOpen) {
+    return (
+      <MissingResults
+        isOpen={isMissingResultsOpen}
+        onClose={() => setIsMissingResultsOpen(false)}
+      />
+    );
+  }
+
+  // Renderizamos el estado de carga
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -49,6 +67,7 @@ const SessionResultPage = () => {
     );
   }
 
+  // Renderizamos el estado de error
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -57,6 +76,7 @@ const SessionResultPage = () => {
     );
   }
 
+  // Renderizamos el caso de datos de sesión no disponibles
   if (!sessionData) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -65,6 +85,7 @@ const SessionResultPage = () => {
     );
   }
 
+  // Renderizamos la UI completa si no hay modal abierto
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />

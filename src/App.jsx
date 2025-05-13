@@ -17,6 +17,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 import AdminResultsManagementPage from "./pages/AdminResultsManagementPage";
 import SessionResultPage from "./pages/SessionResultPage";
+import AdminDriverManagementPage from "./pages/AdminDriverManagementPage";
 
 function App() {
   return (
@@ -64,6 +65,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminResultsManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/drivers" // Nueva ruta
+          element={
+            <ProtectedRoute>
+              <AdminDriverManagementPage />
             </ProtectedRoute>
           }
         />

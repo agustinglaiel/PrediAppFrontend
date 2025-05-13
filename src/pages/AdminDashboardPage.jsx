@@ -40,7 +40,7 @@ const AdminDashboardPage = () => {
           </div>
           <div className="w-full">
             <a
-              href="/admin/results"
+              href="/admin/drivers"
               className="block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-center w-full"
             >
               Gestionar Pilotos
