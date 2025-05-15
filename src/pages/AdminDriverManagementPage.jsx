@@ -5,8 +5,12 @@ import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import DriverDisplay from "../components/admin/DriverDisplay";
 import DriverFormModal from "../components/admin/DriverFormModal"; // Cambiado de DriverCreate
-import { getAllDrivers, createDriver, updateDriver } from "../api/drivers";
-import ProtectedRoute from "../components/ProtectedRoute";
+import {
+  getAllDrivers,
+  createDriver,
+  updateDriver,
+  fetchAllDriversFromExternalAPI,
+} from "../api/drivers";
 
 const AdminDriverManagementPage = () => {
   const [drivers, setDrivers] = useState([]);
@@ -74,6 +78,24 @@ const AdminDriverManagementPage = () => {
     }
   };
 
+  const handleFetchExternalDrivers = async () => {
+    try {
+      setLoading(true);
+      const newDrivers = await fetchAllDriversFromExternalAPI();
+      if (newDrivers.length > 0) {
+        setDrivers((prev) => [...prev, ...newDrivers]); // Añadir los nuevos pilotos a la lista existente
+        setError(null);
+      } else {
+        setError("No se encontraron nuevos pilotos para agregar.");
+      }
+    } catch (err) {
+      console.error("Error al obtener pilotos de la API externa:", err);
+      setError(err.message || "Error al obtener pilotos de la API externa.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEditDriver = (driver) => {
     setSelectedDriver(driver);
     setIsModalOpen(true);
@@ -109,15 +131,23 @@ const AdminDriverManagementPage = () => {
       <Header />
       <main className="flex-grow pt-24 px-4">
         <h1 className="text-3xl font-bold mb-4 ml-3">Gestión de Pilotos</h1>
-        <button
-          onClick={() => {
-            setSelectedDriver(null); // Aseguramos que se abra en modo creación
-            setIsModalOpen(true);
-          }}
-          className="mb-4 ml-3 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Añadir Piloto
-        </button>
+        <div className="flex gap-4 mb-4 ml-3">
+          <button
+            onClick={() => {
+              setSelectedDriver(null);
+              setIsModalOpen(true);
+            }}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Añadir Piloto
+          </button>
+          <button
+            onClick={handleFetchExternalDrivers}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Cargar Pilotos desde API Externa
+          </button>
+        </div>
         <div className="px-4 mt-12">
           <h2 className="text-2xl font-bold mb-4">Lista de Pilotos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -130,7 +160,6 @@ const AdminDriverManagementPage = () => {
             ))}
           </div>
 
-          {/* Sección para pilotos inactivos */}
           {inactiveDrivers.length > 0 && (
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-4">Pilotos Inactivos</h2>
@@ -162,8 +191,4 @@ const AdminDriverManagementPage = () => {
   );
 };
 
-export default () => (
-  <ProtectedRoute>
-    <AdminDriverManagementPage />
-  </ProtectedRoute>
-);
+export default AdminDriverManagementPage;

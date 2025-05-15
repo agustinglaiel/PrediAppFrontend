@@ -82,3 +82,28 @@ export const updateDriver = async (driverId, driverData) => {
     throw new Error(error.response?.data?.message || "Error updating driver.");
   }
 };
+
+export const fetchAllDriversFromExternalAPI = async () => {
+  try {
+    const response = await api.get("/drivers/external", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
+    });
+    console.log(
+      "Pilotos nuevos insertados desde la API externa:",
+      response.data
+    );
+    return response.data; // Retorna la lista de pilotos nuevos insertados
+  } catch (error) {
+    console.error("Error fetching drivers from external API - Detalle:", {
+      message: error.message,
+      code: error.code,
+      config: error.config,
+      request: error.request,
+      response: error.response,
+    });
+    throw new Error(
+      error.response?.data?.message ||
+        "Error fetching drivers from external API."
+    );
+  }
+};
