@@ -64,3 +64,21 @@ export const createDriver = async (driverData) => {
     throw new Error(error.response?.data?.message || "Error creating driver."); // Lanza un error personalizado
   }
 };
+
+export const updateDriver = async (driverId, driverData) => {
+  try {
+    const response = await api.put(`/drivers/${driverId}`, driverData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating driver - Detalle:", {
+      message: error.message,
+      response: error.response,
+    });
+    throw new Error(error.response?.data?.message || "Error updating driver.");
+  }
+};

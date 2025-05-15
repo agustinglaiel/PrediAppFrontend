@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+// src/components/admin/DriverFormModal.jsx
+import React, { useState, useEffect } from "react";
 
-const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
+const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
+  const isEditing = !!driver; // Si driver existe, estamos editando
+
   const [formData, setFormData] = useState({
     broadcast_name: "",
     country_code: "",
@@ -14,6 +17,24 @@ const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
     activo: true,
   });
   const [error, setError] = useState(null);
+
+  // Cargar los datos del piloto si estamos editando
+  useEffect(() => {
+    if (isEditing && driver) {
+      setFormData({
+        broadcast_name: driver.broadcast_name || "",
+        country_code: driver.country_code || "",
+        driver_number: driver.driver_number?.toString() || "", // Convertimos a string para el input
+        first_name: driver.first_name || "",
+        last_name: driver.last_name || "",
+        full_name: driver.full_name || "",
+        name_acronym: driver.name_acronym || "",
+        headshot_url: driver.headshot_url || "",
+        team_name: driver.team_name || "",
+        activo: driver.activo ?? true,
+      });
+    }
+  }, [isEditing, driver]);
 
   if (!isOpen) return null;
 
@@ -36,11 +57,34 @@ const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
       setError("Todos los campos obligatorios deben estar completos.");
       return;
     }
-    // Convertir driver_number a entero
+
+    // Preparar los datos para enviar
     const driverData = {
-      ...formData,
+      broadcast_name: formData.broadcast_name,
+      country_code: formData.country_code,
       driver_number: parseInt(formData.driver_number, 10),
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      full_name: formData.full_name,
+      name_acronym: formData.name_acronym,
+      headshot_url: formData.headshot_url,
+      team_name: formData.team_name,
+      activo: formData.activo,
     };
+
+    // Si estamos editando, eliminamos campos vacíos para cumplir con UpdateDriverDTO
+    if (isEditing) {
+      Object.keys(driverData).forEach((key) => {
+        if (
+          driverData[key] === "" ||
+          driverData[key] === null ||
+          (key === "driver_number" && isNaN(driverData[key]))
+        ) {
+          delete driverData[key];
+        }
+      });
+    }
+
     console.log("Datos del formulario antes de enviar:", driverData); // Depuración
     onSubmit(driverData);
     onClose();
@@ -49,7 +93,9 @@ const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
       <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Añadir Nuevo Piloto</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {isEditing ? "Editar Piloto" : "Añadir Nuevo Piloto"}
+        </h2>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -192,7 +238,7 @@ const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
               type="submit"
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             >
-              Aceptar
+              {isEditing ? "Actualizar" : "Aceptar"}
             </button>
           </div>
         </form>
@@ -201,4 +247,4 @@ const DriverCreate = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 
-export default DriverCreate;
+export default DriverFormModal;

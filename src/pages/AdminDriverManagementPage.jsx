@@ -1,10 +1,11 @@
+// src/pages/AdminDriverManagementPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import DriverDisplay from "../components/admin/DriverDisplay";
-import DriverCreate from "../components/admin/DriverCreate"; // Nuevo import
-import { getAllDrivers, createDriver } from "../api/drivers";
+import DriverFormModal from "../components/admin/DriverFormModal"; // Cambiado de DriverCreate
+import { getAllDrivers, createDriver, updateDriver } from "../api/drivers";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 const AdminDriverManagementPage = () => {
@@ -12,6 +13,7 @@ const AdminDriverManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null); // Para manejar el piloto en edición
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,20 +35,53 @@ const AdminDriverManagementPage = () => {
   const handleCreateDriver = async (driverData) => {
     try {
       setLoading(true);
-      console.log("Payload enviado a createDriver:", driverData); // Depuración
+      console.log("Payload enviado a createDriver:", driverData);
       const newDriver = await createDriver(driverData);
-      setDrivers((prev) => [...prev, newDriver]); // Agregar el nuevo piloto a la lista
-      setError(null); // Limpiar cualquier error previo
+      setDrivers((prev) => [...prev, newDriver]);
+      setError(null);
     } catch (err) {
       console.error("Error al crear piloto - Detalle:", err);
       setError(err.message || "Error al crear el piloto. Verifica los datos.");
-      // Mostrar detalles del error si están disponibles
       if (err.response?.data) {
         console.log("Respuesta del backend:", err.response.data);
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateDriver = async (driverData) => {
+    try {
+      setLoading(true);
+      console.log("Payload enviado a updateDriver:", driverData);
+      const updatedDriver = await updateDriver(selectedDriver.id, driverData);
+      setDrivers((prev) =>
+        prev.map((driver) =>
+          driver.id === updatedDriver.id ? updatedDriver : driver
+        )
+      );
+      setError(null);
+    } catch (err) {
+      console.error("Error al actualizar piloto - Detalle:", err);
+      setError(
+        err.message || "Error al actualizar el piloto. Verifica los datos."
+      );
+      if (err.response?.data) {
+        console.log("Respuesta del backend:", err.response.data);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditDriver = (driver) => {
+    setSelectedDriver(driver);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDriver(null);
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -75,7 +110,10 @@ const AdminDriverManagementPage = () => {
       <main className="flex-grow pt-24 px-4">
         <h1 className="text-3xl font-bold mb-4 ml-3">Gestión de Pilotos</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setSelectedDriver(null); // Aseguramos que se abra en modo creación
+            setIsModalOpen(true);
+          }}
           className="mb-4 ml-3 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           Añadir Piloto
@@ -84,7 +122,11 @@ const AdminDriverManagementPage = () => {
           <h2 className="text-2xl font-bold mb-4">Lista de Pilotos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {activeDrivers.map((driver) => (
-              <DriverDisplay key={driver.id} driver={driver} />
+              <DriverDisplay
+                key={driver.id}
+                driver={driver}
+                onEdit={handleEditDriver}
+              />
             ))}
           </div>
 
@@ -94,7 +136,11 @@ const AdminDriverManagementPage = () => {
               <h2 className="text-2xl font-bold mb-4">Pilotos Inactivos</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {inactiveDrivers.map((driver) => (
-                  <DriverDisplay key={driver.id} driver={driver} />
+                  <DriverDisplay
+                    key={driver.id}
+                    driver={driver}
+                    onEdit={handleEditDriver}
+                  />
                 ))}
               </div>
             </div>
@@ -102,10 +148,11 @@ const AdminDriverManagementPage = () => {
         </div>
       </main>
       {isModalOpen && (
-        <DriverCreate
+        <DriverFormModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleCreateDriver}
+          onClose={handleCloseModal}
+          onSubmit={selectedDriver ? handleUpdateDriver : handleCreateDriver}
+          driver={selectedDriver}
         />
       )}
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm mt-4">
