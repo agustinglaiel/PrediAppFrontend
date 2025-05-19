@@ -15,6 +15,7 @@ const EventCard = ({
   isAdmin = false,
   onEditClick,
   editButtonText,
+  hasResults, // Prop opcional para claridad (puede ser ignorada si viene en sessions)
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -77,7 +78,7 @@ const EventCard = ({
             sessionType={session.sessionType}
             startTime={session.startTime}
             endTime={session.endTime}
-            date_end={session.date_end} // Añadimos date_end
+            date_end={session.date_end}
             hasPronostico={session.hasPronostico}
             isModalOpen={isModalOpen}
             onCloseModal={onCloseModal}
@@ -90,6 +91,7 @@ const EventCard = ({
             isAdmin={isAdmin}
             onEditClick={() => onEditClick && onEditClick(session)}
             editButtonText={editButtonText}
+            hasResults={session.hasResults} // Aseguramos que se pase desde session
           />
         ))}
       </div>

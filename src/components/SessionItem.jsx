@@ -1,6 +1,7 @@
 import React from "react";
 import DateDisplay from "./DateDisplay";
 import AuthModal from "./AuthModal";
+import { FaCheckCircle } from "react-icons/fa"; // Ícono de check verde
 
 const SessionItem = ({
   sessionId,
@@ -23,6 +24,7 @@ const SessionItem = ({
   isAdmin = false,
   onEditClick,
   editButtonText,
+  hasResults, // Nueva prop
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -73,12 +75,20 @@ const SessionItem = ({
       ) : null}
 
       {isAdmin && onEditClick && (
-        <button
-          onClick={onEditClick}
-          className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
-        >
-          {editButtonText || "Editar"}
-        </button>
+        <div className="flex items-center gap-2">
+          {isAdmin && hasResults && (
+            <FaCheckCircle
+              className="text-green-500"
+              title="Resultados cargados"
+            />
+          )}
+          <button
+            onClick={onEditClick}
+            className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
+          >
+            {editButtonText || "Editar"}
+          </button>
+        </div>
       )}
 
       <AuthModal

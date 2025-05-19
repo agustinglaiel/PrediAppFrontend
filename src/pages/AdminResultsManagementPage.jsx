@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import EventCard from "../components/EventCard";
-import UpdateResults from "../components/admin/UpdateResults"; // Corrección aquí
+import UpdateResults from "../components/admin/UpdateResults";
 import { getPastSessionsByYear } from "../api/sessions";
 import { getAllDrivers } from "../api/drivers";
-import { saveSessionResultsAdmin } from "../api/results";
+import {
+  saveSessionResultsAdmin,
+  getResultsOrderedByPosition,
+} from "../api/results";
 
 const AdminResultsManagementPage = () => {
   const [events, setEvents] = useState([]);
@@ -23,7 +26,7 @@ const AdminResultsManagementPage = () => {
           getPastSessionsByYear(selectedYear),
           getAllDrivers(),
         ]);
-        const groupedEvents = processSessions(sessionsData);
+        const groupedEvents = await processSessions(sessionsData);
         setEvents(groupedEvents);
         setDrivers(driversData);
       } catch (err) {
@@ -35,9 +38,9 @@ const AdminResultsManagementPage = () => {
     fetchData();
   }, [selectedYear]);
 
-  const processSessions = (sessions) => {
+  const processSessions = async (sessions) => {
     const eventsMap = {};
-    sessions.forEach((session) => {
+    for (const session of sessions) {
       const weekendId = session.weekend_id;
       if (!eventsMap[weekendId]) {
         eventsMap[weekendId] = {
@@ -85,6 +88,16 @@ const AdminResultsManagementPage = () => {
         .split("-")[0]
         .split(":");
       const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
+
+      // Verificar si hay resultados para esta sesión
+      let hasResults = false;
+      try {
+        const results = await getResultsOrderedByPosition(session.id);
+        hasResults = results && results.length > 0;
+      } catch (err) {
+        hasResults = false; // Si falla el fetch o no hay resultados, asumimos que no hay resultados
+      }
+
       eventsMap[weekendId].sessions.push({
         id: session.id,
         date: day,
@@ -94,6 +107,7 @@ const AdminResultsManagementPage = () => {
         startTime: `${startTime}:00`,
         endTime: `${endTime}:00`,
         date_start: session.date_start,
+        date_end: session.date_end,
         weekend_id: session.weekend_id,
         circuit_key: session.circuit_key,
         circuit_short_name: session.circuit_short_name,
@@ -101,8 +115,9 @@ const AdminResultsManagementPage = () => {
         country_name: session.country_name,
         location: session.location,
         year: session.year,
+        hasResults: hasResults, // Agregar propiedad hasResults
       });
-    });
+    }
     return Object.values(eventsMap).sort((a, b) => {
       const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
       const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
@@ -127,7 +142,7 @@ const AdminResultsManagementPage = () => {
       setSelectedSession(null);
       // Refetch sessions to update the UI
       const data = await getPastSessionsByYear(selectedYear);
-      const groupedEvents = processSessions(data);
+      const groupedEvents = await processSessions(data);
       setEvents(groupedEvents);
     } catch (err) {
       setError(err.message || "Error al guardar los resultados.");
