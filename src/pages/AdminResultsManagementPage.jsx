@@ -89,13 +89,12 @@ const AdminResultsManagementPage = () => {
         .split(":");
       const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
 
-      // Verificar si hay resultados para esta sesión
       let hasResults = false;
       try {
         const results = await getResultsOrderedByPosition(session.id);
         hasResults = results && results.length > 0;
       } catch (err) {
-        hasResults = false; // Si falla el fetch o no hay resultados, asumimos que no hay resultados
+        hasResults = false;
       }
 
       eventsMap[weekendId].sessions.push({
@@ -115,7 +114,7 @@ const AdminResultsManagementPage = () => {
         country_name: session.country_name,
         location: session.location,
         year: session.year,
-        hasResults: hasResults, // Agregar propiedad hasResults
+        hasResults: hasResults,
       });
     }
     return Object.values(eventsMap).sort((a, b) => {
@@ -140,7 +139,6 @@ const AdminResultsManagementPage = () => {
       await saveSessionResultsAdmin(selectedSession.id, results);
       setIsModalOpen(false);
       setSelectedSession(null);
-      // Refetch sessions to update the UI
       const data = await getPastSessionsByYear(selectedYear);
       const groupedEvents = await processSessions(data);
       setEvents(groupedEvents);
@@ -215,6 +213,7 @@ const AdminResultsManagementPage = () => {
                   isAdmin={true}
                   onEditClick={handleEditClick}
                   editButtonText="Actualizar resultado"
+                  showGetResultsButton={true}
                 />
               ))}
             </div>

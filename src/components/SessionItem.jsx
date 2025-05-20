@@ -24,16 +24,15 @@ const SessionItem = ({
   isAdmin = false,
   onEditClick,
   editButtonText,
-  hasResults, // Nueva prop
+  hasResults,
+  showGetResultsButton, // Nueva prop
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
     (sessionType === "Race" && prodeRace);
 
-  // Validar si la sesión ha finalizado
   const isSessionEnded = date_end ? new Date() > new Date(date_end) : false;
 
-  // Lógica de renderizado priorizando resultados para eventos pasados terminados
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
       <DateDisplay date={date} month={month} />
@@ -75,7 +74,7 @@ const SessionItem = ({
       ) : null}
 
       {isAdmin && onEditClick && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           {isAdmin && hasResults && (
             <FaCheckCircle
               className="text-green-500"
@@ -88,6 +87,11 @@ const SessionItem = ({
           >
             {editButtonText || "Editar"}
           </button>
+          {showGetResultsButton && (
+            <button className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-green-500 text-white hover:bg-green-600 mt-1">
+              Obtener Resultados
+            </button>
+          )}
         </div>
       )}
 

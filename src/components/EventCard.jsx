@@ -15,7 +15,8 @@ const EventCard = ({
   isAdmin = false,
   onEditClick,
   editButtonText,
-  hasResults, // Prop opcional para claridad (puede ser ignorada si viene en sessions)
+  hasResults,
+  showGetResultsButton,
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -91,7 +92,8 @@ const EventCard = ({
             isAdmin={isAdmin}
             onEditClick={() => onEditClick && onEditClick(session)}
             editButtonText={editButtonText}
-            hasResults={session.hasResults} // Aseguramos que se pase desde session
+            hasResults={session.hasResults}
+            showGetResultsButton={showGetResultsButton}
           />
         ))}
       </div>
