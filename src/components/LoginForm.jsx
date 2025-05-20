@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { login } from "../api/users";
 
 const LoginForm = () => {
-  const { login: authLogin } = useContext(AuthContext); // Obtenemos la función login del contexto
+  const { login: authLogin } = useContext(AuthContext);
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
@@ -17,14 +17,13 @@ const LoginForm = () => {
     e.preventDefault();
     try {
       setError(null);
-      const response = await login(credentials); // Llama al backend
-      authLogin(response); // Pasa los datos al AuthContext para manejar la autenticación
+      const response = await login(credentials);
+      authLogin(response);
 
-      // Redirección basada en el rol
       if (response.role === "admin") {
         navigate("/admin", { replace: true });
       } else {
-        navigate("/", { replace: true }); // Opcional: ajusta según tu lógica
+        navigate("/", { replace: true });
       }
     } catch (err) {
       setError(
@@ -90,6 +89,12 @@ const LoginForm = () => {
           Iniciar Sesión
         </button>
       </form>
+      <p className="text-center mt-4 text-sm text-gray-600">
+        ¿No tienes una cuenta?{" "}
+        <Link to="/signup" className="text-red-600 hover:underline">
+          Registrarse aquí
+        </Link>
+      </p>
     </div>
   );
 };

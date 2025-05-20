@@ -18,6 +18,7 @@ import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 import AdminResultsManagementPage from "./pages/AdminResultsManagementPage";
 import SessionResultPage from "./pages/SessionResultPage";
 import AdminDriverManagementPage from "./pages/AdminDriverManagementPage";
+import SignUpPage from "./pages/SignUpPage"; // Nueva importación
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/pronosticos" element={<PronosticosPage />} />
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route
