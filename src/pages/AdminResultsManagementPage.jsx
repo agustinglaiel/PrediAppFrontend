@@ -7,6 +7,7 @@ import { getAllDrivers } from "../api/drivers";
 import {
   saveSessionResultsAdmin,
   getResultsOrderedByPosition,
+  fetchResultsFromExternalAPI,
 } from "../api/results";
 
 const AdminResultsManagementPage = () => {
@@ -30,7 +31,8 @@ const AdminResultsManagementPage = () => {
         setEvents(groupedEvents);
         setDrivers(driversData);
       } catch (err) {
-        setError(err.message || "Error al cargar datos.");
+        setError(err.message || "Error al cargar datos iniciales.");
+        setTimeout(() => setError(null), 5000);
       } finally {
         setLoading(false);
       }
@@ -133,6 +135,24 @@ const AdminResultsManagementPage = () => {
     setIsModalOpen(true);
   };
 
+  const handleGetResults = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await fetchResultsFromExternalAPI(sessionId);
+      const data = await getPastSessionsByYear(selectedYear);
+      const groupedEvents = await processSessions(data);
+      setEvents(groupedEvents);
+    } catch (err) {
+      setError(
+        err.message || "Error al obtener los resultados desde la API externa."
+      );
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveResults = async (results) => {
     try {
       setLoading(true);
@@ -144,6 +164,7 @@ const AdminResultsManagementPage = () => {
       setEvents(groupedEvents);
     } catch (err) {
       setError(err.message || "Error al guardar los resultados.");
+      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -154,33 +175,23 @@ const AdminResultsManagementPage = () => {
     setSelectedSession(null);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600">Cargando...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <main className="flex-grow pt-24 px-4">
         <h1 className="text-3xl font-bold mb-6">Gestión de Resultados</h1>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+            <span>{error}</span>
+          </div>
+        )}
         <div className="mb-4">
           <label className="mr-2 text-gray-700">Seleccionar Año:</label>
           <select
             value={selectedYear}
             onChange={handleYearChange}
             className="p-2 border rounded"
+            disabled={loading} // Deshabilitamos el select mientras se carga
           >
             {[...Array(10).keys()].map((i) => {
               const year = new Date().getFullYear() - i;
@@ -196,7 +207,30 @@ const AdminResultsManagementPage = () => {
           <h2 className="text-2xl font-bold mb-4">
             Sesiones Pasadas: {selectedYear}
           </h2>
-          {events.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center">
+              <svg
+                className="animate-spin h-8 w-8 text-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </div>
+          ) : events.length === 0 ? (
             <p className="text-gray-600">
               No hay sesiones pasadas para este año.
             </p>
@@ -212,6 +246,7 @@ const AdminResultsManagementPage = () => {
                   circuitLayoutUrl={event.circuitLayoutUrl}
                   isAdmin={true}
                   onEditClick={handleEditClick}
+                  onGetResults={handleGetResults}
                   editButtonText="Actualizar resultado"
                   showGetResultsButton={true}
                 />

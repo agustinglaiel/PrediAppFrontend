@@ -98,3 +98,30 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
     );
   }
 };
+
+export const fetchResultsFromExternalAPI = async (sessionID) => {
+  try {
+    const response = await axios.get(`${API_URL}/results/api/${sessionID}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(
+      `Fetched results from external API for session ${sessionID}:`,
+      response.data
+    );
+    return response.data; // Devuelve array de ResponseResultDTO
+  } catch (error) {
+    console.error(
+      `Error fetching results from external API for session ${sessionID}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    throw new Error(
+      error.response?.data?.message ||
+        "Error fetching results from external API for the session."
+    );
+  }
+};

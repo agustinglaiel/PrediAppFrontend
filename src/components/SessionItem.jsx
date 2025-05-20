@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import DateDisplay from "./DateDisplay";
 import AuthModal from "./AuthModal";
-import { FaCheckCircle } from "react-icons/fa"; // Ícono de check verde
+import { FaCheckCircle } from "react-icons/fa";
 
 const SessionItem = ({
   sessionId,
@@ -23,15 +23,29 @@ const SessionItem = ({
   score,
   isAdmin = false,
   onEditClick,
+  onGetResults,
   editButtonText,
   hasResults,
-  showGetResultsButton, // Nueva prop
+  showGetResultsButton,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
     (sessionType === "Race" && prodeRace);
 
   const isSessionEnded = date_end ? new Date() > new Date(date_end) : false;
+
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleGetResultsClick = async () => {
+    if (onGetResults) {
+      try {
+        setIsFetching(true);
+        await onGetResults(sessionId);
+      } finally {
+        setIsFetching(false);
+      }
+    }
+  };
 
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
@@ -74,24 +88,64 @@ const SessionItem = ({
       ) : null}
 
       {isAdmin && onEditClick && (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
+          {" "}
+          {/* Cambiado a flex-row con items-center */}
           {isAdmin && hasResults && (
             <FaCheckCircle
               className="text-green-500"
               title="Resultados cargados"
             />
           )}
-          <button
-            onClick={onEditClick}
-            className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
-          >
-            {editButtonText || "Editar"}
-          </button>
-          {showGetResultsButton && (
-            <button className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-green-500 text-white hover:bg-green-600 mt-1">
-              Obtener Resultados
+          <div className="flex flex-col gap-2">
+            {" "}
+            {/* Botones siguen en columna */}
+            <button
+              onClick={onEditClick}
+              className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
+            >
+              {editButtonText || "Editar"}
             </button>
-          )}
+            {showGetResultsButton && (
+              <button
+                onClick={handleGetResultsClick}
+                disabled={isFetching}
+                className={`px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap ${
+                  isFetching
+                    ? "bg-green-300 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                } text-white flex items-center justify-center`}
+              >
+                {isFetching ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Cargando...
+                  </>
+                ) : (
+                  "Obtener Resultados"
+                )}
+              </button>
+            )}
+          </div>
         </div>
       )}
 

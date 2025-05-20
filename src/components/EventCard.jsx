@@ -14,6 +14,7 @@ const EventCard = ({
   isPastEvent = false,
   isAdmin = false,
   onEditClick,
+  onGetResults,
   editButtonText,
   hasResults,
   showGetResultsButton,
@@ -91,6 +92,7 @@ const EventCard = ({
             onPronosticoClick={() => handlePronosticoClickLocal(session)}
             isAdmin={isAdmin}
             onEditClick={() => onEditClick && onEditClick(session)}
+            onGetResults={onGetResults}
             editButtonText={editButtonText}
             hasResults={session.hasResults}
             showGetResultsButton={showGetResultsButton}
