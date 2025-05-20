@@ -99,7 +99,11 @@ const SessionResultPage = () => {
             sessionType={sessionData.sessionType || "Unknown Type"}
             className="mb-4"
           />
-          <ResultGrid results={results} />
+          <ResultGrid
+            results={results}
+            sessionType={sessionData.sessionType || "Unknown Type"}
+            sessionName={sessionData.sessionName || "Unknown Session"}
+          />
         </div>
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
