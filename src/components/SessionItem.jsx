@@ -37,13 +37,23 @@ const SessionItem = ({
   const [isFetching, setIsFetching] = useState(false);
 
   const handleGetResultsClick = async () => {
-    if (onGetResults) {
-      try {
-        setIsFetching(true);
+    if (!onGetResults) return;
+
+    try {
+      setIsFetching(true);
+      // Verificar si sessionName y sessionType son ambos "Race" (insensible a mayúsculas)
+      const isRaceSession =
+        sessionName.toLowerCase() === "race" &&
+        sessionType.toLowerCase() === "race";
+
+      // Llamar a la función adecuada según si es una sesión de carrera o no
+      if (isRaceSession) {
         await onGetResults(sessionId);
-      } finally {
-        setIsFetching(false);
+      } else {
+        await onGetResults(sessionId, true); // Pasar un indicador para non-race
       }
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -89,8 +99,6 @@ const SessionItem = ({
 
       {isAdmin && onEditClick && (
         <div className="flex items-center gap-2">
-          {" "}
-          {/* Cambiado a flex-row con items-center */}
           {isAdmin && hasResults && (
             <FaCheckCircle
               className="text-green-500"
@@ -98,8 +106,6 @@ const SessionItem = ({
             />
           )}
           <div className="flex flex-col gap-2">
-            {" "}
-            {/* Botones siguen en columna */}
             <button
               onClick={onEditClick}
               className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"

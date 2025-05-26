@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import DriverSelect from "../pronosticos/DriverSelect";
+import React, { useState, useEffect } from "react";
+import { getResultsOrderedByPosition } from "../../api/results";
 
 const UpdateResults = ({ session, drivers, onSave, onCancel }) => {
   const [results, setResults] = useState(
@@ -9,6 +9,33 @@ const UpdateResults = ({ session, drivers, onSave, onCancel }) => {
       status: "FINISHED",
     }))
   );
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const existingResults = await getResultsOrderedByPosition(session.id);
+        if (existingResults && existingResults.length > 0) {
+          // Mapear los resultados existentes al formato del estado
+          const formattedResults = Array.from({ length: 20 }, (_, index) => {
+            const result = existingResults.find(
+              (r) => r.position === index + 1
+            );
+            return {
+              position: index + 1,
+              driver_id: result ? result.driver.id : null,
+              status: result ? result.status : "FINISHED",
+            };
+          });
+          setResults(formattedResults);
+        }
+      } catch (error) {
+        console.error("Error fetching results for session:", error);
+        // Mantener el estado inicial si hay un error
+      }
+    };
+
+    fetchResults();
+  }, [session.id]);
 
   const handleDriverChange = (position, driverId) => {
     const updatedResults = [...results];

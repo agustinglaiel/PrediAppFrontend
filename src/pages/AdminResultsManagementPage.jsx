@@ -8,6 +8,7 @@ import {
   saveSessionResultsAdmin,
   getResultsOrderedByPosition,
   fetchResultsFromExternalAPI,
+  FetchNonRaceResultsExternalAPI,
 } from "../api/results";
 
 const AdminResultsManagementPage = () => {
@@ -135,17 +136,24 @@ const AdminResultsManagementPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleGetResults = async (sessionId) => {
+  const handleGetResults = async (sessionId, isNonRace = false) => {
     try {
       setLoading(true);
       setError(null);
-      await fetchResultsFromExternalAPI(sessionId);
+      if (isNonRace) {
+        await FetchNonRaceResultsExternalAPI(sessionId);
+      } else {
+        await fetchResultsFromExternalAPI(sessionId);
+      }
       const data = await getPastSessionsByYear(selectedYear);
       const groupedEvents = await processSessions(data);
       setEvents(groupedEvents);
     } catch (err) {
       setError(
-        err.message || "Error al obtener los resultados desde la API externa."
+        err.message ||
+          (isNonRace
+            ? "Error al obtener los resultados no de carrera desde la API externa."
+            : "Error al obtener los resultados desde la API externa.")
       );
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -191,7 +199,7 @@ const AdminResultsManagementPage = () => {
             value={selectedYear}
             onChange={handleYearChange}
             className="p-2 border rounded"
-            disabled={loading} // Deshabilitamos el select mientras se carga
+            disabled={loading}
           >
             {[...Array(10).keys()].map((i) => {
               const year = new Date().getFullYear() - i;

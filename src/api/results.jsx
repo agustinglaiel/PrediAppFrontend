@@ -99,6 +99,31 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
   }
 };
 
+export const FetchNonRaceResultsExternalAPI = async (sessionID) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/results/session/api/${sessionID}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.error(
+      `Error fetching non race results from external API for session ${sessionID}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    throw new Error(
+      error.response?.data?.message ||
+        "Error fetching non race results from external API for the session."
+    );
+  }
+};
+
 export const fetchResultsFromExternalAPI = async (sessionID) => {
   try {
     const response = await axios.get(`${API_URL}/results/api/${sessionID}`, {
