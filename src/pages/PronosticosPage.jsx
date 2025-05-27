@@ -1,4 +1,3 @@
-// frontendnuevo/src/pages/PronosticosPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +33,7 @@ const PronosticosPage = () => {
             ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
             : "/images/circuitLayouts/default.png",
           sessions: [],
+          earliestDate: session.date_start, // Guardar la fecha más temprana para ordenar
         };
       }
 
@@ -68,7 +68,16 @@ const PronosticosPage = () => {
         prodeRace: null,
         score: null,
       });
+
+      // Actualizar la fecha más temprana del evento si es necesario
+      if (
+        new Date(session.date_start) <
+        new Date(eventsMap[weekendId].earliestDate)
+      ) {
+        eventsMap[weekendId].earliestDate = session.date_start;
+      }
     });
+
     return Object.values(eventsMap);
   };
 
@@ -111,10 +120,10 @@ const PronosticosPage = () => {
         setLoading(true);
         setError(null);
 
-        const currentYear = new Date().getFullYear(); // Obtenemos el año actual
+        const currentYear = new Date().getFullYear();
         const [upcomingRaw, pastRaw] = await Promise.all([
           getUpcomingSessions(),
-          getPastSessionsByYear(currentYear), // Pasamos el año actual
+          getPastSessionsByYear(currentYear),
         ]);
 
         console.log("Sesiones pasadas crudas:", pastRaw);
@@ -122,8 +131,18 @@ const PronosticosPage = () => {
         const upcomingGrouped = groupSessionsByWeekend(upcomingRaw || []);
         const pastGrouped = groupSessionsByWeekend(pastRaw || []);
 
-        const upcomingWithProde = await fillProdeData(upcomingGrouped);
-        const pastWithProde = await fillProdeData(pastGrouped);
+        // Ordenar eventos próximos por fecha ascendente
+        const sortedUpcoming = upcomingGrouped.sort((a, b) => {
+          return new Date(a.earliestDate) - new Date(b.earliestDate);
+        });
+
+        // Ordenar eventos pasados por fecha descendente
+        const sortedPast = pastGrouped.sort((a, b) => {
+          return new Date(b.earliestDate) - new Date(a.earliestDate);
+        });
+
+        const upcomingWithProde = await fillProdeData(sortedUpcoming);
+        const pastWithProde = await fillProdeData(sortedPast);
 
         setUpcomingEvents(upcomingWithProde);
         setPastEvents(pastWithProde);
