@@ -181,58 +181,7 @@ export const getRaceProdeByUserAndSession = async (userId, sessionId) => {
   }
 };
 
-// // Obtener un prode de sesión por user_id y session_id
-// export const getSessionProdeByUserAndSession = async (userId, sessionId) => {
-//   try {
-//     const token = localStorage.getItem("jwtToken");
-//     if (!token) {
-//       throw new Error("Authentication token not found. Please log in.");
-//     }
-
-//     const response = await axios.get(
-//       `${API_URL}/prodes/session/user/${userId}/session/${sessionId}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//           "Content-Type": "application/json",
-//         },
-//         // Aceptar todos los códigos 200 para manejar manualmente
-//         validateStatus: (status) => status === 200,
-//       }
-//     );
-
-//     // Verificar si la respuesta está vacía, null, o un objeto vacío
-//     if (
-//       !response.data ||
-//       Object.keys(response.data).length === 0 ||
-//       (typeof response.data === "object" &&
-//         Object.values(response.data).every((v) => v === null || v === ""))
-//     ) {
-//       return null; // Devolver null silenciosamente si no hay datos
-//     }
-//     console.log(
-//       `Successfully fetched session prode for user ${userId}, session ${sessionId}:`,
-//       response.data
-//     );
-//     return response.data;
-//   } catch (error) {
-//     // Silenciar errores 404/400 si los hubiera (aunque el backend ahora devuelve 200)
-//     if (
-//       error.response &&
-//       (error.response.status === 404 || error.response.status === 400)
-//     ) {
-//       return null; // Devolver null silenciosamente para 404/400 (por si acaso)
-//     }
-//     console.log(
-//       `Unexpected error fetching session prode for user ${userId}, session ${sessionId}:`,
-//       error.message
-//     );
-//     throw new Error(error.message || "Error fetching session prediction.");
-//   }
-// };
-
 // Obtener un prode de sesión por user_id y session_id
-
 export const getProdeByUserAndSession = async (userId, sessionId) => {
   try {
     const token = localStorage.getItem("jwtToken");
@@ -270,5 +219,59 @@ export const getProdeByUserAndSession = async (userId, sessionId) => {
       error.message
     );
     throw new Error(error.message || "Error fetching prode prediction.");
+  }
+};
+
+// Actualizar puntajes de pronósticos de carrera
+export const updateRaceProdeScores = async (sessionId) => {
+  try {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      throw new Error("Authentication token not found. Please log in.");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/prodes/carrera/${sessionId}/score`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating race prode scores:", error);
+    const errorMsg =
+      error.response?.data?.message || "Error updating race prode scores.";
+    throw new Error(errorMsg);
+  }
+};
+
+// Actualizar puntajes de pronósticos de sesión
+export const updateSessionProdeScores = async (sessionId) => {
+  try {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      throw new Error("Authentication token not found. Please log in.");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/prodes/session/${sessionId}/score`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating session prode scores:", error);
+    const errorMsg =
+      error.response?.data?.message || "Error updating session prode scores.";
+    throw new Error(errorMsg);
   }
 };

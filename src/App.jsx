@@ -18,7 +18,8 @@ import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 import AdminResultsManagementPage from "./pages/AdminResultsManagementPage";
 import SessionResultPage from "./pages/SessionResultPage";
 import AdminDriverManagementPage from "./pages/AdminDriverManagementPage";
-import SignUpPage from "./pages/SignUpPage"; // Nueva importación
+import SignUpPage from "./pages/SignUpPage";
+import AdminProdesManagementPage from "./pages/AdminProdesManagementPage";
 
 function App() {
   return (
@@ -75,6 +76,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminDriverManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/prodes" // Nueva ruta
+          element={
+            <ProtectedRoute>
+              <AdminProdesManagementPage />
             </ProtectedRoute>
           }
         />

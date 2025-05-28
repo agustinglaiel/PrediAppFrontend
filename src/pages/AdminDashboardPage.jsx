@@ -46,6 +46,14 @@ const AdminDashboardPage = () => {
               Gestionar Pilotos
             </a>
           </div>
+          <div className="w-full">
+            <a
+              href="/admin/prodes"
+              className="block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-center w-full"
+            >
+              Gestionar Pronósticos
+            </a>
+          </div>
         </div>
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">

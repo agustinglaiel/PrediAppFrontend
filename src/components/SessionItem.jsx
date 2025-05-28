@@ -27,6 +27,7 @@ const SessionItem = ({
   editButtonText,
   hasResults,
   showGetResultsButton,
+  onUpdateProdeClick,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -41,16 +42,14 @@ const SessionItem = ({
 
     try {
       setIsFetching(true);
-      // Verificar si sessionName y sessionType son ambos "Race" (insensible a mayúsculas)
       const isRaceSession =
         sessionName.toLowerCase() === "race" &&
         sessionType.toLowerCase() === "race";
 
-      // Llamar a la función adecuada según si es una sesión de carrera o no
       if (isRaceSession) {
         await onGetResults(sessionId);
       } else {
-        await onGetResults(sessionId, true); // Pasar un indicador para non-race
+        await onGetResults(sessionId, true);
       }
     } finally {
       setIsFetching(false);
@@ -97,22 +96,35 @@ const SessionItem = ({
         </button>
       ) : null}
 
-      {isAdmin && onEditClick && (
+      {isAdmin && onUpdateProdeClick ? (
         <div className="flex items-center gap-2">
-          {isAdmin && hasResults && (
+          <button
+            onClick={() =>
+              onUpdateProdeClick({ sessionId, sessionName, sessionType })
+            }
+            className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Actualizar pronósticos
+          </button>
+        </div>
+      ) : isAdmin && (onEditClick || onGetResults) ? (
+        <div className="flex items-center gap-2">
+          {hasResults && (
             <FaCheckCircle
               className="text-green-500"
               title="Resultados cargados"
             />
           )}
           <div className="flex flex-col gap-2">
-            <button
-              onClick={onEditClick}
-              className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
-            >
-              {editButtonText || "Editar"}
-            </button>
-            {showGetResultsButton && (
+            {onEditClick && (
+              <button
+                onClick={onEditClick}
+                className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-blue-500 text-white hover:bg-blue-600"
+              >
+                {editButtonText || "Editar"}
+              </button>
+            )}
+            {showGetResultsButton && onGetResults && (
               <button
                 onClick={handleGetResultsClick}
                 disabled={isFetching}
@@ -153,7 +165,7 @@ const SessionItem = ({
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       <AuthModal
         isOpen={isModalOpen}
