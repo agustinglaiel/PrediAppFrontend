@@ -1,27 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOutAlert from "./SignOutAlert";
-import { logout } from "../api/users"; // Importamos la función logout desde users.jsx
+import { logout } from "../api/users";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showHamburger, setShowHamburger] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const navigate = useNavigate();
-
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollPos = window.scrollY;
-      setShowHamburger(currentScrollPos > 64); // Ajusta si la altura del Header cambia
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Verificar si el usuario está autenticado
   const isAuthenticated = !!localStorage.getItem("jwtToken");
@@ -64,35 +48,11 @@ const Header = () => {
 
   return (
     <div className="relative">
-      <header className="bg-red-600 text-white w-full z-50 shadow-md fixed top-0 left-0 mb-3">
-        <div className="container mx-auto px-4 py-4 flex items-center">
-          {/* Contenedor izquierdo para hamburguesa */}
-          <div className="w-6 flex-none">
-            {showHamburger && (
-              <button
-                className="text-white hover:text-gray-200 focus:outline-none"
-                onClick={toggleMenu}
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Logo/Texto "PREDI" (center) - usando absolute para centrarlo siempre */}
-          <div className="absolute left-0 right-0 flex justify-center pointer-events-none">
+      <header className="bg-red-700 text-white w-full z-50 shadow-md fixed top-0 left-0 mb-3">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          {/* Logo/Texto "PREDI" (center) */}
+          <div className="flex-1"></div>
+          <div className="pointer-events-none">
             <Link
               to="/"
               className="text-2xl md:text-3xl font-bold tracking-wide pointer-events-auto"
@@ -101,12 +61,8 @@ const Header = () => {
               PREDI
             </Link>
           </div>
-
-          {/* Espacio para mantener el flex balanceado */}
-          <div className="flex-1"></div>
-
-          {/* Logo como botón de Log In/Sign Out (right) */}
-          <div className="flex-none mr-2 md:mr-6 flex items-center">
+          <div className="flex-1 flex justify-end">
+            {/* Logo como botón de Log In/Sign Out (right) */}
             <button
               onClick={handleLogoClick}
               className="focus:outline-none flex items-center justify-center"
@@ -122,52 +78,6 @@ const Header = () => {
             </button>
           </div>
         </div>
-
-        {/* Menú móvil (hamburger) */}
-        {isMenuOpen && (
-          <nav className="md:hidden bg-red-600 px-4 pb-4 flex flex-col space-y-2 text-center shadow-md">
-            <Link
-              to="/"
-              className="hover:text-gray-200"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/");
-              }}
-            >
-              Inicio
-            </Link>
-            <Link
-              to="/pronosticos"
-              className="hover:text-gray-200"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/pronosticos");
-              }}
-            >
-              Prónosticos
-            </Link>
-            <Link
-              to="/grupos"
-              className="hover:text-gray-200"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/grupos");
-              }}
-            >
-              Grupos
-            </Link>
-            <Link
-              to="/resultados"
-              className="hover:text-gray-200"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/resultados");
-              }}
-            >
-              Resultados
-            </Link>
-          </nav>
-        )}
       </header>
 
       {/* Modal de confirmación de Sign Out */}
