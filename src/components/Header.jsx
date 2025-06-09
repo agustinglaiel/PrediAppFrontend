@@ -48,7 +48,7 @@ const Header = () => {
 
   return (
     <div className="relative">
-      <header className="bg-red-700 text-white w-full z-50 shadow-md fixed top-0 left-0 mb-3">
+      <header className="bg-red-700 text-white w-full z-50 shadow-md fixed top-0 left-0 mb-3 h-16">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo/Texto "PREDI" (center) */}
           <div className="flex-1"></div>

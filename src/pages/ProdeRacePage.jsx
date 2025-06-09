@@ -185,7 +185,7 @@ const ProdeRacePage = () => {
       <NavigationBar />
 
       {/* main con flex-grow para empujar el footer */}
-      <main className="flex-grow pt-28 px-4">
+      <main className="flex-grow pt-12 px-4 pb-8">
         <SessionHeader
           countryName={sessionDetails.countryName}
           flagUrl={sessionDetails.flagUrl}

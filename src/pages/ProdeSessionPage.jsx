@@ -130,7 +130,7 @@ const ProdeSessionPage = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-28 px-4">
+      <main className="flex-grow pt-12 px-4 pb-4">
         <SessionHeader
           countryName={sessionDetails.countryName}
           flagUrl={sessionDetails.flagUrl}

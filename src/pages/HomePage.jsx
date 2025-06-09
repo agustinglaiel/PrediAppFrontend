@@ -246,17 +246,15 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-24">
-        {/* Pasamos handlePronosticoClick a UpcomingEvents */}
+      <main className="flex-grow pt-12 pb-12">
         <UpcomingEvents
           events={events}
           onPronosticoClick={handlePronosticoClick}
-          // isModalOpen={...} onCloseModal={...} si corresponde
         />
       </main>
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
+      {/* <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
-      </footer>
+      </footer> */}
     </div>
   );
 };

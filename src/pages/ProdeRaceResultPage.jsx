@@ -173,7 +173,7 @@ const ProdeRaceResultPage = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-28 px-4">
+      <main className="flex-grow pt-12 px-4 pb-8">
         {/* Pronóstico del usuario */}
         <SessionHeader
           countryName={sessionDetails?.countryName}
