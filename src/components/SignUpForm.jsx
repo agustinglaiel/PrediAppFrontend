@@ -1,11 +1,12 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import { signUp } from "../api/users";
+import { signUp as apiSignUp } from "../api/users";
 
 const SignupForm = () => {
-  const { login: authLogin } = useContext(AuthContext);
+  const { login: contextLogin } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -17,18 +18,19 @@ const SignupForm = () => {
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setError(null);
-
-      const response = await signUp(formData);
-      authLogin(response);
-
-      if (response.role === "admin") {
+      // 1) Llamar al API, que devuelve { token, id, first_name, … }
+      const userData = await apiSignUp(formData);
+      // 2) Contexto guarda el JWT y decodifica para poblar user
+      contextLogin(userData);
+      // 3) Redirigir según rol
+      if (userData.role === "admin") {
         navigate("/admin", { replace: true });
       } else {
         navigate("/", { replace: true });

@@ -1,9 +1,10 @@
 import axios from "axios";
+import * as jwtDecode from "jwt-decode";
 
 const API_URL = "http://localhost:8080";
 
 // Función para establecer el token JWT en el encabezado de autorización
-const setAuthToken = (token) => {
+export const setAuthToken = (token) => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
@@ -11,130 +12,91 @@ const setAuthToken = (token) => {
   }
 };
 
+export function parseJwt(token) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 // Función de registro que guarda el token en localStorage
 export const signUp = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}/api/signup`, userData);
-    const data = response.data;
+    const { data } = await axios.post(
+      "http://localhost:8080/api/signup",
+      userData
+    );
+    // data = { id, first_name, last_name, username, email, role, token, created_at }
+    const { token } = data;
+    if (!token) throw new Error("No se recibió token en signup");
 
-    // Verificamos si data existe y es un objeto
-    if (!data || typeof data !== "object") {
-      throw new Error("Respuesta del servidor inválida.");
-    }
-
-    // Extraemos token, refresh_token, id y role de la respuesta
-    const { token, refresh_token, id: userId, role } = data;
-
-    // Verificamos si los campos necesarios existen
-    if (!token || !refresh_token || !userId || !role) {
-      throw new Error(
-        "Faltan datos necesarios en la respuesta del servidor. Verifica que el backend devuelva 'token', 'refresh_token', 'id' y 'role'."
-      );
-    }
-
-    // Almacenar tokens, userId y role
+    // Guardar solo el JWT
     localStorage.setItem("jwtToken", token);
-    localStorage.setItem("refreshToken", refresh_token);
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("userRole", role);
     setAuthToken(token);
 
-    return data;
-  } catch (error) {
-    console.error("Signup error:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Error signing up.");
+    // Devolver la info pública (sin token)
+    const { id, first_name, last_name, username, email, role, created_at } =
+      data;
+    return { id, first_name, last_name, username, email, role, created_at };
+  } catch (err) {
+    console.error("Signup error:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.error || "Error al registrarse");
   }
 };
 
 // Función de inicio de sesión que guarda el token en localStorage
 export const login = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}/api/login`, userData);
-    const data = response.data;
+    const { data } = await axios.post(
+      "http://localhost:8080/api/login",
+      userData
+    );
+    // data = { id, first_name, last_name, username, email, role, token, created_at }
+    const {
+      token,
+      id,
+      first_name,
+      last_name,
+      username,
+      email,
+      role,
+      created_at,
+    } = data;
+    if (!token) throw new Error("No se recibió token en login");
 
-    // Verificamos si data existe y es un objeto
-    if (!data || typeof data !== "object") {
-      throw new Error("Respuesta del servidor inválida.");
-    }
-
-    // Extraemos token, refresh_token, id y role de la respuesta
-    const { token, refresh_token, id: userId, role } = data;
-
-    // Verificamos si los campos necesarios existen
-    if (!token || !refresh_token || !userId || !role) {
-      throw new Error(
-        "Faltan datos necesarios en la respuesta del servidor. Verifica que el backend devuelva 'token', 'refresh_token', 'id' y 'role'."
-      );
-    }
-
-    // Almacenar tokens, userId y role
+    // Guardar solo el JWT
     localStorage.setItem("jwtToken", token);
-    localStorage.setItem("refreshToken", refresh_token);
-    localStorage.setItem("userId", userId);
-    localStorage.setItem("userRole", role); // Almacenar el rol
     setAuthToken(token);
 
-    return data;
-  } catch (error) {
-    console.error("Login error:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
-    throw new Error(
-      error.response?.data?.message ||
-        "Error logging in. Verifica tus credenciales o contacta al soporte."
-    );
+    // Devolver toda la info (incluido el token)
+    return {
+      token,
+      id,
+      first_name,
+      last_name,
+      username,
+      email,
+      role,
+      created_at,
+    };
+  } catch (err) {
+    console.error("Login error:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.error || "Error al iniciar sesión");
   }
 };
 
-export const refreshToken = async () => {
-  try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) {
-      throw new Error("No refresh token available. Please log in again.");
-    }
-
-    const response = await axios.post(`${API_URL}/api/refresh`, {
-      refresh_token: refreshToken,
-    });
-    const { token } = response.data;
-
-    if (token) {
-      localStorage.setItem("jwtToken", token);
-      setAuthToken(token);
-      return token;
-    }
-
-    throw new Error("No token received from refresh endpoint.");
-  } catch (error) {
-    console.error(
-      "Refresh token error:",
-      error.response?.data || error.message
-    );
-    throw new Error(error.response?.data?.message || "Error refreshing token.");
-  }
-};
-
-export const logout = async () => {
-  try {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (refreshToken) {
-      await axios.post(`${API_URL}/api/signout`, {
-        refresh_token: refreshToken,
-      });
-    }
-
-    // Limpiar localStorage y encabezados
-    localStorage.removeItem("jwtToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userRole"); // Eliminar el rol
-    setAuthToken(null);
-  } catch (error) {
-    console.error("Logout error:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Error logging out.");
-  }
+export const logout = () => {
+  localStorage.removeItem("jwtToken");
+  setAuthToken(null);
 };
 
 // Obtener usuario por ID (requiere token en el encabezado)
@@ -185,30 +147,56 @@ export const getUsers = async () => {
   }
 };
 
+export const fetchMe = async () => {
+  try {
+    // Asegúrate de haber llamado setAuthToken() tras login
+    const { data } = await axios.get("/api/auth/me");
+    // data = { id, first_name, last_name, username, email, role, score, expires_at }
+    return data;
+  } catch (err) {
+    console.error("fetchMe error:", err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export function getUserFromToken() {
+  const token = localStorage.getItem("jwtToken");
+  if (!token) return null;
+  try {
+    const {
+      user_id,
+      first_name,
+      last_name,
+      username,
+      email,
+      role,
+      score,
+      exp,
+    } = jwtDecode(token);
+    return {
+      id: user_id,
+      firstName: first_name,
+      lastName: last_name,
+      username,
+      email,
+      role,
+      score,
+      exp,
+    };
+  } catch {
+    return null;
+  }
+}
+
 axios.interceptors.response.use(
-  (response) => response, // Pasar respuestas exitosas sin cambios
-  async (error) => {
-    const originalRequest = error.config;
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry && // Evitar bucles infinitos
-      originalRequest.url !== `${API_URL}/api/refresh` && // No reintentar en el refresh
-      originalRequest.url !== `${API_URL}/api/login` && // No reintentar en login
-      originalRequest.url !== `${API_URL}/api/signup` // No reintentar en signup
-    ) {
-      originalRequest._retry = true;
-      try {
-        const newToken = await refreshToken();
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-        return axios(originalRequest); // Reintentar la solicitud original con el nuevo token
-      } catch (refreshError) {
-        console.error("Failed to refresh token:", refreshError);
-        await logout(); // Forzar logout si falla la renovación
-        window.location.href = "/login"; // Redirigir al login
-        return Promise.reject(refreshError);
-      }
+  (res) => res,
+  (err) => {
+    // Si recibes 401, probablemente el token expiró: limpias y rediriges
+    if (err.response?.status === 401) {
+      logout();
+      window.location.href = "/login";
     }
-    return Promise.reject(error); // Rechazar otros errores
+    return Promise.reject(err);
   }
 );
 

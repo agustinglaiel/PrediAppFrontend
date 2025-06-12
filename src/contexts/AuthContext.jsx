@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { logout } from "../api/users";
+import { parseJwt, logout, setAuthToken } from "../api/users";
 
 export const AuthContext = createContext();
 
@@ -8,41 +8,65 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Al montar, si hay token, decodifícalo para poblar user
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem("jwtToken");
-      const userId = localStorage.getItem("userId");
-      const role = localStorage.getItem("userRole");
-
-      if (token && userId && role) {
-        setUser({ id: userId, role });
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      setAuthToken(token);
+      const payload = parseJwt(token);
+      if (payload) {
+        const { user_id, first_name, last_name, username, email, role, score } =
+          payload;
+        setUser({
+          id: user_id,
+          firstName: first_name,
+          lastName: last_name,
+          username,
+          email,
+          role,
+          score,
+        });
         setIsAuthenticated(true);
+      } else {
+        // Token inválido o corrupto
+        localStorage.removeItem("jwtToken");
       }
-      setLoading(false);
-    };
-
-    initializeAuth();
+    }
+    setLoading(false);
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem("jwtToken", userData.token);
-    localStorage.setItem("userId", userData.id);
-    localStorage.setItem("userRole", userData.role);
+    const { token } = userData;
+    localStorage.setItem("jwtToken", token);
+    setAuthToken(token);
 
-    setUser({ id: userData.id, role: userData.role });
-    setIsAuthenticated(true);
+    const payload = parseJwt(token);
+    if (payload) {
+      const { user_id, first_name, last_name, username, email, role, score } =
+        payload;
+      setUser({
+        id: user_id,
+        firstName: first_name,
+        lastName: last_name,
+        username,
+        email,
+        role,
+        score,
+      });
+      setIsAuthenticated(true);
+    }
   };
 
   const handleLogout = async () => {
     try {
       await logout();
+    } catch {
+      // Ignorar fallo remoto
+    } finally {
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem("jwtToken");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("userRole");
-    } catch (error) {
-      console.error("Error during logout:", error);
+      setAuthToken(null);
     }
   };
 

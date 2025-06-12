@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import { login } from "../api/users";
+import { login as apiLogin } from "../api/users";
 
 const LoginForm = () => {
-  const { login: authLogin } = useContext(AuthContext);
+  const { login: contextLogin } = useContext(AuthContext);
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
@@ -17,10 +17,12 @@ const LoginForm = () => {
     e.preventDefault();
     try {
       setError(null);
-      const response = await login(credentials);
-      authLogin(response);
-
-      if (response.role === "admin") {
+      // 1) Llamamos al API, que retorna { token, id, first_name, … }
+      const userData = await apiLogin(credentials);
+      // 2) Contexto guarda el JWT y decodifica para poblar user
+      contextLogin(userData);
+      // 3) Redirigimos según rol
+      if (userData.role === "admin") {
         navigate("/admin", { replace: true });
       } else {
         navigate("/", { replace: true });
