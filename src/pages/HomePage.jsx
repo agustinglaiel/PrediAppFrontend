@@ -224,7 +224,6 @@ const HomePage = () => {
 
   // FUNCIÓN que llamaremos cuando hagamos click en “Completar/Actualizar pronóstico”
   const handlePronosticoClick = (sessionData) => {
-    console.log("HomePage: handlePronosticoClick -> sessionData:", sessionData);
     navigate(`/pronosticos/${sessionData.id}`, { state: sessionData });
   };
 

@@ -91,7 +91,6 @@ const SessionForm = ({
         dnf: formData.dnf ? parseInt(formData.dnf, 10) : null,
       }),
     };
-    console.log("Submit Data:", submitData); // Para depuración
     onSubmit(submitData);
   };
 

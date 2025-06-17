@@ -127,8 +127,6 @@ const PronosticosPage = () => {
           getPastSessionsByYear(currentYear),
         ]);
 
-        console.log("Sesiones pasadas crudas:", pastRaw);
-
         const upcomingGrouped = groupSessionsByWeekend(upcomingRaw || []);
         const pastGrouped = groupSessionsByWeekend(pastRaw || []);
 

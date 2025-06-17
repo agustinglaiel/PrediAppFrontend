@@ -39,16 +39,12 @@ const AdminDriverManagementPage = () => {
   const handleCreateDriver = async (driverData) => {
     try {
       setLoading(true);
-      console.log("Payload enviado a createDriver:", driverData);
       const newDriver = await createDriver(driverData);
       setDrivers((prev) => [...prev, newDriver]);
       setError(null);
     } catch (err) {
       console.error("Error al crear piloto - Detalle:", err);
       setError(err.message || "Error al crear el piloto. Verifica los datos.");
-      if (err.response?.data) {
-        console.log("Respuesta del backend:", err.response.data);
-      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +53,7 @@ const AdminDriverManagementPage = () => {
   const handleUpdateDriver = async (driverData) => {
     try {
       setLoading(true);
-      console.log("Payload enviado a updateDriver:", driverData);
+      s;
       const updatedDriver = await updateDriver(selectedDriver.id, driverData);
       setDrivers((prev) =>
         prev.map((driver) =>
@@ -66,13 +62,11 @@ const AdminDriverManagementPage = () => {
       );
       setError(null);
     } catch (err) {
-      console.error("Error al actualizar piloto - Detalle:", err);
-      setError(
-        err.message || "Error al actualizar el piloto. Verifica los datos."
-      );
-      if (err.response?.data) {
-        console.log("Respuesta del backend:", err.response.data);
-      }
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Error al actualizar el piloto. Verifica los datos.";
+      setError(message);
     } finally {
       setLoading(false);
     }

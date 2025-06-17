@@ -145,8 +145,6 @@ const ProdeRacePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("ProdeRacePage submit:", formData, session_id);
-
     try {
       const payload = {
         session_id,
@@ -161,7 +159,6 @@ const ProdeRacePage = () => {
       };
 
       const response = await createProdeCarrera(userId, payload);
-      console.log("ProdeCarrera response:", response);
       navigate("/");
     } catch (error) {
       console.error("Error en createProdeCarrera:", error.message);

@@ -205,7 +205,6 @@ axios.interceptors.response.use(
 const token = localStorage.getItem("jwtToken");
 if (token) {
   setAuthToken(token);
-  console.log("JWT Token establecido desde almacenamiento local");
 } else {
   console.warn("No se encontró un JWT Token almacenado");
 }

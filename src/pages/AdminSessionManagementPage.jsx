@@ -143,9 +143,7 @@ const AdminSessionManagementPage = () => {
   const handleCreateSession = async (sessionData) => {
     try {
       setLoading(true);
-      console.log("Enviando datos a createSession:", sessionData);
       const { data, status } = await createSession(sessionData);
-      console.log("Respuesta de createSession:", { data, status });
       if (status === 201) {
         const [updatedUpcoming, updatedPast] = await Promise.all([
           getUpcomingSessions(),
@@ -182,12 +180,10 @@ const AdminSessionManagementPage = () => {
   const handleUpdateSession = async (sessionData) => {
     try {
       setLoading(true);
-      console.log("Enviando datos a updateSession:", sessionData);
       const { data, status } = await updateSession(
         selectedSession.id,
         sessionData
       );
-      console.log("Respuesta de updateSession:", { data, status });
       if (status === 200) {
         const [updatedUpcoming, updatedPast] = await Promise.all([
           getUpcomingSessions(),

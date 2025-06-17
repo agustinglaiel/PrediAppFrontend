@@ -38,8 +38,6 @@ const EventCard = ({
       flagUrl: flagUrl,
       circuitName: circuit,
     };
-
-    console.log("EventCard: Enviando sessionData:", sessionData);
     onPronosticoClick(sessionData);
   };
 

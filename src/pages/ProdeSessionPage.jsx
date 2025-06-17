@@ -108,7 +108,6 @@ const ProdeSessionPage = () => {
         p3: formData.P3,
       };
       const response = await createProdeSession(userId, payload);
-      console.log("ProdeSession response:", response);
       navigate("/");
     } catch (err) {
       console.error("Error createProdeSession:", err.message);

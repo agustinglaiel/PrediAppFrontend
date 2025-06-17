@@ -11,7 +11,6 @@ export const getAllDrivers = async () => {
     const response = await api.get("/drivers", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
-    console.log("Pilotos recibidos desde el backend:", response.data); // Log para depuración
     return response.data; // Retorna los datos de los pilotos
   } catch (error) {
     console.error("Error fetching drivers - Detalle:", {
@@ -33,7 +32,6 @@ export const getDriverById = async (driverId) => {
     const response = await api.get(`/drivers/${driverId}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
-    console.log(`Piloto con ID ${driverId} recibido:`, response.data);
     return response.data; // Retorna el objeto ResponseDriverDTO
   } catch (error) {
     console.error(`Error fetching driver with ID ${driverId}:`, {
@@ -54,7 +52,6 @@ export const createDriver = async (driverData) => {
         "Content-Type": "application/json",
       },
     });
-    console.log("Piloto creado con éxito:", response.data); // Log para depuración
     return response.data; // Retorna el ResponseDriverDTO
   } catch (error) {
     console.error("Error creating driver - Detalle:", {
@@ -88,10 +85,6 @@ export const fetchAllDriversFromExternalAPI = async () => {
     const response = await api.get("/drivers/external", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
-    console.log(
-      "Pilotos nuevos insertados desde la API externa:",
-      response.data
-    );
     return response.data; // Retorna la lista de pilotos nuevos insertados
   } catch (error) {
     console.error("Error fetching drivers from external API - Detalle:", {

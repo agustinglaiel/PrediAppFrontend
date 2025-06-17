@@ -84,8 +84,6 @@ const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
         }
       });
     }
-
-    console.log("Datos del formulario antes de enviar:", driverData); // Depuración
     onSubmit(driverData);
     onClose();
   };

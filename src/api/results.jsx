@@ -13,7 +13,7 @@ export const getResultsOrderedByPosition = async (sessionID) => {
         },
       }
     );
-    console.log(`Results for session ${sessionID}:`, response.data);
+
     return response.data; // Returns array of ResponseResultDTO
   } catch (error) {
     console.error(`Error fetching ordered results for session ${sessionID}:`, {
@@ -47,13 +47,9 @@ export const getTopNDriversInSession = async (sessionID, n) => {
         },
       }
     );
-    console.log(`Top ${n} drivers for session ${sessionID}:`, response.data);
     return response.data; // Returns array of TopDriverDTO
   } catch (error) {
     if (error.response?.status === 404) {
-      console.log(
-        `No results found for session ${sessionID}, returning empty array`
-      );
       return []; // Devolver array vacío en lugar de lanzar error
     }
     console.error(`Error fetching top ${n} drivers for session ${sessionID}:`, {
@@ -86,7 +82,6 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`, // Añadimos token si es necesario
       },
     });
-    console.log(`Results saved for session ${sessionId}:`, response.data);
     return response.data; // Devuelve array de ResponseResultDTO
   } catch (error) {
     console.error(`Error saving results for session ${sessionId}:`, {
@@ -131,10 +126,6 @@ export const fetchResultsFromExternalAPI = async (sessionID) => {
         "Content-Type": "application/json",
       },
     });
-    console.log(
-      `Fetched results from external API for session ${sessionID}:`,
-      response.data
-    );
     return response.data; // Devuelve array de ResponseResultDTO
   } catch (error) {
     console.error(

@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+// src/components/Header.jsx
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOutAlert from "./SignOutAlert";
 import { logout } from "../api/users";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Header = () => {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem("jwtToken");
+  const { user, isAuthenticated } = useContext(AuthContext);
 
-  const handleLogoClick = () => {
+  const handleUsernameClick = () => {
     if (isAuthenticated) {
       setShowSignOutModal(true);
     } else {
@@ -19,72 +21,52 @@ const Header = () => {
   const confirmSignOut = async () => {
     try {
       await logout();
-      setShowSignOutModal(false);
-      navigate("/");
-      window.location.reload();
     } catch (error) {
-      console.error("Error during sign out:", error.message);
+      console.error("Error during sign out:", error);
+    } finally {
       setShowSignOutModal(false);
       navigate("/");
       window.location.reload();
     }
   };
 
-  const closeSignOutModal = () => {
-    setShowSignOutModal(false);
-  };
-
-  const Link = ({ to, children, className, onClick }) => (
-    <button className={className} onClick={onClick}>
-      {children}
-    </button>
-  );
+  const closeSignOutModal = () => setShowSignOutModal(false);
 
   return (
     <div className="relative">
-      <header className="bg-red-700 text-white w-full z-50 shadow-md fixed top-0 left-0 mb-3 h-16">
+      <header className="bg-red-700 text-white fixed top-0 left-0 w-full h-16 z-50 shadow-md">
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
-          {/* Logo y texto "predi" a la izquierda */}
+          {/* Logo y título */}
           <div className="flex items-center h-full">
             <img
               src="/images/logo.png"
               alt="Logo"
-              className="h-8 w-auto object-contain flex-shrink-0"
+              className="h-8 w-auto object-contain"
             />
-            <Link
-              to="/"
-              className="text-2xl md:text-3xl font-bold tracking-wide ml-2 pointer-events-auto leading-none"
+            <button
               onClick={() => navigate("/")}
+              className="ml-2 text-2xl md:text-3xl font-bold leading-none"
             >
               predi
-            </Link>
+            </button>
           </div>
 
-          {/* Puntos y Logo como botón de Log In/Sign Out (right) */}
-          <div className="flex items-center h-full space-x-3">
-            {/* Rectángulo de puntos */}
-            {isAuthenticated && (
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm">
-                <div className="flex items-center space-x-1.5">
-                  <div className="w-2 h-2 bg-white rounded-full shadow-sm"></div>
-                  <span className="text-sm font-semibold text-white">
-                    120 Puntos
-                  </span>
-                </div>
-              </div>
-            )}
+          {/* Score y Username */}
+          <div className="flex items-center h-full space-x-6">
+            {isAuthenticated && user && (
+              <>
+                {/* Score como texto plano */}
+                <span className="text-sm font-semibold">
+                  {typeof user.score === "number" ? user.score : 0} Puntos
+                </span>
 
-            {/* Rectángulo de usuario con flecha */}
-            <button
-              onClick={handleLogoClick}
-              className="focus:outline-none hover:scale-105 transition-transform duration-200"
-              title={isAuthenticated ? "Sign Out" : "Log In"}
-            >
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm hover:bg-white/15 transition-colors duration-200">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-semibold text-white">
-                    {isAuthenticated ? "User" : "Log In"}
-                  </span>
+                {/* Username con recuadro y flecha */}
+                <button
+                  onClick={handleUsernameClick}
+                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm flex items-center space-x-1 text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
+                  title="Cerrar sesión"
+                >
+                  <span>{user.username}</span>
                   <svg
                     className="w-4 h-4 text-white"
                     fill="none"
@@ -98,14 +80,23 @@ const Header = () => {
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
-                </div>
-              </div>
-            </button>
+                </button>
+              </>
+            )}
+
+            {!isAuthenticated && (
+              <button
+                onClick={() => navigate("/login")}
+                className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
+              >
+                Ingresar
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Modal de confirmación de Sign Out */}
+      {/* Modal de confirmación */}
       <SignOutAlert
         isOpen={showSignOutModal}
         onClose={closeSignOutModal}
