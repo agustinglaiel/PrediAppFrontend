@@ -1,6 +1,7 @@
 // ProdeRacePage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
@@ -26,6 +27,8 @@ const ProdeRacePage = () => {
   const [allDrivers, setAllDrivers] = useState([]);
   const [loadingDrivers, setLoadingDrivers] = useState(true);
   const [driversError, setDriversError] = useState(null);
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
 
   const [sessionDetails, setSessionDetails] = useState(() => {
     if (state) {
@@ -157,7 +160,7 @@ const ProdeRacePage = () => {
         dnf: formData.dnf,
       };
 
-      const response = await createProdeCarrera(payload);
+      const response = await createProdeCarrera(userId, payload);
       console.log("ProdeCarrera response:", response);
       navigate("/");
     } catch (error) {

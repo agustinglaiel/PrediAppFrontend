@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
         });
         setIsAuthenticated(true);
       } else {
-        // Token inválido o corrupto
         localStorage.removeItem("jwtToken");
       }
     }

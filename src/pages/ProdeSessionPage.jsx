@@ -1,5 +1,6 @@
 // ProdeSessionPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 import Header from "../components/Header";
@@ -25,6 +26,8 @@ const ProdeSessionPage = () => {
   const [allDrivers, setAllDrivers] = useState([]);
   const [loadingDrivers, setLoadingDrivers] = useState(true);
   const [driversError, setDriversError] = useState(null);
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
 
   const [sessionDetails, setSessionDetails] = useState(() => {
     if (state) {
@@ -104,7 +107,7 @@ const ProdeSessionPage = () => {
         p2: formData.P2,
         p3: formData.P3,
       };
-      const response = await createProdeSession(payload);
+      const response = await createProdeSession(userId, payload);
       console.log("ProdeSession response:", response);
       navigate("/");
     } catch (err) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Header from "../components/Header";
@@ -8,6 +8,7 @@ import PastEvents from "../components/PastEvents";
 
 import { getUpcomingSessions, getPastSessionsByYear } from "../api/sessions";
 import { getProdeByUserAndSession } from "../api/prodes";
+import { AuthContext } from "../contexts/AuthContext";
 
 const PronosticosPage = () => {
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,9 @@ const PronosticosPage = () => {
 
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
+
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
 
   const navigate = useNavigate();
 
@@ -82,9 +86,6 @@ const PronosticosPage = () => {
   };
 
   const fillProdeData = async (eventsArray) => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return eventsArray;
-
     for (const event of eventsArray) {
       const prodePromises = event.sessions.map(async (sess) => {
         try {

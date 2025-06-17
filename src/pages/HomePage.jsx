@@ -1,5 +1,6 @@
 // HomePage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom"; // <--- Importante
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
@@ -16,6 +17,8 @@ const HomePage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
 
   // Para navegación
   const navigate = useNavigate();
@@ -120,7 +123,6 @@ const HomePage = () => {
       });
     });
 
-    const userId = localStorage.getItem("userId");
     if (userId) {
       const updatedEventsMap = { ...eventsMap };
       const processedSessions = new Set();

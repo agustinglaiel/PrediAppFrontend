@@ -97,6 +97,7 @@ export const login = async (userData) => {
 export const logout = () => {
   localStorage.removeItem("jwtToken");
   setAuthToken(null);
+  window.location.reload();
 };
 
 // Obtener usuario por ID (requiere token en el encabezado)

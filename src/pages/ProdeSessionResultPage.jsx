@@ -1,5 +1,5 @@
 // frontendnuevo/src/pages/ProdeSessionResultPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Header from "../components/Header";
@@ -12,10 +12,13 @@ import { getProdeByUserAndSession } from "../api/prodes";
 import { getDriverById } from "../api/drivers";
 import { getSessionById } from "../api/sessions";
 import { getTopNDriversInSession } from "../api/results";
+import { AuthContext } from "../contexts/AuthContext";
 
 const ProdeSessionResultPage = () => {
   const { session_id } = useParams();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
 
   const [sessionDetails, setSessionDetails] = useState(null);
   const [prodeData, setProdeData] = useState(null);
@@ -40,10 +43,6 @@ const ProdeSessionResultPage = () => {
         setError(null);
 
         const sessionId = parseInt(session_id, 10);
-        const userId = localStorage.getItem("userId");
-        if (!userId) {
-          throw new Error("Usuario no autenticado. Por favor, inicia sesión.");
-        }
 
         // Obtener detalles de la sesión
         const sessionData = await getSessionById(sessionId);
