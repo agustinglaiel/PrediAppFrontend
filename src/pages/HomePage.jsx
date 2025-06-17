@@ -1,16 +1,125 @@
-// HomePage.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom"; // <--- Importante
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import UpcomingEvents from "../components/UpcomingEvents";
 import { getUpcomingSessions } from "../api/sessions";
-import { getProdeByUserAndSession } from "../api/prodes"; // Usamos el nuevo endpoint
+import { getProdeByUserAndSession } from "../api/prodes";
 
 // Simulamos isRaceSession desde el frontend para consistencia con el backend
 const isRaceSession = (sessionName, sessionType) => {
   return sessionName === "Race" && sessionType === "Race";
+};
+
+const processSessions = (sessions) => {
+  const eventsMap = {};
+  sessions.forEach((session) => {
+    const weekendId = session.weekend_id;
+    if (!eventsMap[weekendId]) {
+      eventsMap[weekendId] = {
+        country: session.country_name,
+        circuit: session.circuit_short_name,
+        flagUrl: session.country_name
+          ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
+          : "/images/flags/default.jpg",
+        circuitLayoutUrl: session.country_name
+          ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
+          : "/images/circuitLayouts/default.png",
+        sessions: [],
+        earliestDate: session.date_start,
+      };
+    }
+
+    let day = "1";
+    let month = "JAN";
+    if (session.date_start && typeof session.date_start === "string") {
+      try {
+        const [datePart] = session.date_start.split("T");
+        if (datePart) {
+          const [year, monthNum, dayNum] = datePart.split("-");
+          day = dayNum;
+          const months = [
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC",
+          ];
+          month = months[parseInt(monthNum, 10) - 1] || "JAN";
+        }
+      } catch (error) {
+        console.error("Error parsing date_start:", session.date_start, error);
+      }
+    }
+
+    const [startTime] = session.date_start
+      .split("T")[1]
+      .split("-")[0]
+      .split(":");
+    const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
+
+    eventsMap[weekendId].sessions.push({
+      id: session.id,
+      date: day,
+      month: month,
+      type: session.session_type,
+      startTime: `${startTime}:00`,
+      endTime: `${endTime}:00`,
+      hasPronostico: true,
+      prodeSession: null,
+      prodeRace: null,
+      sessionName: session.session_name,
+      sessionType: session.session_type,
+      date_start: session.date_start,
+    });
+
+    if (
+      new Date(session.date_start) < new Date(eventsMap[weekendId].earliestDate)
+    ) {
+      eventsMap[weekendId].earliestDate = session.date_start;
+    }
+  });
+
+  return Object.values(eventsMap).sort((a, b) => {
+    return new Date(a.earliestDate) - new Date(b.earliestDate);
+  });
+};
+
+const fillProdeData = async (eventsArray, userId) => {
+  for (const event of eventsArray) {
+    await Promise.all(
+      event.sessions.map(async (sess) => {
+        try {
+          const prode = await getProdeByUserAndSession(
+            parseInt(userId, 10),
+            sess.id
+          );
+          if (prode) {
+            const isRace = prode.p4 !== undefined && prode.p5 !== undefined;
+            sess.prodeRace = isRace ? prode : null;
+            sess.prodeSession = isRace ? null : prode;
+            sess.score = prode.score ?? null;
+          } else {
+            sess.prodeRace = sess.prodeSession = null;
+            sess.score = null;
+          }
+        } catch (err) {
+          console.error(`Error fetching prode for session ${sess.id}:`, err);
+          sess.prodeRace = sess.prodeSession = null;
+          sess.score = null;
+        }
+      })
+    );
+  }
+  return eventsArray;
 };
 
 const HomePage = () => {
@@ -20,17 +129,19 @@ const HomePage = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
 
-  // Para navegación
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUpcomingSessionsAndProdes = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        setEvents([]); // Limpiar el estado antes de fetch para evitar datos cacheados
-        const data = await getUpcomingSessions();
-        const groupedEvents = processSessions(data);
-        setEvents(groupedEvents);
+        setError(null);
+        const raw = await getUpcomingSessions();
+        const grouped = processSessions(raw || []);
+        const finalEvents = userId
+          ? await fillProdeData(grouped, parseInt(userId, 10))
+          : grouped;
+        setEvents(finalEvents);
       } catch (err) {
         if (err.response && err.response.status === 403) {
           setError(
@@ -43,186 +154,15 @@ const HomePage = () => {
         } else {
           setError(`No se pudieron cargar los eventos: ${err.message}`);
         }
-        console.error("Error fetching sessions:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUpcomingSessionsAndProdes();
-  }, []);
+    fetchData();
+  }, [userId]);
 
-  const processSessions = (sessions) => {
-    const eventsMap = {};
-    let prodeCount = 0;
-
-    sessions.forEach((session) => {
-      const weekendId = session.weekend_id;
-      if (!eventsMap[weekendId]) {
-        eventsMap[weekendId] = {
-          country: session.country_name,
-          circuit: session.circuit_short_name,
-          flagUrl: session.country_name
-            ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
-            : "/images/flags/default.jpg",
-          circuitLayoutUrl: session.country_name
-            ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
-            : "/images/circuitLayouts/default.png",
-          sessions: [],
-        };
-      }
-
-      let day = "1";
-      let month = "JAN";
-      if (session.date_start && typeof session.date_start === "string") {
-        try {
-          const [datePart] = session.date_start.split("T");
-          if (datePart) {
-            const [year, monthNum, dayNum] = datePart.split("-");
-            day = dayNum;
-            const months = [
-              "JAN",
-              "FEB",
-              "MAR",
-              "APR",
-              "MAY",
-              "JUN",
-              "JUL",
-              "AUG",
-              "SEP",
-              "OCT",
-              "NOV",
-              "DEC",
-            ];
-            month = months[parseInt(monthNum, 10) - 1] || "JAN";
-          }
-        } catch (error) {
-          console.error("Error parsing date_start:", session.date_start, error);
-        }
-      }
-
-      const [startTime] = session.date_start
-        .split("T")[1]
-        .split("-")[0]
-        .split(":");
-      const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
-
-      eventsMap[weekendId].sessions.push({
-        id: session.id,
-        date: day,
-        month: month,
-        type: session.session_type,
-        startTime: `${startTime}:00`,
-        endTime: `${endTime}:00`,
-        hasPronostico: true,
-        prodeSession: null,
-        prodeRace: null,
-        sessionName: session.session_name, // Añadimos sessionName para usar en isRaceSession
-        sessionType: session.session_type, // Añadimos sessionType para usar en isRaceSession
-        date_start: session.date_start, // Guardamos la fecha completa si la quieres usar luego
-      });
-    });
-
-    if (userId) {
-      const updatedEventsMap = { ...eventsMap };
-      const processedSessions = new Set();
-
-      Object.values(eventsMap).forEach((event) => {
-        const prodePromises = event.sessions.map((session) => {
-          const sessionKey = `${userId}-${session.id}-${session.type}`;
-          if (processedSessions.has(sessionKey)) {
-            return Promise.resolve({
-              prode: null,
-              error: null,
-              isRace: isRaceSession(session.sessionName, session.sessionType),
-            });
-          }
-          processedSessions.add(sessionKey);
-
-          return getProdeByUserAndSession(parseInt(userId, 10), session.id)
-            .then((prode) => {
-              if (prode) {
-                prodeCount++;
-                if (prode.p4 !== undefined && prode.p5 !== undefined) {
-                  return { prode, error: null, isRace: true };
-                } else {
-                  return { prode, error: null, isRace: false };
-                }
-              }
-              return {
-                prode: null,
-                error: null,
-                isRace: isRaceSession(session.sessionName, session.sessionType),
-              };
-            })
-            .catch((error) => {
-              if (error.response && error.response.status === 404) {
-                return {
-                  prode: null,
-                  error: null,
-                  isRace: isRaceSession(
-                    session.sessionName,
-                    session.sessionType
-                  ),
-                };
-              }
-              console.error(
-                `Unexpected error fetching prode for session ${session.id}:`,
-                error
-              );
-              return {
-                prode: null,
-                error: null,
-                isRace: isRaceSession(session.sessionName, session.sessionType),
-              };
-            });
-        });
-
-        Promise.all(prodePromises)
-          .then((results) => {
-            results.forEach((result, index) => {
-              const session = event.sessions[index];
-              if (result.isRace) {
-                session.prodeRace = result.prode === null ? null : result.prode;
-                session.prodeSession = null;
-              } else {
-                session.prodeSession =
-                  result.prode === null ? null : result.prode;
-                session.prodeRace = null;
-              }
-            });
-            setEvents(
-              Object.values(updatedEventsMap).sort((a, b) => {
-                const dateA = new Date(
-                  a.sessions[0].date_start || "2025-01-01"
-                );
-                const dateB = new Date(
-                  b.sessions[0].date_start || "2025-01-01"
-                );
-                return dateA - dateB;
-              })
-            );
-          })
-          .catch((error) =>
-            console.error("Error fetching prodes in batch:", error)
-          );
-      });
-    } else {
-      return Object.values(eventsMap).sort((a, b) => {
-        const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
-        const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
-        return dateA - dateB;
-      });
-    }
-
-    return Object.values(eventsMap).sort((a, b) => {
-      const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
-      const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
-      return dateA - dateB;
-    });
-  };
-
-  // FUNCIÓN que llamaremos cuando hagamos click en “Completar/Actualizar pronóstico”
   const handlePronosticoClick = (sessionData) => {
     navigate(`/pronosticos/${sessionData.id}`, { state: sessionData });
   };
@@ -253,9 +193,6 @@ const HomePage = () => {
           onPronosticoClick={handlePronosticoClick}
         />
       </main>
-      {/* <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2025 PrediApp</p>
-      </footer> */}
     </div>
   );
 };
