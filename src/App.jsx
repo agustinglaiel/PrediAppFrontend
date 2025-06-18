@@ -20,6 +20,7 @@ import SessionResultPage from "./pages/SessionResultPage";
 import AdminDriverManagementPage from "./pages/AdminDriverManagementPage";
 import SignUpPage from "./pages/SignUpPage";
 import AdminProdesManagementPage from "./pages/AdminProdesManagementPage";
+import GroupsPage from "./pages/GroupsPage";
 
 function App() {
   return (
@@ -30,6 +31,14 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/pronosticos" element={<PronosticosPage />} />
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
+        <Route
+          path="/grupos"
+          element={
+            <ProtectedRoute>
+              <GroupsPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/pronosticos/result/:session_id"
           element={<ProdeSessionResultPage />}

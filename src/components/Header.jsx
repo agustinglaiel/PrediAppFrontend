@@ -7,8 +7,48 @@ import { AuthContext } from "../contexts/AuthContext";
 
 const Header = () => {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
+
+  // Efecto para manejar el scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Solo ocultar/mostrar si hay un scroll significativo (más de 10px)
+      if (Math.abs(currentScrollY - lastScrollY) < 10) {
+        return;
+      }
+
+      // Si estamos cerca del top (menos de 100px), siempre mostrar
+      if (currentScrollY < 100) {
+        setIsVisible(true);
+      } else {
+        // Si scrolleamos hacia abajo, ocultar. Si hacia arriba, mostrar
+        setIsVisible(currentScrollY < lastScrollY);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    // Throttle para mejorar performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", throttledHandleScroll);
+
+    return () => window.removeEventListener("scroll", throttledHandleScroll);
+  }, [lastScrollY]);
 
   const handleUsernameClick = () => {
     if (isAuthenticated) {
@@ -34,7 +74,11 @@ const Header = () => {
 
   return (
     <div className="relative">
-      <header className="bg-red-700 text-white fixed top-0 left-0 w-full h-16 z-50 shadow-md">
+      <header
+        className={`bg-red-700 text-white fixed top-0 left-0 w-full h-16 z-50 shadow-md transition-transform duration-300 ease-in-out ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="container mx-auto px-4 h-full flex items-center justify-between">
           {/* Logo y título */}
           <div className="flex items-center h-full">
