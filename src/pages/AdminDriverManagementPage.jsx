@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import DriverDisplay from "../components/admin/DriverDisplay";
-import DriverFormModal from "../components/admin/DriverFormModal"; // Cambiado de DriverCreate
+import DriverFormModal from "../components/admin/DriverFormModal";
 import {
   getAllDrivers,
   createDriver,
@@ -104,14 +104,6 @@ const AdminDriverManagementPage = () => {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
         <p className="text-gray-600">Cargando...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-red-600">{error}</p>
       </div>
     );
   }

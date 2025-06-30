@@ -3,7 +3,7 @@ import { getUsers, updateUserById, deleteUserById } from "../api/users";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 
-const UserManagementPage = () => {
+const AdminUsersManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -126,4 +126,4 @@ const UserManagementPage = () => {
   );
 };
 
-export default UserManagementPage;
+export default AdminUsersManagementPage;

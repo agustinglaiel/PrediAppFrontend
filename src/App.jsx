@@ -12,7 +12,7 @@ import ResultsPage from "./pages/ResultsPage";
 // import SessionResult from "./pages/SessionResults";
 // import AdminSessionResults from "./pages/AdminSessionResults";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
-import UserManagementPage from "./pages/UserManagementPage";
+import AdminUsersManagementPage from "./pages/AdminUsersManagementPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminSessionManagementPage from "./pages/AdminSessionManagementPage";
 import AdminResultsManagementPage from "./pages/AdminResultsManagementPage";
@@ -21,6 +21,7 @@ import AdminDriverManagementPage from "./pages/AdminDriverManagementPage";
 import SignUpPage from "./pages/SignUpPage";
 import AdminProdesManagementPage from "./pages/AdminProdesManagementPage";
 import GroupsPage from "./pages/GroupsPage";
+import ForoPage from "./pages/ForoPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/pronosticos" element={<PronosticosPage />} />
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
+        <Route path="/foro" element={<ForoPage />} />
         <Route
           path="/grupos"
           element={
@@ -60,7 +62,7 @@ function App() {
           path="/admin/users"
           element={
             <ProtectedRoute>
-              <UserManagementPage />
+              <AdminUsersManagementPage />
             </ProtectedRoute>
           }
         />

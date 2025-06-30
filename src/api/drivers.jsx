@@ -11,8 +11,14 @@ export const getAllDrivers = async () => {
     const response = await api.get("/drivers", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
-    return response.data; // Retorna los datos de los pilotos
+    return response.data; // Retorna los datos si todo va bien (ej. status 200)
   } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.warn(
+        "API devolvió 404 en /drivers. Se asume que no hay pilotos y se retorna un array vacío."
+      );
+      return [];
+    }
     console.error("Error fetching drivers - Detalle:", {
       message: error.message,
       code: error.code,
@@ -23,7 +29,7 @@ export const getAllDrivers = async () => {
     throw new Error(
       error.response?.data?.message ||
         "Error fetching drivers from the backend."
-    ); // Lanza un error personalizado
+    );
   }
 };
 
