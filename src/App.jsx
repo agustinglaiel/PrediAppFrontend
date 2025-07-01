@@ -33,14 +33,7 @@ function App() {
         <Route path="/pronosticos" element={<PronosticosPage />} />
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route path="/foro" element={<ForoPage />} />
-        <Route
-          path="/grupos"
-          element={
-            <ProtectedRoute>
-              <GroupsPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/grupos" element={<GroupsPage />} />
         <Route
           path="/pronosticos/result/:session_id"
           element={<ProdeSessionResultPage />}

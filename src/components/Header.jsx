@@ -91,7 +91,7 @@ const Header = () => {
               onClick={() => navigate("/")}
               className="ml-2 text-2xl md:text-3xl font-bold leading-none"
             >
-              predi
+              Predi
             </button>
           </div>
 

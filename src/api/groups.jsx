@@ -4,31 +4,31 @@ const API_BASE_URL = "http://localhost:8080";
 
 export const getGroupByUserId = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/groups/user/${userId}`, {
+    const res = await axios.get(`${API_BASE_URL}/groups/user/${userId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
     });
-    return response.data; // GroupResponseDTO
+    return { status: res.status, data: res.data };
   } catch (error) {
-    // 404 → usuario aún no pertenece a ningún grupo
-    if (error.response?.status === 404) return null;
-    console.error("Error fetching group by user ID:", error);
-    throw new Error(
+    if (error.response?.status === 404) {
+      return { status: 404, data: [] };
+    }
+    console.error("Error fetching groups:", error);
+    const err = new Error(
       error.response?.data?.message ||
-        "Error al obtener el grupo. Intenta nuevamente."
+        "Error al obtener los grupos. Intenta nuevamente."
     );
+    err.status = error.response?.status ?? 500;
+    throw err;
   }
 };
 
 export const joinGroup = async (groupCode, userId) => {
   try {
-    const response = await axios.post(
+    const res = await axios.post(
       `${API_BASE_URL}/groups/join`,
-      {
-        group_code: groupCode,
-        user_id: userId,
-      },
+      { group_code: groupCode, user_id: userId },
       {
         headers: {
           "Content-Type": "application/json",
@@ -36,13 +36,14 @@ export const joinGroup = async (groupCode, userId) => {
         },
       }
     );
-    return response.data;
+    return { status: res.status, message: res.data.message };
   } catch (error) {
-    console.error("Error joining group:", error);
-    throw new Error(
+    const err = new Error(
       error.response?.data?.message ||
-        "No se pudo enviar la solicitud para unirse al grupo."
+        "Error al enviar solicitud para unirse al grupo."
     );
+    err.status = error.response?.status ?? 500;
+    throw err;
   }
 };
 
@@ -54,18 +55,20 @@ export const createGroup = async ({ groupName, userId, description = "" }) => {
       ...(description && { description }),
     };
 
-    const response = await axios.post(`${API_BASE_URL}/groups`, payload, {
+    const res = await axios.post(`${API_BASE_URL}/groups`, payload, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
     });
-    return response.data;
+
+    return { status: res.status, data: res.data };
   } catch (error) {
     console.error("Error creating group:", error);
-    throw new Error(
-      error.response?.data?.message ||
-        "No se pudo crear el grupo. Intenta nuevamente."
+    const err = new Error(
+      error.response?.data?.message || "No se pudo crear el grupo."
     );
+    err.status = error.response?.status ?? 500;
+    throw err;
   }
 };
