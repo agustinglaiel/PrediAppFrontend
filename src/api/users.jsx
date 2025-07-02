@@ -137,6 +137,28 @@ export const deleteUserById = async (id) => {
   }
 };
 
+export const getUserScoreByUserId = async (userId) => {
+  try {
+    const res = await axios.get(`${API_URL}/users/${userId}/score`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+    return { status: res.status, data: res.data };
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return { status: 404, data: null };
+    }
+    console.error("Error fetching user score:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al obtener el puntaje del usuario. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+};
+
 // Obtener todos los usuarios (requiere token en el encabezado)
 export const getUsers = async () => {
   try {

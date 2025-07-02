@@ -22,6 +22,7 @@ import SignUpPage from "./pages/SignUpPage";
 import AdminProdesManagementPage from "./pages/AdminProdesManagementPage";
 import GroupsPage from "./pages/GroupsPage";
 import ForoPage from "./pages/ForoPage";
+import GroupPage from "./pages/GroupPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route path="/foro" element={<ForoPage />} />
         <Route path="/grupos" element={<GroupsPage />} />
+        <Route path="/grupos/:groupId" element={<GroupPage />} />
         <Route
           path="/pronosticos/result/:session_id"
           element={<ProdeSessionResultPage />}

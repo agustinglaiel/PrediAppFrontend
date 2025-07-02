@@ -2,6 +2,28 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080";
 
+export const getGroupById = async (groupId) => {
+  try{
+    const res = await axios.get(`${API_BASE_URL}/groups/${groupId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+    return { status: res.status, data: res.data };
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return { status: 404, data: null };
+    }
+    console.error("Error fetching group:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al obtener el grupo. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+}
+
 export const getGroupByUserId = async (userId) => {
   try {
     const res = await axios.get(`${API_BASE_URL}/groups/user/${userId}`, {
@@ -18,6 +40,28 @@ export const getGroupByUserId = async (userId) => {
     const err = new Error(
       error.response?.data?.message ||
         "Error al obtener los grupos. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+};
+
+export const getJoinRequestByGroupId = async (groupId) => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/groups/${groupId}/join-requests` , {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },  
+  });
+  return { status: res.status, data: res.data };
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return { status: 404, data: [] };
+    }
+    console.error("Error fetching join requests:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al obtener las solicitudes de unión al grupo. Intenta nuevamente."
     );
     err.status = error.response?.status ?? 500;
     throw err;

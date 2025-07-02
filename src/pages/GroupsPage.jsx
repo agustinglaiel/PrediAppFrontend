@@ -1,14 +1,19 @@
 // src/pages/GroupsPage.jsx
 import React, { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import GroupPreview from "../components/groups/GroupPreview";
 import NewGroupModal from "../components/groups/NewGroupModal";
 import MessageStatus from "../components/MessageStatus";
+import WarningModal from "../components/WarningModal";
 import { getGroupByUserId, joinGroup } from "../api/groups";
 import { AuthContext } from "../contexts/AuthContext";
 
 const GroupsPage = () => {
+  const { user } = useContext(AuthContext);
+  const userId = user?.id;
+  const isLoggedIn = Boolean(userId);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,9 +21,7 @@ const GroupsPage = () => {
   const [joinLoading, setJoinLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
-
-  const { user } = useContext(AuthContext);
-  const userId = user?.id;
+  const [warningMessage, setWarningMessage] = useState(null);
 
   /* fetch grupos */
   const fetchGroups = async () => {
@@ -35,12 +38,15 @@ const GroupsPage = () => {
   };
 
   useEffect(() => {
-    if (userId) fetchGroups();
-    else {
+    if (isLoggedIn) {
+      fetchGroups();
+    } else {
       setLoading(false);
-      setError("No se encontró el ID del usuario.");
+      setWarningMessage(
+        "Es necesario iniciar sesión para acceder a esta funcionalidad."
+      );
     }
-  }, [userId]);
+  }, [isLoggedIn]);
 
   /* join */
   const handleJoin = async (e) => {
@@ -54,6 +60,7 @@ const GroupsPage = () => {
       const { status, message } = await joinGroup(joinCode.trim(), userId);
       setToast({ text: message, status });
       setJoinCode("");
+      fetchGroups();
     } catch (err) {
       setToast({ text: err.message, status: err.status ?? 500 });
     } finally {
@@ -73,15 +80,14 @@ const GroupsPage = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-
       <main className="flex-grow pt-24 px-4">
         {/* título + botón */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Grupos</h1>
-          {/* botón vuelve al tamaño original */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            disabled={!isLoggedIn}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Crear grupo
           </button>
@@ -96,12 +102,13 @@ const GroupsPage = () => {
                 placeholder="Ingresa el código del grupo"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
-                className="flex-grow py-2 px-4 bg-transparent focus:outline-none placeholder-gray-500"
+                disabled={!isLoggedIn}
+                className="flex-grow py-2 px-4 bg-transparent focus:outline-none placeholder-gray-500 disabled:opacity-50"
               />
               <button
                 type="submit"
-                disabled={joinLoading}
-                className="py-2 px-4 text-black font-medium disabled:opacity-50"
+                disabled={!isLoggedIn || joinLoading}
+                className="py-2 px-4 text-black font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {joinLoading ? "Enviando…" : "Unirme"}
               </button>
@@ -109,22 +116,27 @@ const GroupsPage = () => {
           </form>
         </div>
 
-        {/* error */}
+        {/* error de fetch */}
         {error && (
           <div className="mb-6 px-4 py-2 rounded bg-red-100 text-red-700">
             {error}
           </div>
         )}
 
-        {/* grupos */}
+        {/* lista de grupos */}
         {groups.length > 0 && (
-          <div className="space-y-4">
-            {groups.map((g) => (
-              <GroupPreview
-                key={g.id}
-                name={g.group_name}
-                count={g.users?.length ?? 0}
-              />
+          <div>
+            {groups.map((g, index) => (
+              <Link 
+                key={g.id} 
+                to={`/grupos/${g.id}`} 
+                className={`block ${index < groups.length - 1 ? 'mb-4' : ''}`}
+              >
+                <GroupPreview
+                  name={g.group_name}
+                  count={g.users?.length ?? 0}
+                />
+              </Link>
             ))}
           </div>
         )}
@@ -156,6 +168,14 @@ const GroupsPage = () => {
           text={toast.text}
           status={toast.status}
           onHide={() => setToast(null)}
+        />
+      )}
+
+      {/* warning modal */}
+      {warningMessage && (
+        <WarningModal
+          message={warningMessage}
+          onClose={() => setWarningMessage(null)}
         />
       )}
     </div>
