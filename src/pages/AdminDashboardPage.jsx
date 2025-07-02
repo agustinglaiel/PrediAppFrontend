@@ -13,11 +13,11 @@ const AdminDashboardPage = () => {
           Bienvenido al panel de administración. Aquí puedes gestionar usuarios,
           configurar eventos y más.
         </p>
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center max-w-6xl mx-auto">
           <div className="w-full">
             <a
               href="/admin/users"
-              className="block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-center w-full"
+              className="block h-20 px-4 py-4 bg-white text-gray-700 border-2 border-gray-400 rounded-lg hover:bg-gray-50 hover:border-gray-500 text-center w-full flex items-center justify-center transition-colors duration-200"
             >
               Gestionar Usuarios
             </a>
@@ -25,7 +25,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/sessions"
-              className="block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-center w-full"
+              className="block h-20 px-4 py-4 bg-white text-gray-700 border-2 border-gray-400 rounded-lg hover:bg-gray-50 hover:border-gray-500 text-center w-full flex items-center justify-center transition-colors duration-200"
             >
               Gestionar Sesiones
             </a>
@@ -33,7 +33,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/results"
-              className="block px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 text-center w-full"
+              className="block h-20 px-4 py-4 bg-white text-gray-700 border-2 border-gray-400 rounded-lg hover:bg-gray-50 hover:border-gray-500 text-center w-full flex items-center justify-center transition-colors duration-200"
             >
               Gestionar Resultados
             </a>
@@ -41,7 +41,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/drivers"
-              className="block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-center w-full"
+              className="block h-20 px-4 py-4 bg-white text-gray-700 border-2 border-gray-400 rounded-lg hover:bg-gray-50 hover:border-gray-500 text-center w-full flex items-center justify-center transition-colors duration-200"
             >
               Gestionar Pilotos
             </a>
@@ -49,7 +49,7 @@ const AdminDashboardPage = () => {
           <div className="w-full">
             <a
               href="/admin/prodes"
-              className="block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-center w-full"
+              className="block h-20 px-4 py-4 bg-white text-gray-700 border-2 border-gray-400 rounded-lg hover:bg-gray-50 hover:border-gray-500 text-center w-full flex items-center justify-center transition-colors duration-200"
             >
               Gestionar Pronósticos
             </a>

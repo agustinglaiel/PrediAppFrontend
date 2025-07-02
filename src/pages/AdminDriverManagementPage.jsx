@@ -25,7 +25,7 @@ const AdminDriverManagementPage = () => {
       try {
         setLoading(true);
         const data = await getAllDrivers();
-        setDrivers(data);
+        setDrivers(data ?? []);
       } catch (err) {
         setError(err.message || "Error al cargar los pilotos.");
       } finally {
@@ -53,7 +53,6 @@ const AdminDriverManagementPage = () => {
   const handleUpdateDriver = async (driverData) => {
     try {
       setLoading(true);
-      s;
       const updatedDriver = await updateDriver(selectedDriver.id, driverData);
       setDrivers((prev) =>
         prev.map((driver) =>
@@ -109,8 +108,12 @@ const AdminDriverManagementPage = () => {
   }
 
   // Filtrar pilotos activos e inactivos
-  const activeDrivers = drivers.filter((driver) => driver.activo === true);
-  const inactiveDrivers = drivers.filter((driver) => driver.activo === false);
+  const activeDrivers = Array.isArray(drivers) 
+  ? drivers.filter((d) => d.activo) 
+  : [];
+const inactiveDrivers = Array.isArray(drivers) 
+  ? drivers.filter((d) => !d.activo) 
+  : [];
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
