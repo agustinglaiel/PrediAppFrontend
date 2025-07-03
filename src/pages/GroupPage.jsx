@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import WarningModal from "../components/WarningModal";
 import Leaderboard from "../components/Leaderboard";
+import GroupRequests from "../components/groups/GroupRequests";
 import { AuthContext } from "../contexts/AuthContext";
 import { getGroupById, getJoinRequestByGroupId } from "../api/groups";
 import { getUserScoreByUserId } from "../api/users";
@@ -19,21 +20,22 @@ const GroupPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Estados para el modal de solicitudes
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [joinRequests, setJoinRequests] = useState([]);
   const [joinReqLoading, setJoinReqLoading] = useState(false);
   const [joinReqError, setJoinReqError] = useState(null);
 
+  // 1) Obtiene grupo y leaderboard
   const fetchGroup = async () => {
     try {
       setLoading(true);
       const { data: grp } = await getGroupById(groupId);
       setGroup(grp);
 
-      // sólo usuarios con role != "invited"
-      const validUsers = grp.users.filter(u => u.role !== "invited");
+      const validUsers = grp.users.filter((u) => u.role !== "invited");
       const scores = await Promise.all(
-        validUsers.map(async u => {
+        validUsers.map(async (u) => {
           const { data } = await getUserScoreByUserId(u.user_id);
           return {
             user_id: u.user_id,
@@ -51,15 +53,12 @@ const GroupPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchGroup();
-  }, [groupId]);
-
+  // 2) Obtiene solicitudes
   const handleShowRequests = async () => {
     try {
       setJoinReqLoading(true);
       const { data } = await getJoinRequestByGroupId(groupId);
-      setJoinRequests(data);
+      setJoinRequests(data?.users ?? []);
       setJoinReqError(null);
     } catch (err) {
       setJoinReqError(err.message);
@@ -69,6 +68,24 @@ const GroupPage = () => {
       setShowRequestsModal(true);
     }
   };
+
+  // Cierra el modal y refresca la página (vuelve a cargar datos)
+  const handleCloseRequests = () => {
+    setShowRequestsModal(false);
+    fetchGroup();
+  };
+
+  // Marcadores de aceptar/rechazar (pueden usar manageGroupInvitation internamente)
+  const handleAccept = (userId) => {
+    console.log("Aceptar solicitud de user:", userId);
+  };
+  const handleReject = (userId) => {
+    console.log("Rechazar solicitud de user:", userId);
+  };
+
+  useEffect(() => {
+    fetchGroup();
+  }, [groupId]);
 
   if (loading) {
     return (
@@ -86,8 +103,8 @@ const GroupPage = () => {
     );
   }
 
-  // ¿es el usuario logueado el creador?
-  const creatorId = group.users.find(u => u.role === "creator")?.user_id;
+  // ¿Es el usuario logueado el creador?
+  const creatorId = group.users.find((u) => u.role === "creator")?.user_id;
   const isCreator = creatorId === loggedUserId;
 
   return (
@@ -101,7 +118,7 @@ const GroupPage = () => {
           {isCreator && (
             <button
               onClick={handleShowRequests}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-green-600"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Solicitudes
             </button>
@@ -118,34 +135,14 @@ const GroupPage = () => {
 
       {/* Modal de solicitudes */}
       {showRequestsModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Solicitudes para unirse</h2>
-
-            {joinReqLoading ? (
-              <p>Cargando...</p>
-            ) : joinReqError ? (
-              <p className="text-red-500">{joinReqError}</p>
-            ) : (
-              <ul className="list-disc list-inside space-y-1 mb-4">
-                {joinRequests.length > 0 ? (
-                  joinRequests.map(username => (
-                    <li key={username}>{username}</li>
-                  ))
-                ) : (
-                  <li>No hay solicitudes pendientes.</li>
-                )}
-              </ul>
-            )}
-
-            <button
-              onClick={() => setShowRequestsModal(false)}
-              className="mt-2 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
+        <GroupRequests
+          groupId={parseInt(groupId, 10)}
+          creatorId={creatorId}
+          requests={joinRequests}
+          loading={joinReqLoading}
+          error={joinReqError}
+          onClose={handleCloseRequests}
+        />
       )}
     </div>
   );

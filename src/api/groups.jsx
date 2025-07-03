@@ -116,3 +116,37 @@ export const createGroup = async ({ groupName, userId, description = "" }) => {
     throw err;
   }
 };
+
+export const manageGroupInvitation = async ({
+  groupId,
+  creatorId,
+  targetUserId,
+  action,
+}) => {
+  try {
+    const res = await axios.post(
+      `${API_BASE_URL}/groups/manage-invitation`,
+      {
+        group_id: groupId,
+        creator_id: creatorId,
+        target_user_id: targetUserId,
+        action,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      }
+    );
+    return { status: res.status, message: res.data.message };
+  } catch (error) {
+    console.error("Error managing invitation:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al gestionar la invitación. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+};

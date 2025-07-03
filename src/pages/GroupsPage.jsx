@@ -14,6 +14,7 @@ const GroupsPage = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const isLoggedIn = Boolean(userId);
+
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -76,10 +77,17 @@ const GroupsPage = () => {
     );
   }
 
+  // Filtrar grupos en los que el usuario NO tiene role "invited"
+  const visibleGroups = groups.filter((g) => {
+    const membership = g.users.find((u) => u.user_id === userId);
+    return membership && membership.role !== "invited";
+  });
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
+
       <main className="flex-grow pt-24 px-4">
         {/* título + botón */}
         <div className="flex justify-between items-center mb-6">
@@ -123,14 +131,14 @@ const GroupsPage = () => {
           </div>
         )}
 
-        {/* lista de grupos */}
-        {groups.length > 0 && (
+        {/* lista de grupos filtrados */}
+        {visibleGroups.length > 0 && (
           <div>
-            {groups.map((g, index) => (
-              <Link 
-                key={g.id} 
-                to={`/grupos/${g.id}`} 
-                className={`block ${index < groups.length - 1 ? 'mb-4' : ''}`}
+            {visibleGroups.map((g, index) => (
+              <Link
+                key={g.id}
+                to={`/grupos/${g.id}`}
+                className={`block ${index < visibleGroups.length - 1 ? "mb-4" : ""}`}
               >
                 <GroupPreview
                   name={g.group_name}
