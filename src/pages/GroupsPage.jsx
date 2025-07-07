@@ -134,18 +134,26 @@ const GroupsPage = () => {
         {/* lista de grupos filtrados */}
         {visibleGroups.length > 0 && (
           <div>
-            {visibleGroups.map((g, index) => (
-              <Link
-                key={g.id}
-                to={`/grupos/${g.id}`}
-                className={`block ${index < visibleGroups.length - 1 ? "mb-4" : ""}`}
-              >
-                <GroupPreview
-                  name={g.group_name}
-                  count={g.users?.length ?? 0}
-                />
-              </Link>
-            ))}
+            {visibleGroups.map((g, index) => {
+              // Filtrar usuarios que no tengan role "invited"
+              const activeMembersCount =
+                g.users?.filter((u) => u.role !== "invited").length ?? 0;
+
+              return (
+                <Link
+                  key={g.id}
+                  to={`/grupos/${g.id}`}
+                  className={`block ${
+                    index < visibleGroups.length - 1 ? "mb-4" : ""
+                  }`}
+                >
+                  <GroupPreview
+                    name={g.group_name}
+                    count={activeMembersCount}
+                  />
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>

@@ -113,8 +113,15 @@ const GroupPage = () => {
       <NavigationBar />
 
       <main className="flex-grow pt-24 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">{group.group_name}</h1>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-4">{group.group_name}</h1>
+            {isCreator && (
+              <span className="text-lg text-gray-500 font-medium">
+                Codigo: {group.group_code}
+              </span>
+            )}
+          </div>
           {isCreator && (
             <button
               onClick={handleShowRequests}
