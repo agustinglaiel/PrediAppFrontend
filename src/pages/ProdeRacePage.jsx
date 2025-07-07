@@ -33,11 +33,11 @@ const ProdeRacePage = () => {
   const [sessionDetails, setSessionDetails] = useState(() => {
     if (state) {
       return {
-        countryName: state.countryName || "Hungary",
-        flagUrl: state.flagUrl || "/images/flags/hungary.jpg",
-        sessionType: state.sessionType || "Race",
-        sessionName: state.sessionName || "Race",
-        dateStart: state.dateStart || "2025-12-02T04:00:00-03:00",
+        countryName: state.countryName,
+        flagUrl: state.flagUrl,
+        sessionType: state.sessionType,
+        sessionName: state.sessionName,
+        dateStart: state.dateStart,
       };
     } else {
       return {
