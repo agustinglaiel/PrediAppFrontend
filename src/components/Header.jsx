@@ -1,5 +1,4 @@
-// src/components/Header.jsx
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOutAlert from "./SignOutAlert";
 import { logout } from "../api/users";
@@ -7,35 +6,27 @@ import { AuthContext } from "../contexts/AuthContext";
 
 const Header = () => {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
+  const menuRef = useRef(null);
 
-  // Efecto para manejar el scroll
+  // Manejo de scroll para mostrar/ocultar header
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      // Solo ocultar/mostrar si hay un scroll significativo (más de 10px)
-      if (Math.abs(currentScrollY - lastScrollY) < 10) {
-        return;
-      }
-
-      // Si estamos cerca del top (menos de 100px), siempre mostrar
+      if (Math.abs(currentScrollY - lastScrollY) < 10) return;
       if (currentScrollY < 100) {
         setIsVisible(true);
       } else {
-        // Si scrolleamos hacia abajo, ocultar. Si hacia arriba, mostrar
         setIsVisible(currentScrollY < lastScrollY);
       }
-
       setLastScrollY(currentScrollY);
     };
-
-    // Throttle para mejorar performance
     let ticking = false;
-    const throttledHandleScroll = () => {
+    const throttled = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           handleScroll();
@@ -44,18 +35,37 @@ const Header = () => {
         ticking = true;
       }
     };
-
-    window.addEventListener("scroll", throttledHandleScroll);
-
-    return () => window.removeEventListener("scroll", throttledHandleScroll);
+    window.addEventListener("scroll", throttled);
+    return () => window.removeEventListener("scroll", throttled);
   }, [lastScrollY]);
 
-  const handleUsernameClick = () => {
-    if (isAuthenticated) {
-      setShowSignOutModal(true);
-    } else {
-      navigate("/login");
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const toggleMenu = () => setShowMenu(prev => !prev);
+
+  const onClickProfile = () => {
+    setShowMenu(false);
+    navigate(`/${user.id}`);
+  };
+
+  const onClickSignOut = () => {
+    setShowMenu(false);
+    setShowSignOutModal(true);
   };
 
   const confirmSignOut = async () => {
@@ -69,8 +79,6 @@ const Header = () => {
       window.location.reload();
     }
   };
-
-  const closeSignOutModal = () => setShowSignOutModal(false);
 
   return (
     <div className="relative">
@@ -94,41 +102,56 @@ const Header = () => {
               Predi
             </button>
           </div>
-
-          {/* Score y Username */}
-          <div className="flex items-center h-full space-x-6">
-            {isAuthenticated && user && (
+          {/* Score y menú desplegable */}
+          <div className="flex items-center h-full space-x-6 relative">
+            {isAuthenticated && user ? (
               <>
-                {/* Score como texto plano */}
                 <span className="text-sm font-semibold">
                   {typeof user.score === "number" ? user.score : 0} Puntos
                 </span>
-
-                {/* Username con recuadro y flecha */}
-                <button
-                  onClick={handleUsernameClick}
-                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm flex items-center space-x-1 text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
-                  title="Cerrar sesión"
-                >
-                  <span>{user.username}</span>
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="relative" ref={menuRef}>
+                  <button
+                    onClick={toggleMenu}
+                    className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm flex items-center space-x-1 text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
+                    title="Menú usuario"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
+                    <span>{user.username}</span>
+                    <svg
+                      className={`w-4 h-4 text-white transition-transform duration-200 ${
+                        showMenu ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {/* Dropdown */}
+                  {showMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-50">
+                      <button
+                        onClick={onClickProfile}
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-t-lg"
+                      >
+                        Mi Perfil
+                      </button>
+                      <button
+                        onClick={onClickSignOut}
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-b-lg"
+                      >
+                        Cerrar Sesión
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
-            )}
-
-            {!isAuthenticated && (
+            ) : (
               <button
                 onClick={() => navigate("/login")}
                 className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
@@ -139,11 +162,10 @@ const Header = () => {
           </div>
         </div>
       </header>
-
-      {/* Modal de confirmación */}
+      {/* Reutilizamos SignOutAlert para confirmación */}
       <SignOutAlert
         isOpen={showSignOutModal}
-        onClose={closeSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
         onConfirm={confirmSignOut}
       />
     </div>
