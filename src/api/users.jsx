@@ -119,11 +119,15 @@ export const getUserById = async (id) => {
 // Actualizar usuario por ID (requiere token en el encabezado)
 export const updateUserById = async (id, userData) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${id}`, userData);
-    return response.data;
+    const res = await axios.put(`${API_URL}/users/${id}`, userData, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
+    });
+    return res.data;
   } catch (error) {
     console.error("Update user error:", error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Error updating user.");
+    throw new Error(
+      error.response?.data?.message || "Error actualizando el usuario."
+    );
   }
 };
 
