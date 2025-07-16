@@ -37,7 +37,7 @@ function App() {
         <Route path="/foro" element={<ForoPage />} />
         <Route path="/grupos" element={<GroupsPage />} />
         <Route path="/grupos/:groupId" element={<GroupPage />} />
-        <Route path="/:userId" element={<MyProfilePage />} />
+        <Route path="/profile/:userId" element={<MyProfilePage />} />
         <Route
           path="/pronosticos/result/:session_id"
           element={<ProdeSessionResultPage />}

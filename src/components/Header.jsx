@@ -60,7 +60,7 @@ const Header = () => {
 
   const onClickProfile = () => {
     setShowMenu(false);
-    navigate(`/${user.id}`);
+    navigate(`/profile/${user.id}`);
   };
 
   const onClickSignOut = () => {
