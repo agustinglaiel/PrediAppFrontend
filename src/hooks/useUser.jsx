@@ -1,45 +1,55 @@
+// src/hooks/useUser.js
 import { useState, useEffect } from "react";
 import { getUserById } from "../api/users";
 
 export default function useUser(userId) {
-  const [user, setUser] = useState(null);
+  const [user, setUser]     = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
 
   useEffect(() => {
     if (!userId || isNaN(userId)) {
-      console.log("useUser: ID inválido, no se realiza la solicitud", { userId });
       setLoading(false);
       setError(new Error("ID de usuario inválido"));
       return;
     }
-
-    let canceled = false;
+    let cancelled = false;
     setLoading(true);
-    console.log("useUser: solicitando usuario con ID:", userId);
+
     getUserById(userId)
       .then(data => {
-        console.log("useUser: datos recibidos:", data);
-        if (!canceled) {
-          setUser(data);
-          setError(null);
-        }
+        if (cancelled) return;
+
+        // Conversión única de TODOS los campos que vas a usar:
+        const mapped = {
+          id:             data.id,
+          firstName:      data.first_name,
+          lastName:       data.last_name,
+          username:       data.username,
+          email:          data.email,
+          role:           data.role,
+          score:          data.score,
+          createdAt:      data.created_at,
+          isActive:       data.is_active,
+          phoneNumber:    data.phone_number,
+          // aquí usamos directamente lo que devolvió el backend
+          profileImageUrl:
+            data.imagen_perfil && data.imagen_mime_type
+              ? `data:${data.imagen_mime_type};base64,${data.imagen_perfil}`
+              : null,
+        };
+
+        setUser(mapped);
+        setError(null);
       })
       .catch(err => {
-        console.error("useUser: error:", err);
-        if (!canceled) {
-          setError(err);
-        }
+        if (!cancelled) setError(err);
       })
       .finally(() => {
-        if (!canceled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       });
 
-    return () => {
-      canceled = true;
-    };
+    return () => { cancelled = true; };
   }, [userId]);
 
   return { user, loading, error };

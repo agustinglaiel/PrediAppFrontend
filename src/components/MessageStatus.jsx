@@ -1,20 +1,19 @@
 // src/components/MessageStatus.jsx
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 
 const MessageStatus = ({ text, status, onHide }) => {
-  /* Auto-desaparecer después de 3 s */
   useEffect(() => {
     const id = setTimeout(onHide, 3000);
     return () => clearTimeout(id);
   }, [onHide]);
 
-  /* Colores por rango */
   const color =
     status >= 200 && status < 300
       ? "bg-green-600"
       : status >= 400 && status < 500
       ? "bg-red-600"
-      : "bg-yellow-600"; // 300-, 500-, etc.
+      : "bg-yellow-600";
 
   return (
     <div
@@ -23,6 +22,12 @@ const MessageStatus = ({ text, status, onHide }) => {
       {text}
     </div>
   );
+};
+
+MessageStatus.propTypes = {
+  text:   PropTypes.string.isRequired,
+  status: PropTypes.number.isRequired,
+  onHide: PropTypes.func.isRequired,
 };
 
 export default MessageStatus;

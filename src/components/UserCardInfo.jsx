@@ -1,56 +1,110 @@
-import React, { useState } from "react";
+// src/components/UserCardInfo.jsx
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 
 /**
- * Tarjeta para mostrar / editar la información del usuario.
- * - user: objeto con los datos actuales
- * - onSave: callback con el objeto actualizado cuando el usuario pulsa "Guardar cambios"
+ * Props:
+ * - user: { firstName, lastName, username, email, score, phoneNumber, profileImageUrl }
+ * - onSave(updatedUser): se llama al pulsar “Guardar cambios”
+ * - onImageUpload(file): se llama en cuanto se elige un nuevo archivo
  */
-const UserCardInfo = ({ user, onSave }) => {
+const UserCardInfo = ({ user, onSave, onImageUpload }) => {
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ ...user });
-  
+  const [previewImage, setPreviewImage] = useState(user.profileImageUrl);
+  const fileInputRef = useRef(null);
+
+  // mantener formulario sincronizado
   const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-    
-  const toggleEdit = () => {
-    // si pasamos de editMode=true a false sin guardar ⇒ revertimos
-    if (editMode) setForm({ ...user });
-    setEditMode((prev) => !prev);
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  // cuando seleccionan imagen
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      return alert("Selecciona una imagen válida.");
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setPreviewImage(ev.target.result);
+      setForm((f) => ({ ...f, profileImageUrl: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+
+    // subir inmediatamente
+    onImageUpload(file);
   };
-  
-  const handleSave = () => {
+
+  // alternar modo edición
+  const toggleEdit = () => {
+    if (editMode) {
+      setForm({ ...user });
+      setPreviewImage(user.profileImageUrl);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    setEditMode((e) => !e);
+  };
+
+  // guardar cambios texto
+  const handleSaveClick = () => {
     onSave(form);
     setEditMode(false);
   };
-  
+
   if (!user) return null;
-  
+
   return (
     <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-6 overflow-hidden">
-      {/* ─── Cabecera roja con avatar ─────────────────────── */}
+      {/* cabecera roja + avatar */}
       <div className="bg-red-700 px-6 pt-6 pb-4">
         <div className="flex justify-center">
-          {user.profileImageUrl ? (
-            <img
-              src={user.profileImageUrl}
-              alt={`${user.firstName} avatar`}
-              className="w-24 h-24 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-xl">👤</span>
-            </div>
-          )}
+          <div className="relative">
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt={`${user.firstName} avatar`}
+                className={`w-24 h-24 rounded-full object-cover ${
+                  editMode
+                    ? "cursor-pointer hover:opacity-80 transition-opacity"
+                    : ""
+                }`}
+                onClick={() => editMode && fileInputRef.current.click()}
+              />
+            ) : (
+              <div
+                className={`w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ${
+                  editMode
+                    ? "cursor-pointer hover:bg-gray-300 transition-colors"
+                    : ""
+                }`}
+                onClick={() => editMode && fileInputRef.current.click()}
+              >
+                <span className="text-gray-400 text-xl">👤</span>
+              </div>
+            )}
+            {editMode && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            )}
+          </div>
         </div>
+        {editMode && (
+          <p className="text-white text-xs text-center mt-2 opacity-90">
+            Haz clic en la imagen para cambiarla
+          </p>
+        )}
       </div>
-      
-      {/* ─── Cuerpo blanco ───────────────────────────────── */}
+
+      {/* cuerpo, edición o vista */}
       <div className="px-6 pb-6">
         {editMode ? (
-          // Modo edición: campos uno debajo del otro con mejor alineación
           <div className="space-y-4 mt-4">
-            {/* Nombre */}
+            {/** Nombre */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Nombre:
@@ -62,8 +116,7 @@ const UserCardInfo = ({ user, onSave }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            
-            {/* Apellido */}
+            {/** Apellido */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Apellido:
@@ -75,11 +128,10 @@ const UserCardInfo = ({ user, onSave }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            
-            {/* Username */}
+            {/** Username */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Nombre de usuario:
+                Usuario:
               </span>
               <input
                 name="username"
@@ -88,8 +140,7 @@ const UserCardInfo = ({ user, onSave }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            
-            {/* Email */}
+            {/** Email */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Email:
@@ -102,8 +153,7 @@ const UserCardInfo = ({ user, onSave }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            
-            {/* Puntos (solo lectura) */}
+            {/** Score solo lectura */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Puntos:
@@ -112,11 +162,10 @@ const UserCardInfo = ({ user, onSave }) => {
                 {user.score}
               </span>
             </div>
-            
-            {/* Teléfono */}
+            {/** Teléfono */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Número de teléfono:
+                Teléfono:
               </span>
               <input
                 name="phoneNumber"
@@ -128,9 +177,7 @@ const UserCardInfo = ({ user, onSave }) => {
             </div>
           </div>
         ) : (
-          // Modo vista: layout compacto original
           <div className="space-y-3 text-sm mt-4">
-            {/* Nombre + Apellido en la misma fila */}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
@@ -145,24 +192,18 @@ const UserCardInfo = ({ user, onSave }) => {
                 <span className="text-gray-800 text-lg">{user.lastName}</span>
               </div>
             </div>
-            
-            {/* Username */}
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Nombre de usuario:
+                Usuario:
               </span>
               <span className="text-gray-800 text-lg">{user.username}</span>
             </div>
-            
-            {/* Email */}
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
                 Email:
               </span>
               <span className="text-gray-800 text-lg">{user.email}</span>
             </div>
-            
-            {/* Puntos (solo lectura) */}
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
                 Puntos:
@@ -171,25 +212,21 @@ const UserCardInfo = ({ user, onSave }) => {
                 {user.score}
               </span>
             </div>
-            
-            {/* Teléfono */}
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Número de teléfono:
+                Teléfono:
               </span>
-              <span className="text-gray-800 text-lg">
-                {user.phoneNumber || ""}
-              </span>
+              <span className="text-gray-800 text-lg">{user.phoneNumber}</span>
             </div>
           </div>
         )}
-        
-        {/* Botón inferior */}
+
+        {/* botones */}
         <div className="mt-6 pt-4 border-t border-gray-200">
           {editMode ? (
             <div className="flex gap-3">
               <button
-                onClick={handleSave}
+                onClick={handleSaveClick}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm"
               >
                 Guardar cambios
@@ -218,14 +255,15 @@ const UserCardInfo = ({ user, onSave }) => {
 UserCardInfo.propTypes = {
   user: PropTypes.shape({
     profileImageUrl: PropTypes.string,
-    firstName: PropTypes.string.isRequired,
-    lastName: PropTypes.string.isRequired,
-    username: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-    score: PropTypes.number.isRequired,
-    phoneNumber: PropTypes.string,
+    firstName:       PropTypes.string.isRequired,
+    lastName:        PropTypes.string.isRequired,
+    username:        PropTypes.string.isRequired,
+    email:           PropTypes.string.isRequired,
+    score:           PropTypes.number.isRequired,
+    phoneNumber:     PropTypes.string,
   }).isRequired,
-  onSave: PropTypes.func.isRequired,
+  onSave:          PropTypes.func.isRequired,
+  onImageUpload:   PropTypes.func.isRequired,
 };
 
 export default UserCardInfo;
