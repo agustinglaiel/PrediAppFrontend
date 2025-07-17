@@ -17,7 +17,7 @@ const ForoPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-24 px-4">
+      <main className="flex-grow pt-20 pb-8 px-4">
         {loading ? (
           <p>Cargando posts…</p>
         ) : error ? (
@@ -29,7 +29,7 @@ const ForoPage = () => {
         {/* FAB */}
         <button
           onClick={() => setShowModal(true)}
-          className="fixed bottom-24 right-4 w-12 h-12 bg-red-600 rounded-full shadow-lg text-white text-3xl flex items-center justify-center z-50"
+          className="fixed bottom-24 right-4 w-12 h-12 bg-red-600 rounded-full shadow-lg text-white text-3xl flex items-center justify-center z-50 leading-none pb-1"
           title="Nuevo post"
         >
           +

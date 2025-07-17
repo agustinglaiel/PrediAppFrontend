@@ -24,6 +24,7 @@ import GroupsPage from "./pages/GroupsPage";
 import ForoPage from "./pages/ForoPage";
 import GroupPage from "./pages/GroupPage";
 import MyProfilePage from "./pages/MyProfilePage";
+import PostPage from "./pages/PostPage";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/grupos" element={<GroupsPage />} />
         <Route path="/grupos/:groupId" element={<GroupPage />} />
         <Route path="/profile/:userId" element={<MyProfilePage />} />
+        <Route path="/foro/:postId" element={<PostPage />} />
         <Route
           path="/pronosticos/result/:session_id"
           element={<ProdeSessionResultPage />}

@@ -1,8 +1,11 @@
 // src/components/foro/PostList.jsx
 import React from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 const PostList = ({ posts }) => {
+  const nav = useNavigate();
+
   if (!posts || posts.length === 0) {
     return (
       <p className="text-gray-600 text-center mt-6">
@@ -14,8 +17,11 @@ const PostList = ({ posts }) => {
   return (
     <>
       {posts.map((post) => (
-        <div key={post.id} className="border-b last:border-none py-4">
-          {/* El clamp y overflow se aplica dentro del área con padding */}
+        <div
+          key={post.id}
+          className="border-b last:border-none py-4 cursor-pointer"
+          onClick={() => nav(`/foro/${post.id}`)}
+        >
           <div className="px-4">
             <p
               className="
@@ -26,9 +32,6 @@ const PostList = ({ posts }) => {
                 overflow-hidden
                 break-words
               "
-              style={{
-                paddingRight: '1em'
-              }}
             >
               {post.body}
             </p>
