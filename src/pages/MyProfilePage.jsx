@@ -44,7 +44,6 @@ const MyProfilePage = () => {
   const handleImageUpload = async file => {
     try {
       const res = await uploadProfilePicture(authUser.id, file);
-      // construyo dataURL local para el preview
       const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = e => resolve(e.target.result);
@@ -52,10 +51,7 @@ const MyProfilePage = () => {
         reader.readAsDataURL(file);
       });
       setProfile(p => ({ ...p, profileImageUrl: dataUrl }));
-      setMsgStatus(200);
-      setMsgText("Imagen actualizada correctamente");
     } catch (err) {
-      // rollback preview automático: no tocamos profileImageUrl
       setMsgStatus(err.status || 500);
       setMsgText(err.message || "Error subiendo la imagen");
     }
@@ -72,9 +68,8 @@ const MyProfilePage = () => {
         phone_number: updated.phoneNumber,
       });
       setProfile(p => ({ ...p, ...updated }));
-      setMsgStatus(200);
-      setMsgText("Perfil actualizado correctamente");
     } catch (err) {
+      console.error("Error al guardar perfil:", err);
       setMsgStatus(err.status || 500);
       setMsgText(err.message);
     }

@@ -24,14 +24,6 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
     if (!file || !file.type.startsWith("image/")) {
       return alert("Selecciona una imagen válida.");
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPreviewImage(ev.target.result);
-      setForm((f) => ({ ...f, profileImageUrl: ev.target.result }));
-    };
-    reader.readAsDataURL(file);
-
-    // subir inmediatamente
     onImageUpload(file);
   };
 
@@ -39,7 +31,6 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
   const toggleEdit = () => {
     if (editMode) {
       setForm({ ...user });
-      setPreviewImage(user.profileImageUrl);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
     setEditMode((e) => !e);
@@ -59,9 +50,9 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
       <div className="bg-red-700 px-6 pt-6 pb-4">
         <div className="flex justify-center">
           <div className="relative">
-            {previewImage ? (
+            {user.profileImageUrl ? (
               <img
-                src={previewImage}
+                src={user.profileImageUrl}
                 alt={`${user.firstName} avatar`}
                 className={`w-24 h-24 rounded-full object-cover ${
                   editMode
