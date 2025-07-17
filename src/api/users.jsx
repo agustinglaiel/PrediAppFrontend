@@ -174,6 +174,27 @@ export const getUsers = async () => {
   }
 };
 
+export const uploadProfilePicture = async (id, file) => {
+  // Construyes el payload multipart/form-data
+  const fd = new FormData();
+  fd.append("profile_picture", file);          // ⬅️ nombre del campo que espera el backend
+
+  try {
+    const res = await axios.post(`${API_URL}/users/${id}/profile-picture`, fd, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Upload avatar error:", err.response?.data || err.message);
+    throw new Error(
+      err.response?.data?.message || "Error al subir la imagen de perfil."
+    );
+  }
+};
+
 export const fetchMe = async () => {
   try {
     // Asegúrate de haber llamado setAuthToken() tras login

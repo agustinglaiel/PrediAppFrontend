@@ -178,7 +178,7 @@ const UserCardInfo = ({ user, onSave }) => {
                 Número de teléfono:
               </span>
               <span className="text-gray-800 text-lg">
-                {user.phoneNumber || " -"}
+                {user.phoneNumber || ""}
               </span>
             </div>
           </div>
