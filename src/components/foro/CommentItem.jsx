@@ -4,38 +4,37 @@ import PropTypes from "prop-types";
 
 export default function CommentItem({ comment, level = 0 }) {
   const indent = level * 16; // px por nivel
-  const barThickness = 2;    // grosor de la línea
 
   return (
     <div className="relative mb-4" style={{ paddingLeft: indent + 8 }}>
-      {/* Vertical line: solo desde el top hasta el centro */}
+      {/* Vertical line - solo hasta donde empieza la L */}
       {level > 0 && (
         <div
           className="absolute bg-gray-200"
           style={{
-            left: indent + 4,
+            left: indent + 4, // ajustar para centrar la línea
             top: 0,
-            height: `calc(50% - ${barThickness / 2}px)`,
-            width: `${barThickness}px`,
+            height: 32, // Solo hasta donde empieza la L (aproximadamente la mitad del elemento)
+            width: 2,
           }}
         />
       )}
-
-      {/* Horizontal “pata” de la L, justo en el medio */}
+      {/* Horizontal connector at middle (la pata de la L) */}
       {level > 0 && (
         <div
           className="absolute bg-gray-200"
           style={{
             left: indent + 4,
-            top: "50%",
-            transform: `translateY(-${barThickness / 2}px)`,
+            top: 32,      // Más abajo, centrado en el elemento
             width: 8,
-            height: `${barThickness}px`,
+            height: 2,
           }}
         />
       )}
 
-      <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-default">
+      <div
+        className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-default"
+      >
         <p className="text-gray-800 whitespace-pre-wrap break-words">
           {comment.body}
         </p>
@@ -46,7 +45,11 @@ export default function CommentItem({ comment, level = 0 }) {
 
       {/* Recursión para hijos */}
       {comment.children?.map((child) => (
-        <CommentItem key={child.id} comment={child} level={level + 1} />
+        <CommentItem
+          key={child.id}
+          comment={child}
+          level={level + 1}
+        />
       ))}
     </div>
   );
@@ -54,10 +57,10 @@ export default function CommentItem({ comment, level = 0 }) {
 
 CommentItem.propTypes = {
   comment: PropTypes.shape({
-    id:         PropTypes.number.isRequired,
-    body:       PropTypes.string.isRequired,
-    created_at: PropTypes.string.isRequired,
-    children:   PropTypes.array,
+    id:            PropTypes.number.isRequired,
+    body:          PropTypes.string.isRequired,
+    created_at:    PropTypes.string.isRequired,
+    children:      PropTypes.array,
   }).isRequired,
   level: PropTypes.number,
 };
