@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 const PostList = ({ posts }) => {
   const nav = useNavigate();
 
-  if (!posts || posts.length === 0) {
-    return (
-      <p className="text-gray-600 text-center mt-6">
-        Ups, cuánto vacío…
-      </p>
-    );
-  }
+  // if (!posts || posts.length === 0) {
+  //   return (
+  //     <p className="text-gray-600 text-center mt-6">
+  //       Ups, cuánto vacío…
+  //     </p>
+  //   );
+  // }
 
   return (
     <>
