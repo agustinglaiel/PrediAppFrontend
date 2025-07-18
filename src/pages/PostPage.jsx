@@ -36,7 +36,7 @@ const PostPage = () => {
             {/* Aquí los comentarios recursivos */}
             <div className="mt-6">
               {post.children?.map((c) => (
-                <CommentItem key={c.id} comment={c} />
+                <CommentItem key={c.id} comment={c} onCommentCreated={refresh} />
               ))}
             </div>
           </>
