@@ -12,16 +12,19 @@ export default function CommentPost({ parentPostId, onCommentCreated }) {
   const [errorText, setErrorText] = useState("");
 
   const handleSubmit = async () => {
+    if (!body.trim()) return; // no permitir si está vacío
+
     try {
       await createPost({ userId: user.id, body, parentPostId });
       setBody("");
-      onCommentCreated?.();  // Para refrescar la lista si quieres
+      onCommentCreated?.();
     } catch (err) {
-      // err.status lo pones en tu MessageStatus
       setStatus(err.status || 500);
       setErrorText(err.message);
     }
   };
+
+  const trimmed = body.trim();
 
   return (
     <div className="mt-6 px-4">
@@ -32,32 +35,46 @@ export default function CommentPost({ parentPostId, onCommentCreated }) {
         value={body}
         onChange={(e) => setBody(e.target.value)}
         style={{
-          height: 'auto',
-          minHeight: '60px',
-          maxHeight: '200px',
-          overflow: 'hidden'
+          height: "auto",
+          minHeight: "60px",
+          maxHeight: "200px",
+          overflow: "hidden"
         }}
         onInput={(e) => {
-          e.target.style.height = 'auto';
-          e.target.style.height = e.target.scrollHeight + 'px';
+          e.target.style.height = "auto";
+          e.target.style.height = e.target.scrollHeight + "px";
         }}
       />
       <div className="flex justify-end gap-2 mt-2">
-        <button
-          onClick={() => setBody("")}
-          className="px-3 py-1 text-red-500 hover:text-red-700 text-sm font-medium"
-        >
-          Cancelar
-        </button>
+        {/* Mostrar el botón Cancelar solo si hay texto */}
+        {trimmed && (
+          <button
+            onClick={() => setBody("")}
+            className="px-3 py-1 text-red-500 hover:text-red-700 text-sm font-medium"
+          >
+            Cancelar
+          </button>
+        )}
         <button
           onClick={handleSubmit}
-          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium"
+          disabled={!trimmed}
+          className={`
+            px-3 py-1 
+            text-white rounded text-sm font-medium
+            ${trimmed
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-blue-300 cursor-not-allowed"}
+          `}
         >
           Comentar
         </button>
       </div>
       {status != null && (
-        <MessageStatus text={errorText} status={status} onHide={() => setStatus(null)} />
+        <MessageStatus
+          text={errorText}
+          status={status}
+          onHide={() => setStatus(null)}
+        />
       )}
     </div>
   );

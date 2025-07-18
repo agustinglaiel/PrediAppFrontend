@@ -1,5 +1,5 @@
 // src/hooks/usePost.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getPostById } from "../api/posts";
 
 export default function usePost(postId) {
@@ -7,16 +7,37 @@ export default function usePost(postId) {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
 
-  useEffect(() => {
+  // 1) Creamos la función de fetch reutilizable
+  const fetchPost = useCallback(() => {
     if (!postId) return;
+
     let canceled = false;
     setLoading(true);
+    setError(null);
+
     getPostById(postId)
-      .then(data => { if (!canceled) setPost(data); })
-      .catch(err => { if (!canceled) setError(err); })
-      .finally(() => { if (!canceled) setLoading(false); });
+      .then(data => {
+        if (!canceled) setPost(data);
+      })
+      .catch(err => {
+        if (!canceled) setError(err);
+      })
+      .finally(() => {
+        if (!canceled) setLoading(false);
+      });
+
     return () => { canceled = true; };
   }, [postId]);
 
-  return { post, loading, error };
+  // 2) Llamamos a fetchPost al montar o cuando cambie postId
+  useEffect(() => {
+    const cancel = fetchPost();
+    // en caso de cleanup
+    return () => {
+      if (typeof cancel === "function") cancel();
+    };
+  }, [fetchPost]);
+
+  // 3) Exponemos la función para recargar a voluntad
+  return { post, loading, error, refresh: fetchPost };
 }
