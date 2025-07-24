@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080"; // Asegúrate de que coincida con tu backend
+axios.defaults.baseURL = "/api";
 
 // Función para obtener las próximas sesiones (ahora pública, sin token)
 export const getUpcomingSessions = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/sessions/upcoming`);
+    const response = await axios.get(`/sessions/upcoming`);
     return response.data;
   } catch (error) {
     console.error("Error fetching upcoming sessions:", error);
@@ -20,7 +20,7 @@ export const getUpcomingSessions = async () => {
 
 export const getPastSessionsByYear = async (year) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/sessions/lasts/${year}`);
+    const response = await axios.get(`/sessions/lasts/${year}`);
     return response.data;
   } catch (error) {
     throw new Error("Error fetching past sessions: " + error.message);
@@ -30,7 +30,7 @@ export const getPastSessionsByYear = async (year) => {
 // Función para obtener la sesión por ID (puedes mantenerla como privada si es necesario, pero la haremos pública también por simplicidad)
 export const getSessionById = async (sessionId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/sessions/${sessionId}`);
+    const response = await axios.get(`/sessions/${sessionId}`);
     return response.data; // Retornamos los datos de la sesión
   } catch (error) {
     throw new Error("Error fetching session by ID: " + error.message);
@@ -39,7 +39,7 @@ export const getSessionById = async (sessionId) => {
 
 export const createSession = async (sessionData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/sessions`, sessionData, {
+    const response = await axios.post(`/sessions`, sessionData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -58,7 +58,7 @@ export const createSession = async (sessionData) => {
 export const updateSession = async (sessionId, sessionData) => {
   try {
     const response = await axios.put(
-      `${API_BASE_URL}/sessions/${sessionId}`,
+      `/sessions/${sessionId}`,
       sessionData,
       {
         headers: {

@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080";
+axios.defaults.baseURL = "/api";
 
 export const getGroupById = async (groupId) => {
   try{
-    const res = await axios.get(`${API_BASE_URL}/groups/${groupId}`, {
+    const res = await axios.get(`/groups/${groupId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
@@ -26,7 +26,7 @@ export const getGroupById = async (groupId) => {
 
 export const getGroupByUserId = async (userId) => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/groups/user/${userId}`, {
+    const res = await axios.get(`/groups/user/${userId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
@@ -48,7 +48,7 @@ export const getGroupByUserId = async (userId) => {
 
 export const getJoinRequestByGroupId = async (groupId) => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/groups/${groupId}/join-requests` , {
+    const res = await axios.get(`/groups/${groupId}/join-requests`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },  
@@ -71,7 +71,7 @@ export const getJoinRequestByGroupId = async (groupId) => {
 export const joinGroup = async (groupCode, userId) => {
   try {
     const res = await axios.post(
-      `${API_BASE_URL}/groups/join`,
+      `/groups/join`,
       { group_code: groupCode, user_id: userId },
       {
         headers: {
@@ -99,7 +99,7 @@ export const createGroup = async ({ groupName, userId, description = "" }) => {
       ...(description && { description }),
     };
 
-    const res = await axios.post(`${API_BASE_URL}/groups`, payload, {
+    const res = await axios.post(`/groups`, payload, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -125,7 +125,7 @@ export const manageGroupInvitation = async ({
 }) => {
   try {
     const res = await axios.post(
-      `${API_BASE_URL}/groups/manage-invitation`,
+      `/groups/manage-invitation`,
       {
         group_id: groupId,
         creator_id: creatorId,

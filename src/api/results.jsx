@@ -1,12 +1,12 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
+axios.defaults.baseURL = "/api";
 
 // New function to get results ordered by position for a session
 export const getResultsOrderedByPosition = async (sessionID) => {
   try {
     const response = await axios.get(
-      `${API_URL}/results/session/${sessionID}`,
+      `/results/session/${sessionID}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export const getTopNDriversInSession = async (sessionID, n) => {
     }
 
     const response = await axios.get(
-      `${API_URL}/results/session/${sessionID}/top/${n}`,
+      `/results/session/${sessionID}/top/${n}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
       })),
     };
 
-    const response = await axios.post(`${API_URL}/results/admin`, payload, {
+    const response = await axios.post(`/results/admin`, payload, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`, // Añadimos token si es necesario
@@ -97,7 +97,7 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
 export const FetchNonRaceResultsExternalAPI = async (sessionID) => {
   try {
     const response = await axios.get(
-      `${API_URL}/results/session/api/${sessionID}`,
+      `/results/session/api/${sessionID}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +121,7 @@ export const FetchNonRaceResultsExternalAPI = async (sessionID) => {
 
 export const fetchResultsFromExternalAPI = async (sessionID) => {
   try {
-    const response = await axios.get(`${API_URL}/results/api/${sessionID}`, {
+    const response = await axios.get(`/results/api/${sessionID}`, {
       headers: {
         "Content-Type": "application/json",
       },

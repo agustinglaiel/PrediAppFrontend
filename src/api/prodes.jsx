@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
+axios.defaults.baseURL = "/api";
 
 // Crear un prode de carrera
 export const createProdeCarrera = async (userId, prodeData) => {
@@ -20,7 +20,7 @@ export const createProdeCarrera = async (userId, prodeData) => {
       dnf: +prodeData.dnf,
     };
 
-    const { data } = await axios.post(`${API_URL}/prodes/carrera`, payload, {
+    const { data } = await axios.post(`/prodes/carrera`, payload, {
       headers: { "Content-Type": "application/json" },
     });
     return data;
@@ -45,7 +45,7 @@ export const createProdeSession = async (userId, prodeData) => {
       p3: +prodeData.p3,
     };
 
-    const { data } = await axios.post(`${API_URL}/prodes/session`, payload, {
+    const { data } = await axios.post(`/prodes/session`, payload, {
       headers: { "Content-Type": "application/json" },
     });
     return data;
@@ -60,7 +60,7 @@ export const createProdeSession = async (userId, prodeData) => {
 // Obtener un prode de carrera por ID
 export const getProdeCarreraByID = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/prode-carrera/${id}`);
+    const response = await axios.get(`/prode-carrera/${id}`);
     return response.data;
   } catch (error) {
     throw new Error(
@@ -72,7 +72,7 @@ export const getProdeCarreraByID = async (id) => {
 // Obtener un prode de sesión por ID
 export const getProdeSessionByID = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/prode-session/${id}`);
+    const response = await axios.get(`/prode-session/${id}`);
     return response.data;
   } catch (error) {
     throw new Error(
@@ -158,7 +158,7 @@ export const getProdeSessionByID = async (id) => {
 export const getProdeByUserAndSession = async (userId, sessionId) => {
   try {
     const { data } = await axios.get(
-      `${API_URL}/prodes/user/${userId}/session/${sessionId}`,
+      `/prodes/user/${userId}/session/${sessionId}`,
       { validateStatus: (status) => status === 200 }
     );
 
@@ -184,7 +184,7 @@ export const updateRaceProdeScores = async (sessionId) => {
     }
 
     const response = await axios.post(
-      `${API_URL}/prodes/carrera/${sessionId}/score`,
+      `/prodes/carrera/${sessionId}/score`,
       {},
       {
         headers: {
@@ -211,7 +211,7 @@ export const updateSessionProdeScores = async (sessionId) => {
     }
 
     const response = await axios.post(
-      `${API_URL}/prodes/session/${sessionId}/score`,
+      `/prodes/session/${sessionId}/score`,
       {},
       {
         headers: {

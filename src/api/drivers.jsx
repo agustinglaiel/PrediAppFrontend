@@ -1,14 +1,11 @@
 import axios from "axios";
 
-// Configura la instancia de Axios con la URL base del backend
-const api = axios.create({
-  baseURL: "http://localhost:8080", // Cambia el puerto si tu backend está en otro puerto
-});
+axios.defaults.baseURL = "/api";
 
 // Función para obtener todos los pilotos desde el backend
 export const getAllDrivers = async () => {
   try {
-    const response = await api.get("/drivers", {
+    const response = await axios.get("/drivers", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
     return response.data; // Retorna los datos si todo va bien (ej. status 200)
@@ -35,7 +32,7 @@ export const getAllDrivers = async () => {
 
 export const getDriverById = async (driverId) => {
   try {
-    const response = await api.get(`/drivers/${driverId}`, {
+    const response = await axios.get(`/drivers/${driverId}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
     return response.data; // Retorna el objeto ResponseDriverDTO
@@ -52,7 +49,7 @@ export const getDriverById = async (driverId) => {
 
 export const createDriver = async (driverData) => {
   try {
-    const response = await api.post("/drivers", driverData, {
+    const response = await axios.post("/drivers", driverData, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         "Content-Type": "application/json",
@@ -70,7 +67,7 @@ export const createDriver = async (driverData) => {
 
 export const updateDriver = async (driverId, driverData) => {
   try {
-    const response = await api.put(`/drivers/${driverId}`, driverData, {
+    const response = await axios.put(`/drivers/${driverId}`, driverData, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         "Content-Type": "application/json",
@@ -88,7 +85,7 @@ export const updateDriver = async (driverId, driverData) => {
 
 export const fetchAllDriversFromExternalAPI = async () => {
   try {
-    const response = await api.get("/drivers/external", {
+    const response = await axios.get("/drivers/external", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
     return response.data; // Retorna la lista de pilotos nuevos insertados

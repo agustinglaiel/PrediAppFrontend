@@ -1,7 +1,7 @@
 // src/api/posts.js
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
+axios.defaults.baseURL = "/api";
 
 // Crear un post (o comentario si incluyes parentPostId)
 export const createPost = async ({ userId, body, parentPostId = null }) => {
@@ -16,7 +16,7 @@ export const createPost = async ({ userId, body, parentPostId = null }) => {
     };
 
     const { data } = await axios.post(
-      `${API_URL}/posts`,
+      `/posts`,
       payload,
       { headers: { "Content-Type": "application/json" } }
     );
@@ -32,7 +32,7 @@ export const createPost = async ({ userId, body, parentPostId = null }) => {
 // Obtener un post por ID (incluye sus hilos hijos)
 export const getPostById = async (id) => {
   try {
-    const { data } = await axios.get(`${API_URL}/posts/${id}`);
+    const { data } = await axios.get(`/posts/${id}`);
     return data;
   } catch (error) {
     console.error("Error fetching post:", error);
@@ -46,7 +46,7 @@ export const getPostById = async (id) => {
 export const getPosts = async (offset = 0, limit = 10) => {
   try {
     const { data } = await axios.get(
-      `${API_URL}/posts?offset=${offset}&limit=${limit}`
+      `/posts?offset=${offset}&limit=${limit}`
     );
     return data;
   } catch (error) {
@@ -61,7 +61,7 @@ export const getPosts = async (offset = 0, limit = 10) => {
 export const getPostsByUserId = async (userId) => {
   try {
     if (!userId) throw new Error("User ID is required");
-    const { data } = await axios.get(`${API_URL}/posts/user/${userId}`);
+    const { data } = await axios.get(`/posts/user/${userId}`);
     return data;
   } catch (error) {
     console.error("Error fetching user's posts:", error);
@@ -77,7 +77,7 @@ export const deletePostById = async (postId, userId) => {
     if (!postId) throw new Error("Post ID is required");
     if (!userId) throw new Error("User ID is required");
 
-    await axios.delete(`${API_URL}/posts/${postId}`, {
+    await axios.delete(`/posts/${postId}`, {
       headers: { "Content-Type": "application/json" },
       data: { user_id: userId },
     });
@@ -94,7 +94,7 @@ export const searchPosts = async (query, offset = 0, limit = 10) => {
   try {
     if (!query) throw new Error("Search query is required");
     const { data } = await axios.get(
-      `${API_URL}/posts/search?query=${encodeURIComponent(query)}&offset=${offset}&limit=${limit}`
+      `/posts/search?query=${encodeURIComponent(query)}&offset=${offset}&limit=${limit}`
     );
     return data;
   } catch (error) {
