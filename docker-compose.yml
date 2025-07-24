@@ -3,8 +3,8 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    image: prediapp-frontend:dev
+      dockerfile: Dockerfile
+    image: prediapp-frontend:latest
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
     volumes:
       - ./:/app                   
