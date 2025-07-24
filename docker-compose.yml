@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
     image: prediapp-frontend:latest
     ports:
       - "5173:80"          # mapea el puerto 80 del contenedor a 5173 en host
