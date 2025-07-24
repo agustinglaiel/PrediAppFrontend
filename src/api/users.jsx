@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
 
-const API_URL = "http://localhost:8080";
+axios.defaults.baseURL = "/api";
 
 // Función para establecer el token JWT en el encabezado de autorización
 export const setAuthToken = (token) => {
@@ -31,10 +31,7 @@ export function parseJwt(token) {
 // Función de registro que guarda el token en localStorage
 export const signUp = async (userData) => {
   try {
-    const { data } = await axios.post(
-      "http://localhost:8080/api/signup",
-      userData
-    );
+    const { data } = await axios.post('/signup', userData);
     // data = { id, first_name, last_name, username, email, role, token, created_at }
     const { token } = data;
     if (!token) throw new Error("No se recibió token en signup");
@@ -56,10 +53,7 @@ export const signUp = async (userData) => {
 // Función de inicio de sesión que guarda el token en localStorage
 export const login = async (userData) => {
   try {
-    const { data } = await axios.post(
-      "http://localhost:8080/api/login",
-      userData
-    );
+    const { data } = await axios.post('/login', userData);
     // data = { id, first_name, last_name, username, email, role, token, created_at }
     const {
       token,
@@ -104,10 +98,8 @@ export const logout = () => {
 export const getUserById = async (id) => {
   try {
     const token = localStorage.getItem("jwtToken");
-    const response = await axios.get(`${API_URL}/users/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axios.get(`/users/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -119,7 +111,7 @@ export const getUserById = async (id) => {
 // Actualizar usuario por ID (requiere token en el encabezado)
 export const updateUserById = async (id, userData) => {
   try {
-    const res = await axios.put(`${API_URL}/users/${id}`, userData, {
+    const res = await axios.put(`/users/${id}`, userData, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
     return res.data;
@@ -134,7 +126,7 @@ export const updateUserById = async (id, userData) => {
 // Eliminar usuario por ID (requiere token en el encabezado)
 export const deleteUserById = async (id) => {
   try {
-    await axios.delete(`${API_URL}/users/${id}`);
+    await axios.delete(`/users/${id}`);
   } catch (error) {
     console.error("Delete user error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Error deleting user.");
@@ -143,10 +135,8 @@ export const deleteUserById = async (id) => {
 
 export const getUserScoreByUserId = async (userId) => {
   try {
-    const res = await axios.get(`${API_URL}/users/${userId}/score`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
+    const res = await axios.get(`/users/${userId}/score`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     });
     return { status: res.status, data: res.data };
   } catch (error) {
@@ -166,7 +156,7 @@ export const getUserScoreByUserId = async (userId) => {
 // Obtener todos los usuarios (requiere token en el encabezado)
 export const getUsers = async () => {
   try {
-    const response = await axios.get(`${API_URL}/users/`);
+    const response = await axios.get('/users/');
     return response.data;
   } catch (error) {
     console.error("Get users error:", error.response?.data || error.message);
@@ -180,7 +170,7 @@ export const uploadProfilePicture = async (id, file) => {
   fd.append("profile_picture", file);          // ⬅️ nombre del campo que espera el backend
 
   try {
-    const res = await axios.post(`${API_URL}/users/${id}/profile-picture`, fd, {
+    const res = await axios.post(`/users/${id}/profile-picture`, fd, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         "Content-Type": "multipart/form-data",
@@ -198,7 +188,7 @@ export const uploadProfilePicture = async (id, file) => {
 export const fetchMe = async () => {
   try {
     // Asegúrate de haber llamado setAuthToken() tras login
-    const { data } = await axios.get("/api/auth/me");
+    const { data } = await axios.get('/auth/me');
     // data = { id, first_name, last_name, username, email, role, score, expires_at }
     return data;
   } catch (err) {

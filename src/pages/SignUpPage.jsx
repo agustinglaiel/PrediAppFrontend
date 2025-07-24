@@ -1,5 +1,5 @@
 import React from "react";
-import SignupForm from "../components/SignupForm";
+import SignUpForm from "../components/SignUpForm";
 import Header from "../components/Header";
 
 const SignupPage = () => {
@@ -10,7 +10,7 @@ const SignupPage = () => {
 
       {/* main con flex-grow para que “empuje” al footer al fondo */}
       <main className="flex-grow flex justify-center items-center pt-20">
-        <SignupForm />
+        <SignUpForm />
       </main>
 
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
