@@ -1,17 +1,27 @@
-# frontend/Dockerfile.dev
-FROM node:18-alpine
-
-# 1) Don’t overwrite local node_modules
-VOLUME ["/app/node_modules"]
+# ---------- Stage 1: Build ----------
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# 2) Trae solo package.json + lock y deja cache de deps
+# 1) Copiamos sólo package.json y lock para cachear deps
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci
 
-# 3) Exponer el puerto de Vite
-EXPOSE 5173
+# 2) Copiamos el resto del código y generamos la build
+COPY . .
+RUN npm run build
 
-# 4) Arrancar el dev‑server en 0.0.0.0 para que sea accesible desde fuera
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# ---------- Stage 2: Runtime ----------
+FROM nginx:stable-alpine
+
+# 3) Copiamos los archivos generados al directorio de Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# 4) (Opcional) Si tienes reglas de SPA (history fallback), puedes customizar:
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 5) Exponemos el puerto (por defecto Nginx escucha en 80)
+EXPOSE 80
+
+# 6) Arrancamos Nginx en primer plano
+CMD ["nginx", "-g", "daemon off;"]
