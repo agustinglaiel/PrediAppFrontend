@@ -21,7 +21,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 5) Exponemos el puerto (por defecto Nginx escucha en 80)
-EXPOSE 80
+EXPOSE 5173
 
 # 6) Arrancamos Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]
