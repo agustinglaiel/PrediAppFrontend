@@ -57,6 +57,7 @@ const PronosticosPage = () => {
         <UpcomingEvents
           events={upcoming}
           onPronosticoClick={handlePronosticoClick}
+          isLoggedIn={!!user}
         />
         <PastEvents events={past} onPronosticoClick={handlePronosticoClick} />
       </main>

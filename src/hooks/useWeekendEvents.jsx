@@ -60,6 +60,7 @@ export default function useWeekendEvents(userId) {
 
   /* helper interno para enriquecer - evita repetir código */
   const enrichEventList = (events, setter) => {
+    if (!userId) return; // No enriquecer si no hay userId
     const mut = structuredClone(events);
     mut.forEach((ev) =>
       ev.sessions.forEach(async (sess) => {
@@ -73,6 +74,7 @@ export default function useWeekendEvents(userId) {
           sess.prodeRace = isRace ? prode : null;
           sess.prodeSession = !isRace ? prode : null;
           sess.score = prode ? prode.score ?? null : null;
+          sess.hasPronostico = !!prode; // Actualizar hasPronostico basado en si hay prode
         } catch {
           /* ignore */
         } finally {
@@ -96,7 +98,6 @@ export default function useWeekendEvents(userId) {
 
   /* ── Próximos ─────────────────────────────────────────────── */
   useEffect(() => {
-    if (!userId) return;
     let cancelled = false;
 
     getUpcomingSessions()
@@ -114,11 +115,10 @@ export default function useWeekendEvents(userId) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, []); // Eliminamos userId de las dependencias
 
   /* ── Pasados ──────────────────────────────────────────────── */
   useEffect(() => {
-    if (!userId) return;
     let cancelled = false;
 
     getPastSessionsByYear(currentYear)
@@ -136,7 +136,7 @@ export default function useWeekendEvents(userId) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, []); // Eliminamos userId de las dependencias
 
   return { upcoming, past, error };
 }
