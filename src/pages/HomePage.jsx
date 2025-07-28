@@ -12,6 +12,7 @@ const HomePage = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const navigate = useNavigate();
+  const isLoggedIn = !!user;
 
   const { events, loading, error } = useUpcomingEvents(userId);
 
@@ -47,6 +48,7 @@ const HomePage = () => {
         <UpcomingEvents
           events={events}
           onPronosticoClick={handlePronosticoClick}
+          isLoggedIn={isLoggedIn}
         />
       </main>
     </div>

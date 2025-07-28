@@ -19,6 +19,7 @@ const EventCard = ({
   hasResults,
   showGetResultsButton,
   onUpdateProdeClick, // Nueva prop para pronósticos
+  isLoggedIn,
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -95,7 +96,8 @@ const EventCard = ({
             editButtonText={editButtonText}
             hasResults={session.hasResults}
             showGetResultsButton={showGetResultsButton}
-            onUpdateProdeClick={onUpdateProdeClick} // Pasar la prop a SessionItem
+            onUpdateProdeClick={onUpdateProdeClick} 
+            isLoggedIn={isLoggedIn} 
           />
         ))}
       </div>

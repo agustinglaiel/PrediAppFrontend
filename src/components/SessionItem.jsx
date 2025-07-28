@@ -28,6 +28,7 @@ const SessionItem = ({
   hasResults,
   showGetResultsButton,
   onUpdateProdeClick,
+  isLoggedIn, // Nueva prop
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -78,7 +79,9 @@ const SessionItem = ({
         </button>
       ) : !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
         <button
-          onClick={onPronosticoClick}
+          onClick={isLoggedIn ? onPronosticoClick : null} // Solo redirige si está logueado
+          disabled={!isLoggedIn} // Deshabilitar si no está logueado
+          title={!isLoggedIn ? "Necesita estar logueado" : ""} // Tooltip
           className={`
             px-4 py-1
             rounded-full
@@ -88,7 +91,8 @@ const SessionItem = ({
             ${
               hasProde
                 ? "bg-white text-green-500 border border-green-500 hover:bg-green-50"
-                : "bg-orange-300 text-white hover:bg-orange-400"
+                : "bg-orange-300 text-white hover:bg-orange-400" +
+                  (!isLoggedIn ? " opacity-50" : "")
             }
           `}
         >
