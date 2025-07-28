@@ -1,7 +1,7 @@
 // src/api/posts.js
 import axios from "axios";
 
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
 
 // Crear un post (o comentario si incluyes parentPostId)
 export const createPost = async ({ userId, body, parentPostId = null }) => {

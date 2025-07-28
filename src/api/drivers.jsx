@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
 
 // Función para obtener todos los pilotos desde el backend
 export const getAllDrivers = async () => {
