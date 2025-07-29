@@ -44,7 +44,7 @@ export const signUp = async (userData) => {
     // Devolver la info pública (sin token)
     const { id, first_name, last_name, username, email, role, created_at } =
       data;
-    return { id, first_name, last_name, username, email, role, created_at };
+    return { token, id, first_name, last_name, username, email, role, created_at };
   } catch (err) {
     console.error("Signup error:", err.response?.data || err.message);
     throw new Error(err.response?.data?.error || "Error al registrarse");
