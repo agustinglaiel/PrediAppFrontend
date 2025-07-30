@@ -1,20 +1,9 @@
+// src/components/SessionItem.jsx
 import React, { useState } from "react";
 import DateDisplay from "./DateDisplay";
 import AuthModal from "./AuthModal";
 import { FaCheckCircle } from "react-icons/fa";
-
-const formatTimeToArgentina = (dateString) => {
-  if (!dateString) return "--:--";
-  const date = new Date(dateString);
-  if (isNaN(date)) return "--:--";
-
-  return new Intl.DateTimeFormat("es-AR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "America/Argentina/Buenos_Aires",
-  }).format(date);
-};
+import { formatArgTime } from "../utils/date";  // ← NEW
 
 const SessionItem = ({
   sessionId,
@@ -40,7 +29,8 @@ const SessionItem = ({
   hasResults,
   showGetResultsButton,
   onUpdateProdeClick,
-  isLoggedIn, // Nueva prop
+  isLoggedIn,
+  hasResults,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -52,14 +42,10 @@ const SessionItem = ({
 
   const handleGetResultsClick = async () => {
     if (!onGetResults) return;
-
     try {
       setIsFetching(true);
-      const isRaceSession =
-        sessionName.toLowerCase() === "race" &&
-        sessionType.toLowerCase() === "race";
-
-      if (isRaceSession) {
+      const isRace = sessionName.toLowerCase() === "race" && sessionType.toLowerCase() === "race";
+      if (isRace) {
         await onGetResults(sessionId);
       } else {
         await onGetResults(sessionId, true);
@@ -69,18 +55,19 @@ const SessionItem = ({
     }
   };
 
-  const formattedStartTime = formatTimeToArgentina(startTime);
-  const formattedEndTime = endTime ? formatTimeToArgentina(endTime) : null;
-
+  // use the single util for formatting
+  const formattedStartTime = formatArgTime(startTime);
+  const formattedEndTime   = endTime ? formatArgTime(endTime) : null;
 
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
       <DateDisplay date={date} month={month} />
+
       <div className="ml-6 flex-grow">
         <div className="font-semibold">{sessionName}</div>
         <div className="text-sm text-gray-600">
           {formattedStartTime}
-          {formattedEndTime ? ` - ${formattedEndTime}` : ""}
+          {formattedEndTime ? ` – ${formattedEndTime}` : ""}
         </div>
       </div>
 
@@ -89,15 +76,13 @@ const SessionItem = ({
           onClick={onPronosticoClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
         >
-          {score !== null && score !== undefined
-            ? `${score} Puntos`
-            : "Ver resultados"}
+          {score != null ? `${score} Puntos` : "Ver resultados"}
         </button>
       ) : !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
         <button
-          onClick={isLoggedIn ? onPronosticoClick : null} // Solo redirige si está logueado
-          disabled={!isLoggedIn} // Deshabilitar si no está logueado
-          title={!isLoggedIn ? "Necesita estar logueado" : ""} // Tooltip
+          onClick={isLoggedIn ? onPronosticoClick : null}
+          disabled={!isLoggedIn}
+          title={!isLoggedIn ? "Necesita estar logueado" : ""}
           className={`
             px-4 py-1
             rounded-full
@@ -169,12 +154,12 @@ const SessionItem = ({
                         r="10"
                         stroke="currentColor"
                         strokeWidth="4"
-                      ></circle>
+                      />
                       <path
                         className="opacity-75"
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
+                      />
                     </svg>
                     Cargando...
                   </>

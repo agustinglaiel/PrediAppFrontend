@@ -16,9 +16,8 @@ const EventCard = ({
   onEditClick,
   onGetResults,
   editButtonText,
-  hasResults,
   showGetResultsButton,
-  onUpdateProdeClick, // Nueva prop para pronósticos
+  onUpdateProdeClick,
   isLoggedIn,
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {

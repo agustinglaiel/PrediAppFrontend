@@ -1,4 +1,11 @@
-// utils/sessions.js
+// src/utils/sessions.js
+
+import { HashRouter } from "react-router-dom";
+import { formatArgTime } from "./date"; // tu helper de date.js
+
+/**
+ * Agrupa un array de sesiones por weekend_id en la forma que usan tus componentes.
+ */
 export function groupSessionsByWeekend(sessions = []) {
   const map = {};
   sessions.forEach((s) => {
@@ -25,9 +32,12 @@ export function groupSessionsByWeekend(sessions = []) {
     map[id].sessions.push({
       id: s.id,
       date: start.getDate().toString(),
-      month: start.toLocaleString("en", { month: "short" }).toUpperCase(),
+      month: start
+        .toLocaleString("en", { month: "short" })
+        .toUpperCase(),
       sessionName: s.session_name,
       sessionType: s.session_type,
+      // Estos campos serán sobreescritos por withArgentinaTimes
       startTime: start.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -55,4 +65,19 @@ export function groupSessionsByWeekend(sessions = []) {
   });
 
   return Object.values(map);
+}
+
+/**
+ * Toma el array de eventos agrupados y reemplaza
+ * startTime / endTime por formato Argentina (es-AR, UTC-3).
+ */
+export function withArgentinaTimes(events = []) {
+  return events.map((ev) => ({
+    ...ev,
+    sessions: ev.sessions.map((sess) => ({
+      ...sess,
+      startTime: formatArgTime(sess.date_start),
+      endTime: formatArgTime(sess.date_end),
+    })),
+  }));
 }

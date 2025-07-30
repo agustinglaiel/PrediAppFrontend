@@ -3,10 +3,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
-import PastResultsEvents from "../components/results/PastResultsEvents"; 
+import PastResultsEvents from "../components/results/PastResultsEvents";
 import { getPastSessionsByYear } from "../api/sessions";
-// reutilizamos tu función de utils
-import { groupSessionsByWeekend } from "../utils/sessions";
+import {
+  groupSessionsByWeekend,
+  withArgentinaTimes,
+} from "../utils/sessions";
 
 const ResultsPage = () => {
   const [events, setEvents] = useState([]);
@@ -21,44 +23,26 @@ const ResultsPage = () => {
         const currentYear = new Date().getFullYear();
         const raw = await getPastSessionsByYear(currentYear);
 
-        // 1) Agrupamos por fin de semana
+        // 1) Agrupo por fin de semana
         const grouped = groupSessionsByWeekend(raw || []);
 
-        // 2) Forzamos el formateo de hora a zona Argentina
-        const withArgTimes = grouped.map((ev) => ({
-          ...ev,
-          sessions: ev.sessions.map((sess) => {
-            const start = new Date(sess.date_start);
-            const end   = new Date(sess.date_end);
-            const fmt   = (dt) =>
-              new Intl.DateTimeFormat("es-AR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                timeZone: "America/Argentina/Buenos_Aires",
-              }).format(dt);
-            return {
-              ...sess,
-              startTime: fmt(start),
-              endTime:   fmt(end),
-            };
-          }),
-        }));
+        // 2) Aplico formateo de hora Argentina
+        const withTimes = withArgentinaTimes(grouped);
 
-        // 3) Ordenamos de más reciente a más antiguo según la primera sesión
-        withArgTimes.sort(
+        // 3) Ordeno de más reciente a más antiguo según la primer sesión
+        withTimes.sort(
           (a, b) =>
             new Date(b.sessions[0]?.date_start || 0) -
             new Date(a.sessions[0]?.date_start || 0)
         );
 
-        setEvents(withArgTimes);
+        setEvents(withTimes);
       } catch (err) {
-        if (err.response && err.response.status === 403) {
+        if (err.response?.status === 403) {
           setError(
             "Acceso denegado (403). Verifica los permisos o contacta al soporte."
           );
-        } else if (err.response && err.response.status === 401) {
+        } else if (err.response?.status === 401) {
           setError(
             "No autorizado (401). Verifica los permisos o contacta al soporte."
           );
@@ -99,7 +83,10 @@ const ResultsPage = () => {
       <Header />
       <NavigationBar />
       <main className="flex-grow pt-12 pb-4">
-        <PastResultsEvents events={events} onResultClick={handleResultClick} />
+        <PastResultsEvents
+          events={events}
+          onResultClick={handleResultClick}
+        />
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
