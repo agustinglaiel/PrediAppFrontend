@@ -30,7 +30,6 @@ const SessionItem = ({
   showGetResultsButton,
   onUpdateProdeClick,
   isLoggedIn,
-  hasResults,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||

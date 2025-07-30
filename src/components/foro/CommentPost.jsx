@@ -1,21 +1,23 @@
-// src/components/foro/CommentPost.jsx
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { AuthContext } from "../../contexts/AuthContext";
 import { createPost } from "../../api/posts";
 import MessageStatus from "../MessageStatus";
 
-export default function CommentPost({ parentPostId, onCommentCreated }) {
+export default function CommentPost({
+  parentPostId,
+  onCommentCreated,
+  isDisabled = false,    // nueva prop
+}) {
   const { user } = useContext(AuthContext);
-  const [body, setBody]           = useState("");
-  const [status, setStatus]       = useState(null);
+  const [body, setBody] = useState("");
+  const [status, setStatus] = useState(null);
   const [errorText, setErrorText] = useState("");
 
   const handleSubmit = async () => {
-    if (!body.trim()) return; // no permitir si está vacío
-
+    if (!body.trim()) return;
     try {
-      await createPost({ userId: user.id, body, parentPostId });
+      await createPost({ userId: user?.id, body, parentPostId });
       setBody("");
       onCommentCreated?.();
     } catch (err) {
@@ -31,23 +33,21 @@ export default function CommentPost({ parentPostId, onCommentCreated }) {
       <textarea
         rows={1}
         className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:border-blue-500 min-h-[60px] resize-none"
-        placeholder="Escribe tu comentario..."
+        placeholder={
+          isDisabled
+            ? "Debes iniciar sesión para comentar..."
+            : "Escribe tu comentario..."
+        }
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        style={{
-          height: "auto",
-          minHeight: "60px",
-          maxHeight: "200px",
-          overflow: "hidden"
-        }}
         onInput={(e) => {
           e.target.style.height = "auto";
           e.target.style.height = e.target.scrollHeight + "px";
         }}
+        disabled={isDisabled}        // <— deshabilitado si no está logueado
       />
       <div className="flex justify-end gap-2 mt-2">
-        {/* Mostrar el botón Cancelar solo si hay texto */}
-        {trimmed && (
+        {trimmed && !isDisabled && (
           <button
             onClick={() => setBody("")}
             className="px-3 py-1 text-red-500 hover:text-red-700 text-sm font-medium"
@@ -57,13 +57,17 @@ export default function CommentPost({ parentPostId, onCommentCreated }) {
         )}
         <button
           onClick={handleSubmit}
-          disabled={!trimmed}
+          disabled={isDisabled || !trimmed}   // <— deshabilitado según prop o campo vacío
           className={`
             px-3 py-1 
             text-white rounded text-sm font-medium
-            ${trimmed
-              ? "bg-blue-600 hover:bg-blue-700"
-              : "bg-blue-300 cursor-not-allowed"}
+            ${
+              isDisabled
+                ? "bg-gray-300 cursor-not-allowed"
+                : trimmed
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-blue-300 cursor-not-allowed"
+            }
           `}
         >
           Comentar
@@ -82,5 +86,6 @@ export default function CommentPost({ parentPostId, onCommentCreated }) {
 
 CommentPost.propTypes = {
   parentPostId:     PropTypes.number.isRequired,
-  onCommentCreated: PropTypes.func, // opcional, si quieres refrescar
+  onCommentCreated: PropTypes.func,
+  isDisabled:       PropTypes.bool,         // nueva prop
 };
