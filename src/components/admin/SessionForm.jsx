@@ -175,7 +175,7 @@ const SessionForm = ({ session, onSubmit, onCancel, isEditing = false }) => {
               Fecha de Inicio
             </label>
             <input
-              type="text"
+              type="datetime-local"
               name="date_start"
               value={formData.date_start}
               onChange={handleChange}
@@ -188,7 +188,7 @@ const SessionForm = ({ session, onSubmit, onCancel, isEditing = false }) => {
               Fecha de Fin
             </label>
             <input
-              type="text"
+              type="datetime-local"
               name="date_end"
               value={formData.date_end}
               onChange={handleChange}

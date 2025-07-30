@@ -24,7 +24,6 @@ const SessionItem = ({
   sessionType,
   startTime,
   endTime,
-  date_end,
   hasPronostico,
   onPronosticoClick,
   isModalOpen,
@@ -47,7 +46,7 @@ const SessionItem = ({
     (sessionType !== "Race" && prodeSession) ||
     (sessionType === "Race" && prodeRace);
 
-  const isSessionEnded = date_end ? new Date() > new Date(date_end) : false;
+  const isSessionEnded = endTime ? new Date() > new Date(endTime) : false;
 
   const [isFetching, setIsFetching] = useState(false);
 

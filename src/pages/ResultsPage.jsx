@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
-import PastResultsEvents from "../components/results/PastResultsEvents"; // Ruta ajustada según tu estructura
+import PastResultsEvents from "../components/results/PastResultsEvents"; 
 import { getPastSessionsByYear } from "../api/sessions";
+// reutilizamos tu función de utils
+import { groupSessionsByWeekend } from "../utils/sessions";
 
 const ResultsPage = () => {
   const [events, setEvents] = useState([]);
@@ -16,11 +18,41 @@ const ResultsPage = () => {
     const fetchPastSessions = async () => {
       try {
         setLoading(true);
-        setEvents([]);
-        const currentYear = new Date().getFullYear(); // Obtenemos el año actual
-        const data = await getPastSessionsByYear(currentYear); // Pasamos el año actual
-        const groupedEvents = processSessions(data);
-        setEvents(groupedEvents);
+        const currentYear = new Date().getFullYear();
+        const raw = await getPastSessionsByYear(currentYear);
+
+        // 1) Agrupamos por fin de semana
+        const grouped = groupSessionsByWeekend(raw || []);
+
+        // 2) Forzamos el formateo de hora a zona Argentina
+        const withArgTimes = grouped.map((ev) => ({
+          ...ev,
+          sessions: ev.sessions.map((sess) => {
+            const start = new Date(sess.date_start);
+            const end   = new Date(sess.date_end);
+            const fmt   = (dt) =>
+              new Intl.DateTimeFormat("es-AR", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "America/Argentina/Buenos_Aires",
+              }).format(dt);
+            return {
+              ...sess,
+              startTime: fmt(start),
+              endTime:   fmt(end),
+            };
+          }),
+        }));
+
+        // 3) Ordenamos de más reciente a más antiguo según la primera sesión
+        withArgTimes.sort(
+          (a, b) =>
+            new Date(b.sessions[0]?.date_start || 0) -
+            new Date(a.sessions[0]?.date_start || 0)
+        );
+
+        setEvents(withArgTimes);
       } catch (err) {
         if (err.response && err.response.status === 403) {
           setError(
@@ -41,83 +73,6 @@ const ResultsPage = () => {
 
     fetchPastSessions();
   }, []);
-
-  const processSessions = (sessions) => {
-    if (!sessions || !Array.isArray(sessions)) {
-      return [];
-    }
-
-    const eventsMap = {};
-    sessions.forEach((session) => {
-      const weekendId = session.weekend_id || "unknown";
-      if (!eventsMap[weekendId]) {
-        eventsMap[weekendId] = {
-          country: session.country_name || "Unknown",
-          circuit: session.circuit_short_name || "Unknown Circuit",
-          flagUrl: session.country_name
-            ? `/images/flags/${session.country_name.toLowerCase()}.jpg`
-            : "/images/flags/default.jpg",
-          circuitLayoutUrl: session.country_name
-            ? `/images/circuitLayouts/${session.location.toLowerCase()}.png`
-            : "/images/circuitLayouts/default.png",
-          sessions: [],
-        };
-      }
-
-      let day = "1";
-      let month = "JAN";
-      if (session.date_start && typeof session.date_start === "string") {
-        try {
-          const [datePart] = session.date_start.split("T");
-          if (datePart) {
-            const [year, monthNum, dayNum] = datePart.split("-");
-            day = dayNum;
-            const months = [
-              "JAN",
-              "FEB",
-              "MAR",
-              "APR",
-              "MAY",
-              "JUN",
-              "JUL",
-              "AUG",
-              "SEP",
-              "OCT",
-              "NOV",
-              "DEC",
-            ];
-            month = months[parseInt(monthNum, 10) - 1] || "JAN";
-          }
-        } catch (error) {
-          console.error("Error parsing date_start:", session.date_start, error);
-        }
-      }
-
-      const [startTime] = session.date_start
-        .split("T")[1]
-        .split("-")[0]
-        .split(":");
-      const [endTime] = session.date_end.split("T")[1].split("-")[0].split(":");
-
-      eventsMap[weekendId].sessions.push({
-        id: session.id || Math.random(),
-        date: day,
-        month: month,
-        sessionName: session.session_name || "Unknown Session",
-        sessionType: session.session_type || "Unknown Type",
-        startTime: `${startTime}:00`,
-        endTime: `${endTime}:00`,
-        date_start: session.date_start,
-        date_end: session.date_end, // Añadimos date_end
-      });
-    });
-
-    return Object.values(eventsMap).sort((a, b) => {
-      const dateA = new Date(a.sessions[0].date_start || "2025-01-01");
-      const dateB = new Date(b.sessions[0].date_start || "2025-01-01");
-      return dateB - dateA; // Ordenamos de más reciente a más antiguo
-    });
-  };
 
   const handleResultClick = (sessionData) => {
     navigate(`/resultados/${sessionData.id}`, { state: sessionData });
