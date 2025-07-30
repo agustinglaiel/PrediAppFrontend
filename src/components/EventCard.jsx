@@ -35,6 +35,7 @@ const EventCard = ({
       sessionName: session.sessionName,
       sessionType: session.sessionType,
       date_start: session.date_start,
+      date_end: session.date_end,
       countryName: country,
       flagUrl: flagUrl,
       circuitName: circuit,
@@ -78,9 +79,8 @@ const EventCard = ({
             month={session.month}
             sessionName={session.sessionName}
             sessionType={session.sessionType}
-            startTime={session.startTime}
-            endTime={session.endTime}
-            date_end={session.date_end}
+            startTime={session.date_start}
+            endTime={session.date_end}
             hasPronostico={session.hasPronostico}
             isModalOpen={isModalOpen}
             onCloseModal={onCloseModal}

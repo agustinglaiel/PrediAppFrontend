@@ -59,6 +59,7 @@ const AdminSessionManagementPage = () => {
         country_code: fetchedSession.country_code,
         country_name: fetchedSession.country_name,
         location: fetchedSession.location,
+        session_key: fetchedSession.session_key,
         session_name: fetchedSession.session_name,
         session_type: fetchedSession.session_type,
         date_start: fetchedSession.date_start,
@@ -194,9 +195,6 @@ const AdminSessionManagementPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
           <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {isEditing ? "Editar Sesión" : "Crear Sesión"}
-            </h2>
             <SessionForm
               session={selectedSession}
               onSubmit={isEditing ? handleUpdateSession : handleCreateSession}

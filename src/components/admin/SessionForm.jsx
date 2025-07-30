@@ -1,323 +1,275 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import useSessionForm from "../../hooks/useSessionForm";
 
-const SessionForm = ({
-  session: initialSession,
-  onSubmit,
-  onCancel,
-  isEditing = false,
-}) => {
-  const [formData, setFormData] = useState({
-    weekend_id: initialSession?.weekend_id || "",
-    circuit_key: initialSession?.circuit_key || "",
-    circuit_short_name: initialSession?.circuit_short_name || "",
-    country_code: initialSession?.country_code || "",
-    country_name: initialSession?.country_name || "",
-    location: initialSession?.location || "",
-    session_key: initialSession?.session_key || "",
-    session_name: initialSession?.session_name || "",
-    session_type: initialSession?.session_type || "",
-    date_start: initialSession?.date_start || "",
-    date_end: initialSession?.date_end || "",
-    year: initialSession?.year || "",
-    vsc: initialSession?.vsc || null,
-    sf: initialSession?.sf || null,
-    dnf: initialSession?.dnf || null,
-  });
-
-  useEffect(() => {
-    if (initialSession?.date_start) {
-      setFormData((prev) => ({
-        ...prev,
-        date_start: new Date(initialSession.date_start)
-          .toISOString()
-          .slice(0, 16),
-      }));
-    }
-    if (initialSession?.date_end) {
-      setFormData((prev) => ({
-        ...prev,
-        date_end: new Date(initialSession.date_end).toISOString().slice(0, 16),
-      }));
-    }
-  }, [initialSession]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+const SessionForm = ({ session, onSubmit, onCancel, isEditing = false }) => {
+  const { formData, handleChange, buildSubmitData } = useSessionForm(
+    session,
+    isEditing
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Filtrar y formatear los datos según UpdateSessionDTO
-    const submitData = {
-      weekend_id: formData.weekend_id
-        ? parseInt(formData.weekend_id, 10)
-        : null,
-      circuit_key: formData.circuit_key
-        ? parseInt(formData.circuit_key, 10)
-        : null,
-      circuit_short_name: formData.circuit_short_name || null,
-      country_code: formData.country_code || null,
-      country_name: formData.country_name || null,
-      location: formData.location || null,
-      session_key: formData.session_key
-      ? parseInt(formData.session_key, 10)
-      : null,
-      session_name: formData.session_name || null,
-      session_type: formData.session_type || null,
-      date_start: formData.date_start
-        ? new Date(formData.date_start).toISOString()
-        : null,
-      date_end: formData.date_end
-        ? new Date(formData.date_end).toISOString()
-        : null,
-      year: formData.year ? parseInt(formData.year, 10) : null,
-      ...(isEditing && {
-        d_fast_lap: formData.d_fast_lap
-          ? parseInt(formData.d_fast_lap, 10)
-          : null,
-        vsc:
-          formData.vsc === "true"
-            ? true
-            : formData.vsc === "false"
-            ? false
-            : null,
-        sf:
-          formData.sf === "true"
-            ? true
-            : formData.sf === "false"
-            ? false
-            : null,
-        dnf: formData.dnf ? parseInt(formData.dnf, 10) : null,
-      }),
-    };
+    const submitData = buildSubmitData();
     onSubmit(submitData);
   };
 
+  const isRaceSession = formData.session_type === "Race";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Weekend ID
-        </label>
-        <input
-          type="number"
-          name="weekend_id"
-          value={formData.weekend_id}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Circuit Key
-        </label>
-        <input
-          type="number"
-          name="circuit_key"
-          value={formData.circuit_key}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Circuit Short Name
-        </label>
-        <input
-          type="text"
-          name="circuit_short_name"
-          value={formData.circuit_short_name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Country Code
-        </label>
-        <input
-          type="text"
-          name="country_code"
-          value={formData.country_code}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Country Name
-        </label>
-        <input
-          type="text"
-          name="country_name"
-          value={formData.country_name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Location
-        </label>
-        <input
-          type="text"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Session Key
-        </label>
-        <input
-          type="number"
-          name="session_key"
-          value={formData.session_key || ""}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Session Name
-        </label>
-        <input
-          type="text"
-          name="session_name"
-          value={formData.session_name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Session Type
-        </label>
-        <select
-          name="session_type"
-          value={formData.session_type}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Selecciona un tipo</option>
-          <option value="Practice">Practice</option>
-          <option value="Qualifying">Qualifying</option>
-          <option value="Race">Race</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Date Start (in UTC)
-        </label>
-        <input
-          type="datetime-local"
-          name="date_start"
-          value={formData.date_start}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Date End (in UTC)
-        </label>
-        <input
-          type="datetime-local"
-          name="date_end"
-          value={formData.date_end}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Year</label>
-        <input
-          type="number"
-          name="year"
-          value={formData.year}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      </div>
-      {isEditing && formData.session_type === "Race" && (
-        <>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        {isEditing ? "Editar Sesión" : "Crear Sesión"}
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              VSC (Virtual Safety Car)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Weekend ID
             </label>
-            <select
-              name="vsc"
-              value={formData.vsc || ""}
+            <input
+              type="text"
+              name="weekend_id"
+              value={formData.weekend_id}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="">Selecciona</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ingresa el Weekend ID"
+            />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              SF (Safety Car)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Circuit Key
             </label>
-            <select
-              name="sf"
-              value={formData.sf || ""}
+            <input
+              type="text"
+              name="circuit_key"
+              value={formData.circuit_key}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="">Selecciona</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ingresa el Circuit Key"
+            />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              DNF (Did Not Finish)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre del Circuito
+            </label>
+            <input
+              type="text"
+              name="circuit_short_name"
+              value={formData.circuit_short_name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: Monza"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Código de País
+            </label>
+            <input
+              type="text"
+              name="country_code"
+              value={formData.country_code}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: ITA"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre del País
+            </label>
+            <input
+              type="text"
+              name="country_name"
+              value={formData.country_name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: Italy"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ubicación
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: Monza, Italy"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Session Key
             </label>
             <input
               type="number"
-              name="dnf"
-              value={formData.dnf || ""}
+              name="session_key"
+              value={formData.session_key !== null ? formData.session_key : ""}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Session Key"
             />
           </div>
-        </>
-      )}
-      <div className="flex space-x-2 pt-4">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          {initialSession ? "Actualizar" : "Crear"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-        >
-          Cancelar
-        </button>
-      </div>
-    </form>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre de la Sesión
+            </label>
+            <select
+              name="session_name"
+              value={formData.session_name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Selecciona el nombre</option>
+              <option value="Practice 1">Practice 1</option>
+              <option value="Practice 2">Practice 2</option>
+              <option value="Practice 3">Practice 3</option>
+              <option value="Qualifying">Qualifying</option>
+              <option value="Sprint Qualifying">Sprint Qualifying</option>
+              <option value="Sprint">Sprint</option>
+              <option value="Race">Race</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Sesión
+            </label>
+            <input
+              type="text"
+              name="session_type"
+              value={formData.session_type}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none cursor-not-allowed"
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Año
+            </label>
+            <input
+              type="number"
+              name="year"
+              value={formData.year}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: 2024"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Fecha de Inicio
+            </label>
+            <input
+              type="text"
+              name="date_start"
+              value={formData.date_start}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Fecha de Fin
+            </label>
+            <input
+              type="text"
+              name="date_end"
+              value={formData.date_end}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Campos extra solo si es tipo Race */}
+        {isEditing && isRaceSession && (
+          <div className="border-t pt-4">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Información de Carrera</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Virtual Safety Car (VSC)
+                  </label>
+                  <select
+                    name="vsc"
+                    value={formData.vsc === true ? "true" : formData.vsc === false ? "false" : ""}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Selecciona</option>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Safety Car (SC)
+                  </label>
+                  <select
+                    name="sf"
+                    value={formData.sf === true ? "true" : formData.sf === false ? "false" : ""}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Selecciona</option>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  DNF (Did Not Finish)
+                </label>
+                <input
+                  type="number"
+                  name="dnf"
+                  value={formData.dnf ?? ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Número de DNFs"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 pt-4">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            {isEditing ? "Guardar cambios" : "Crear sesión"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

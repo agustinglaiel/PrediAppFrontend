@@ -3,6 +3,19 @@ import DateDisplay from "./DateDisplay";
 import AuthModal from "./AuthModal";
 import { FaCheckCircle } from "react-icons/fa";
 
+const formatTimeToArgentina = (dateString) => {
+  if (!dateString) return "--:--";
+  const date = new Date(dateString);
+  if (isNaN(date)) return "--:--";
+
+  return new Intl.DateTimeFormat("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(date);
+};
+
 const SessionItem = ({
   sessionId,
   date,
@@ -57,14 +70,18 @@ const SessionItem = ({
     }
   };
 
+  const formattedStartTime = formatTimeToArgentina(startTime);
+  const formattedEndTime = endTime ? formatTimeToArgentina(endTime) : null;
+
+
   return (
     <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
       <DateDisplay date={date} month={month} />
       <div className="ml-6 flex-grow">
         <div className="font-semibold">{sessionName}</div>
         <div className="text-sm text-gray-600">
-          {startTime}
-          {endTime ? ` - ${endTime}` : ""}
+          {formattedStartTime}
+          {formattedEndTime ? ` - ${formattedEndTime}` : ""}
         </div>
       </div>
 
