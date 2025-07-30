@@ -13,12 +13,12 @@ const SessionForm = ({
     country_code: initialSession?.country_code || "",
     country_name: initialSession?.country_name || "",
     location: initialSession?.location || "",
+    session_key: initialSession?.session_key || "",
     session_name: initialSession?.session_name || "",
     session_type: initialSession?.session_type || "",
     date_start: initialSession?.date_start || "",
     date_end: initialSession?.date_end || "",
     year: initialSession?.year || "",
-    d_fast_lap: initialSession?.d_fast_lap || null,
     vsc: initialSession?.vsc || null,
     sf: initialSession?.sf || null,
     dnf: initialSession?.dnf || null,
@@ -63,6 +63,9 @@ const SessionForm = ({
       country_code: formData.country_code || null,
       country_name: formData.country_name || null,
       location: formData.location || null,
+      session_key: formData.session_key
+      ? parseInt(formData.session_key, 10)
+      : null,
       session_name: formData.session_name || null,
       session_type: formData.session_type || null,
       date_start: formData.date_start
@@ -176,6 +179,18 @@ const SessionForm = ({
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
+          Session Key
+        </label>
+        <input
+          type="number"
+          name="session_key"
+          value={formData.session_key || ""}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
           Session Name
         </label>
         <input
@@ -206,7 +221,7 @@ const SessionForm = ({
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Date Start
+          Date Start (in UTC)
         </label>
         <input
           type="datetime-local"
@@ -219,7 +234,7 @@ const SessionForm = ({
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Date End
+          Date End (in UTC)
         </label>
         <input
           type="datetime-local"
@@ -241,23 +256,11 @@ const SessionForm = ({
           required
         />
       </div>
-      {isEditing && (
+      {isEditing && formData.session_type === "Race" && (
         <>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              D Fast Lap
-            </label>
-            <input
-              type="number"
-              name="d_fast_lap"
-              value={formData.d_fast_lap || ""}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              VSC
+              VSC (Virtual Safety Car)
             </label>
             <select
               name="vsc"
@@ -287,7 +290,7 @@ const SessionForm = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              DNF
+              DNF (Did Not Finish)
             </label>
             <input
               type="number"
