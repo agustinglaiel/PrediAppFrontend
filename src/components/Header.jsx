@@ -56,7 +56,7 @@ const Header = () => {
     };
   }, [showMenu]);
 
-  const toggleMenu = () => setShowMenu(prev => !prev);
+  const toggleMenu = () => setShowMenu((prev) => !prev);
 
   const onClickProfile = () => {
     setShowMenu(false);
@@ -71,6 +71,11 @@ const Header = () => {
   const onClickScoreboard = () => {
     setShowMenu(false);
     navigate("/scoreboard");
+  };
+
+  const onClickAdmin = () => {
+    setShowMenu(false);
+    navigate("/admin");
   };
 
   const confirmSignOut = async () => {
@@ -139,24 +144,32 @@ const Header = () => {
                   </button>
                   {/* Dropdown */}
                   {showMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-50">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-50 overflow-hidden">
+                      {user.role === "admin" && (
+                        <button
+                          onClick={onClickAdmin}
+                          className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
+                        >
+                          Panel admin
+                        </button>
+                      )}
                       <button
                         onClick={onClickProfile}
-                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-t-lg"
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
                       >
                         Mi Perfil
                       </button>
                       <button
-                        onClick={onClickSignOut}
-                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-b-lg"
-                      >
-                        Cerrar Sesión
-                      </button>
-                      <button
                         onClick={onClickScoreboard}
-                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-b-lg"
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
                       >
                         Tabla de Clasificación
+                      </button>
+                      <button
+                        onClick={onClickSignOut}
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        Cerrar Sesión
                       </button>
                     </div>
                   )}

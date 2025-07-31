@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect } from "react";
-import { parseJwt, logout, setAuthToken } from "../api/users";
+import React, { createContext, useState, useEffect, useCallback } from "react";
+import { parseJwt, logout, setAuthToken, getUserById } from "../api/users"; // asumí que exportás getUserById
+// si getUserById está en otro archivo, importalo correctamente
 
 export const AuthContext = createContext();
 
@@ -7,6 +8,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Helper para mapear respuesta del backend al shape esperado
+  const normalizeUser = (data) => {
+    return {
+      id: data.id,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      username: data.username,
+      email: data.email,
+      role: data.role,
+      score: data.score,
+      // si tenés otros campos como imagen, etc., los podés agregar aquí
+    };
+  };
+
+  // Refrescar user desde el backend (no depende del token)
+  const refreshUser = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const fresh = await getUserById(user.id);
+      setUser(normalizeUser(fresh));
+      setIsAuthenticated(true);
+    } catch (err) {
+      console.warn("Error refrescando user:", err);
+      // opcional: podrías invalidar sesión si da 401
+    }
+  }, [user?.id]);
 
   // Al montar, si hay token, decodifícalo para poblar user
   useEffect(() => {
@@ -71,7 +99,14 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout: handleLogout, loading }}
+      value={{
+        user,
+        isAuthenticated,
+        login,
+        logout: handleLogout,
+        loading,
+        refreshUser, // <-- lo exponemos
+      }}
     >
       {children}
     </AuthContext.Provider>

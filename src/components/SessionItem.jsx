@@ -96,7 +96,7 @@ const SessionItem = ({
             }
           `}
         >
-          {hasProde ? "Actualizar pronóstico" : "Completar pronóstico"}
+          {hasProde ? "Actualizar" : "Completar"}
         </button>
       ) : null}
 
