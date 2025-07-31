@@ -14,8 +14,8 @@ const NavigationBar = () => {
   const navItems = [
     { path: "/", label: "Inicio", icon: <IoIosHome className="text-xl" /> },
     {
-      path: "/pronosticos",
-      label: "Prónosticos",
+      path: "/ranking",
+      label: "Ranking",
       icon: <IoIosStats className="text-xl" />,
     },
     {

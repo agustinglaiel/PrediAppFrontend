@@ -12,8 +12,8 @@ const UpcomingEvents = ({
   isLoggedIn,
 }) => {
   return (
-    <div className="px-4 mt-12">
-      <h2 className="text-2xl font-bold mb-4">Próximos eventos</h2>
+    <div className="px-4 mt-8">
+      {/* <h2 className="text-2xl font-bold mb-4">Próximos eventos</h2> */}
       {events.map((event, index) => (
         <EventCard
           key={index}

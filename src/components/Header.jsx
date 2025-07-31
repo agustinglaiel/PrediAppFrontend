@@ -68,10 +68,10 @@ const Header = () => {
     setShowSignOutModal(true);
   };
 
-  const onClickScoreboard = () => {
-    setShowMenu(false);
-    navigate("/scoreboard");
-  };
+  // const onClickScoreboard = () => {
+  //   setShowMenu(false);
+  //   navigate("/scoreboard");
+  // };
 
   const onClickAdmin = () => {
     setShowMenu(false);
@@ -159,12 +159,12 @@ const Header = () => {
                       >
                         Mi Perfil
                       </button>
-                      <button
+                      {/* <button
                         onClick={onClickScoreboard}
                         className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
                       >
                         Tabla de Clasificación
-                      </button>
+                      </button> */}
                       <button
                         onClick={onClickSignOut}
                         className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"

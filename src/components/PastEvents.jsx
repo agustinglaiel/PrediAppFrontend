@@ -10,8 +10,8 @@ const PastEvents = ({
   onContinueToLogin,
 }) => {
   return (
-    <div className="px-4 mt-12">
-      <h2 className="text-2xl font-bold mb-4">Eventos anteriores</h2>
+    <div className="px-4 mt-8">
+      {/* <h2 className="text-2xl font-bold mb-4">Eventos anteriores</h2> */}
       {events.length === 0 ? (
         <p className="text-gray-500 text-sm italic">
           No hay eventos pasados registrados.

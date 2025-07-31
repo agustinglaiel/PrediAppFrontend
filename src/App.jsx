@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import ProdeDispatcher from "./pages/ProdeDispatcher";
-import PronosticosPage from "./pages/PronosticosPage";
 import ProdeSessionResultPage from "./pages/ProdeSessionResultPage";
 import ProdeRaceResultPage from "./pages/ProdeRaceResultPage";
 import ResultsPage from "./pages/ResultsPage";
@@ -24,6 +23,7 @@ import GroupPage from "./pages/GroupPage";
 import MyProfilePage from "./pages/MyProfilePage";
 import PostPage from "./pages/PostPage";
 import ScoreboardPage from "./pages/ScoreboardPage";
+import RankingPage from "./pages/RankingPage";
 
 function App() {
   return (
@@ -32,8 +32,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/scoreboard" element={<ScoreboardPage />} />
-        <Route path="/pronosticos" element={<PronosticosPage />} />
+        <Route path="/ranking" element={<RankingPage />} />
+        <Route path="/scoreboard/general" element={<ScoreboardPage />} />       
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route path="/foro" element={<ForoPage />} />
         <Route path="/grupos" element={<GroupsPage />} />

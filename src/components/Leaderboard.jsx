@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useContext, useMemo } from "react";
+import PropTypes from "prop-types";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Leaderboard = ({ entries }) => {
+  const { user } = useContext(AuthContext);
+  const usernameLogged = user?.username;
+
   // Ordenar las entradas por score de mayor a menor
-  const sortedEntries = [...entries].sort((a, b) => b.score - a.score);
+  const sortedEntries = useMemo(
+    () => [...(entries || [])].sort((a, b) => b.score - a.score),
+    [entries]
+  );
 
   return (
     <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden max-w-full">
@@ -18,19 +26,39 @@ const Leaderboard = ({ entries }) => {
               </tr>
             </thead>
             <tbody>
-              {sortedEntries.map((entry, index) => (
-                <tr key={entry.user_id} className="border-b border-gray-100 last:border-b-0">
-                  <td className="py-3 font-semibold text-gray-900 text-center">{index + 1}</td>
-                  <td className="py-3 text-gray-800 text-center">{entry.username}</td>
-                  <td className="py-3 text-gray-800 text-center font-medium">{entry.score}</td>
-                </tr>
-              ))}
+              {sortedEntries.map((entry, index) => {
+                const isLoggedUser = entry.username === usernameLogged;
+                return (
+                  <tr
+                    key={entry.user_id}
+                    className={`
+                      border-b border-gray-100 last:border-b-0
+                      ${isLoggedUser ? "bg-red-100 font-semibold" : "hover:bg-gray-50"}
+                    `}
+                  >
+                    <td className="py-3 text-center">{index + 1}</td>
+                    <td className="py-3 text-center">{entry.username}</td>
+                    <td className="py-3 text-center font-medium">{entry.score}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
     </div>
   );
+};
+
+Leaderboard.propTypes = {
+  entries: PropTypes.arrayOf(
+    PropTypes.shape({
+      user_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        .isRequired,
+      username: PropTypes.string.isRequired,
+      score: PropTypes.number.isRequired,
+    })
+  ).isRequired,
 };
 
 export default Leaderboard;
