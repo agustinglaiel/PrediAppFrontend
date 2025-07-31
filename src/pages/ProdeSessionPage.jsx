@@ -1,7 +1,7 @@
 // ProdeSessionPage.jsx
-import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../contexts/AuthContext";
+import React, { useMemo, useContext } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
@@ -11,8 +11,7 @@ import DriverSelect from "../components/pronosticos/DriverSelect";
 import SubmitButton from "../components/pronosticos/SubmitButton";
 import WarningModal from "../components/pronosticos/WarningModal";
 
-import { getAllDrivers } from "../api/drivers";
-import { createProdeSession } from "../api/prodes";
+import useSessionProde from "../hooks/useSessionProde";
 
 const isRaceSession = (sessionName, sessionType) => {
   return sessionName === "Race" && sessionType === "Race";
@@ -22,14 +21,10 @@ const ProdeSessionPage = () => {
   const { session_id } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
-
-  const [allDrivers, setAllDrivers] = useState([]);
-  const [loadingDrivers, setLoadingDrivers] = useState(true);
-  const [driversError, setDriversError] = useState(null);
   const { user } = useContext(AuthContext);
   const userId = user?.id;
 
-  const [sessionDetails, setSessionDetails] = useState(() => {
+  const sessionDetails = useMemo(() => {
     if (state) {
       return {
         countryName: state.countryName || "Hungary",
@@ -47,86 +42,43 @@ const ProdeSessionPage = () => {
         dateStart: "2025-12-02T04:00:00-03:00",
       };
     }
+  }, [state]);
+
+  const {
+    loadingDrivers,
+    driversError,
+    formData,
+    driversFor,
+    handleDriverChange,
+    isFormComplete,
+    showWarningModal,
+    closeWarningModal,
+    submit,
+    submitting,
+    existingProde,
+  } = useSessionProde({
+    sessionId: session_id,
+    userId,
+    sessionStartDate: sessionDetails.dateStart,
+    onSuccess: () => navigate("/"),
+    onError: (err) => {
+      console.error("Error submit session prode:", err);
+    },
   });
-
-  const [formData, setFormData] = useState({
-    P1: null,
-    P2: null,
-    P3: null,
-  });
-
-  const isFormComplete = formData.P1 && formData.P2 && formData.P3;
-  const [showWarningModal, setShowWarningModal] = useState(false);
-
-  // Cargar pilotos
-  useEffect(() => {
-    async function fetchDrivers() {
-      try {
-        setLoadingDrivers(true);
-        const response = await getAllDrivers();
-        setAllDrivers(response);
-      } catch (err) {
-        setDriversError(`Error cargando pilotos: ${err.message}`);
-      } finally {
-        setLoadingDrivers(false);
-      }
-    }
-    fetchDrivers();
-  }, [session_id]);
-
-  // Warning si faltan <5 min
-  useEffect(() => {
-    const now = new Date();
-    const sessionStart = new Date(sessionDetails.dateStart);
-    const fiveMin = 5 * 60 * 1000;
-    if (sessionStart - now <= fiveMin && sessionStart - now > 0) {
-      setShowWarningModal(true);
-    }
-  }, [sessionDetails.dateStart]);
-
-  const handleDriverChange = (position, value) => {
-    setFormData((prev) => ({ ...prev, [position]: value }));
-  };
-
-  const driversForP1 = allDrivers.filter(
-    (d) => d.id !== formData.P2 && d.id !== formData.P3
-  );
-  const driversForP2 = allDrivers.filter(
-    (d) => d.id !== formData.P1 && d.id !== formData.P3
-  );
-  const driversForP3 = allDrivers.filter(
-    (d) => d.id !== formData.P1 && d.id !== formData.P2
-  );
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        session_id,
-        p1: formData.P1,
-        p2: formData.P2,
-        p3: formData.P3,
-      };
-      const response = await createProdeSession(userId, payload);
-      navigate("/");
-    } catch (err) {
-      console.error("Error createProdeSession:", err.message);
-    }
-  };
-
-  const handleCloseModal = () => setShowWarningModal(false);
-
-  if (loadingDrivers) {
-    return <div>Cargando pilotos...</div>;
-  }
-  if (driversError) {
-    return <div>{driversError}</div>;
-  }
 
   const isRace = isRaceSession(
     sessionDetails.sessionName,
     sessionDetails.sessionType
   );
+
+  if (loadingDrivers) return <div>Cargando pilotos...</div>;
+  if (driversError) return <div>{driversError}</div>;
+
+  const submitLabel = submitting
+    ? "Enviando..."
+    : existingProde
+    ? "Actualizar pronóstico"
+    : "Enviar pronóstico";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -144,44 +96,40 @@ const ProdeSessionPage = () => {
         {!isRace && (
           <div className="mt-4 p-4 bg-white rounded-lg shadow-md">
             <Top3FormHeader sessionType={sessionDetails.sessionType} />
-            <form
-              onSubmit={handleSubmit}
-              disabled={showWarningModal}
-              className="flex flex-col gap-4"
-            >
+            <form onSubmit={submit} className="flex flex-col gap-4">
               <DriverSelect
                 position="P1"
                 value={formData.P1}
                 onChange={(val) => handleDriverChange("P1", val)}
-                disabled={showWarningModal}
-                drivers={driversForP1}
+                disabled={showWarningModal || submitting}
+                drivers={driversFor.P1}
               />
               <DriverSelect
                 position="P2"
                 value={formData.P2}
                 onChange={(val) => handleDriverChange("P2", val)}
-                disabled={showWarningModal}
-                drivers={driversForP2}
+                disabled={showWarningModal || submitting}
+                drivers={driversFor.P2}
               />
               <DriverSelect
                 position="P3"
                 value={formData.P3}
                 onChange={(val) => handleDriverChange("P3", val)}
-                disabled={showWarningModal}
-                drivers={driversForP3}
+                disabled={showWarningModal || submitting}
+                drivers={driversFor.P3}
               />
 
               <SubmitButton
-                isDisabled={!isFormComplete || showWarningModal}
-                onClick={handleSubmit}
-                label="Enviar pronóstico"
+                isDisabled={!isFormComplete || showWarningModal || submitting}
+                onClick={submit}
+                label={submitLabel}
                 className="mt-4"
               />
             </form>
           </div>
         )}
 
-        <WarningModal isOpen={showWarningModal} onClose={handleCloseModal} />
+        <WarningModal isOpen={showWarningModal} onClose={closeWarningModal} />
       </main>
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
