@@ -9,7 +9,7 @@ const MissingProdeSession = ({ isOpen, onClose }) => {
 
   const handleAccept = () => {
     onClose();
-    navigate("/pronosticos"); // Redirige al inicio (página de pronósticos)
+    navigate("/"); // Redirige al inicio (página de inicio)
   };
 
   return (

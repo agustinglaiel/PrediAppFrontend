@@ -22,7 +22,7 @@ const ScoreboardOverviewCard = ({ title, position, onClick, isGeneral }) => {
       </div>
       <div className="mt-2">
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span>Position:</span>
+          <span>Posición:</span>
           <span className="text-lg font-semibold text-gray-900">
             {position != null ? position : "—"}
           </span>

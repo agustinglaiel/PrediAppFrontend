@@ -75,7 +75,7 @@ const SessionItem = ({
           onClick={onPronosticoClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
         >
-          {score != null ? `${score} Puntos` : "Ver resultados"}
+          {score != null ? `${score} Puntos` : "Ver"}
         </button>
       ) : !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
         <button
