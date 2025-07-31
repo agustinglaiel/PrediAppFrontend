@@ -9,8 +9,6 @@ import PronosticosPage from "./pages/PronosticosPage";
 import ProdeSessionResultPage from "./pages/ProdeSessionResultPage";
 import ProdeRaceResultPage from "./pages/ProdeRaceResultPage";
 import ResultsPage from "./pages/ResultsPage";
-// import SessionResult from "./pages/SessionResults";
-// import AdminSessionResults from "./pages/AdminSessionResults";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminUsersManagementPage from "./pages/AdminUsersManagementPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -25,6 +23,7 @@ import ForoPage from "./pages/ForoPage";
 import GroupPage from "./pages/GroupPage";
 import MyProfilePage from "./pages/MyProfilePage";
 import PostPage from "./pages/PostPage";
+import ScoreboardPage from "./pages/ScoreboardPage";
 
 function App() {
   return (
@@ -33,6 +32,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/scoreboard" element={<ScoreboardPage />} />
         <Route path="/pronosticos" element={<PronosticosPage />} />
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route path="/foro" element={<ForoPage />} />

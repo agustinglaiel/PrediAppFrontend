@@ -68,6 +68,11 @@ const Header = () => {
     setShowSignOutModal(true);
   };
 
+  const onClickScoreboard = () => {
+    setShowMenu(false);
+    navigate("/scoreboard");
+  };
+
   const confirmSignOut = async () => {
     try {
       await logout();
@@ -146,6 +151,12 @@ const Header = () => {
                         className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-b-lg"
                       >
                         Cerrar Sesión
+                      </button>
+                      <button
+                        onClick={onClickScoreboard}
+                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-white/15 transition-colors duration-200 rounded-b-lg"
+                      >
+                        Tabla de Clasificación
                       </button>
                     </div>
                   )}

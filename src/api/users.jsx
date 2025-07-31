@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
 
-// axios.defaults.baseURL = "http://localhost:8080/api";
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
+// axios.defaults.baseURL = "/api";
 
 // Función para establecer el token JWT en el encabezado de autorización
 export const setAuthToken = (token) => {
@@ -162,6 +162,20 @@ export const getUsers = async () => {
   } catch (error) {
     console.error("Get users error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Error fetching users.");
+  }
+};
+
+export const getScoreboard = async () => {
+  try {
+    const response = await axios.get('/users/scoreboard', {
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get scoreboard error:", error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.message || "Error fetching scoreboard."
+    );
   }
 };
 

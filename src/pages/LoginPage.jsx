@@ -1,22 +1,38 @@
-// LoginPage.jsx
+// src/pages/LoginPage.jsx
 import React from "react";
-import LoginForm from "../components/LoginForm";
 import Header from "../components/Header";
+import LoginForm from "../components/LoginForm";
+import Hyperspeed from "../components/Hyperspeed";
+import Threads from "../components/Threads";
+
 
 const LoginPage = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Opcional: si quieres que en Login aparezca o no el Header global */}
-      <Header />
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      {/* Fondo WebGL centrado */}
+      <div className="absolute inset-0 flex justify-center items-center">
+        {/* Si quieres que ocupe todo el ancho/alto, mantiene w-full h-full */}
+        {/* si prefieres un tamaño fijo, cámbialo aquí: e.g. w-3/4 h-3/4 */}
+        <Threads
+          amplitude={3}
+          distance={0}
+          enableMouseInteraction={true}
+        />
+      </div>
 
-      {/* main con flex-grow para que “empuje” al footer al fondo */}
-      <main className="flex-grow flex justify-center items-center">
-        <LoginForm />
-      </main>
+      {/* Contenido superpuesto */}
+      <div className="absolute inset-0 flex flex-col">
+        <Header />
 
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2025 PrediApp</p>
-      </footer>
+        <main className="flex-grow flex justify-center items-center z-10">
+          {/* Ya no hay div blanco alrededor */}
+          <LoginForm />
+        </main>
+
+        {/* <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
+          <p>© 2025 PrediApp</p>
+        </footer> */}
+      </div>
     </div>
   );
 };
