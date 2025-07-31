@@ -154,12 +154,12 @@ const ProdeRaceResultPage = () => {
                       <div className="w-36 flex-shrink-0 text-right">
                         {colorClasses.includes("green") && (
                           <div className="text-sm font-semibold text-green-800">
-                            Acierto exacto
+                            Acierto
                           </div>
                         )}
                         {colorClasses.includes("yellow") && (
                           <div className="text-sm font-semibold text-yellow-800">
-                            Piloto en top5
+                            Top5
                           </div>
                         )}
                         {colorClasses.includes("red") && (
