@@ -6,23 +6,18 @@ import useScoreboard from "../hooks/useScoreboard";
 
 const ScoreboardPage = () => {
   const { scoreboard, loading, error, refresh } = useScoreboard();
-
+  
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       <Header />
       <NavigationBar />
-
-      <main className="flex-grow pt-20 px-4">
+      <main className="flex-grow pt-20 px-4 pb-20 flex flex-col overflow-hidden">
         <Scoreboard
           data={scoreboard}
           loading={loading}
           error={error}
         />
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2025 PrediApp</p>
-      </footer>
     </div>
   );
 };
