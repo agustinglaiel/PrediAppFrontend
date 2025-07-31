@@ -1,158 +1,78 @@
 // frontendnuevo/src/pages/ProdeRaceResultPage.jsx
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import SessionHeader from "../components/pronosticos/SessionHeader";
-import DriverResultDisplay from "../components/results/DriverResultDisplay"; // Cambiado a este componente
-import YesNoButton from "../components/pronosticos/YesNoButton";
 import MissingProdeSession from "../components/results/MissingProdeSession";
 
-import { getProdeByUserAndSession } from "../api/prodes";
-import { getDriverById } from "../api/drivers";
-import { getSessionById } from "../api/sessions";
-import { getTopNDriversInSession } from "../api/results";
 import { AuthContext } from "../contexts/AuthContext";
+import useRaceProdeResult from "../hooks/useRaceProdeResult";
+
+const positionLabels = ["P1", "P2", "P3", "P4", "P5"];
+
+/** Extrae apellido (última palabra) */
+const getLastName = (fullName) => {
+  if (!fullName || typeof fullName !== "string") return "—";
+  const parts = fullName.trim().split(/\s+/);
+  return parts.length > 1 ? parts[parts.length - 1] : fullName;
+};
 
 const ProdeRaceResultPage = () => {
   const { session_id } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user } = React.useContext(AuthContext);
   const userId = user?.id;
 
-  const [sessionDetails, setSessionDetails] = useState(null);
-  const [prodeData, setProdeData] = useState(null);
-  const [userPrediction, setUserPrediction] = useState({
-    p1: null,
-    p2: null,
-    p3: null,
-    p4: null,
-    p5: null,
-    vsc: null,
-    sc: null,
-    dnf: null,
+  const {
+    loading,
+    error,
+    sessionInfo,
+    prode,
+    userDrivers,
+    realDriversList,
+    realRaceExtras,
+    missingProde,
+  } = useRaceProdeResult({
+    sessionId: session_id,
+    userId,
+    topN: 5,
   });
-  const [realResults, setRealResults] = useState({
-    p1: null,
-    p2: null,
-    p3: null,
-    p4: null,
-    p5: null,
-    vsc: null,
-    sc: null,
-    dnf: null,
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showMissingProdeModal, setShowMissingProdeModal] = useState(false);
 
+  // Redirigir si no es carrera
   useEffect(() => {
-    const fetchRaceData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const sessionId = parseInt(session_id, 10);
-        if (!userId) {
-          throw new Error("Usuario no autenticado. Por favor, inicia sesión.");
-        }
-
-        // Obtener detalles de la sesión
-        const sessionData = await getSessionById(sessionId);
-        const sessionInfo = {
-          countryName: sessionData.country_name || "Unknown",
-          flagUrl: sessionData.country_name
-            ? `/images/flags/${sessionData.country_name.toLowerCase()}.jpg`
-            : "/images/flags/default.jpg",
-          sessionType: sessionData.session_type || "Race",
-          sessionName: sessionData.session_name || "Race",
-          dateStart: sessionData.date_start || "2025-01-01T00:00:00Z",
-        };
-        setSessionDetails(sessionInfo);
-
-        // Verificar que sea una carrera
-        if (
-          sessionData.session_type !== "Race" ||
-          sessionData.session_name !== "Race"
-        ) {
-          navigate("/pronosticos");
-          return;
-        }
-
-        // Obtener pronóstico del usuario
-        const prode = await getProdeByUserAndSession(
-          parseInt(userId, 10),
-          sessionId
-        );
-        if (!prode) {
-          setShowMissingProdeModal(true);
-          setProdeData(null);
-        } else {
-          setProdeData(prode);
-          const driverPromises = [
-            prode.p1 ? getDriverById(prode.p1) : Promise.resolve(null),
-            prode.p2 ? getDriverById(prode.p2) : Promise.resolve(null),
-            prode.p3 ? getDriverById(prode.p3) : Promise.resolve(null),
-            prode.p4 ? getDriverById(prode.p4) : Promise.resolve(null),
-            prode.p5 ? getDriverById(prode.p5) : Promise.resolve(null),
-          ];
-          const [p1, p2, p3, p4, p5] = await Promise.all(driverPromises);
-          setUserPrediction({
-            p1: p1?.full_name || "No seleccionado",
-            p2: p2?.full_name || "No seleccionado",
-            p3: p3?.full_name || "No seleccionado",
-            p4: p4?.full_name || "No seleccionado",
-            p5: p5?.full_name || "No seleccionado",
-            vsc: prode.vsc || false,
-            sc: prode.sc || false,
-            dnf: prode.dnf || 0,
-          });
-        }
-
-        // Obtener resultados reales
-        const topDrivers = await getTopNDriversInSession(sessionId, 5);
-        if (topDrivers.length === 0) {
-          setRealResults({
-            p1: "No disponible",
-            p2: "No disponible",
-            p3: "No disponible",
-            p4: "No disponible",
-            p5: "No disponible",
-            vsc: sessionData.vsc || false,
-            sc: sessionData.sc || false,
-            dnf: sessionData.dnf || 0,
-          });
-        } else {
-          const realDriverPromises = topDrivers.map((driver) =>
-            getDriverById(driver.driver_id)
-          );
-          const realDriverData = await Promise.all(realDriverPromises);
-          setRealResults({
-            p1: realDriverData[0]?.full_name || "No disponible",
-            p2: realDriverData[1]?.full_name || "No disponible",
-            p3: realDriverData[2]?.full_name || "No disponible",
-            p4: realDriverData[3]?.full_name || "No disponible",
-            p5: realDriverData[4]?.full_name || "No disponible",
-            vsc: sessionData.vsc || false,
-            sc: sessionData.sc || false,
-            dnf: sessionData.dnf || 0,
-          });
-        }
-      } catch (err) {
-        setError(err.message || "Error al cargar los resultados.");
-        console.error("Error en ProdeRaceResultPage:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRaceData();
-  }, [session_id, navigate]);
+    if (sessionInfo && sessionInfo.sessionType !== "Race") {
+      navigate("/pronosticos");
+    }
+  }, [sessionInfo, navigate]);
 
   const handleCloseMissingProdeModal = () => {
-    setShowMissingProdeModal(false);
     navigate("/pronosticos");
+  };
+
+  // Coloreado para posiciones (P1..P5)
+  const getColorForPrediction = (positionIndex) => {
+    if (!realDriversList || realDriversList.length === 0 || !prode)
+      return "bg-red-100 text-red-800";
+
+    const predictedId = prode[`p${positionIndex + 1}`];
+    const exact = realDriversList[positionIndex]?.driver_id === predictedId;
+    if (exact) return "bg-green-100 text-green-800";
+
+    const inTop = realDriversList.some((d) => d.driver_id === predictedId);
+    if (inTop) return "bg-yellow-100 text-yellow-800";
+
+    return "bg-red-100 text-red-800";
+  };
+
+  // Coloreado para extras: verde si coincide, rojo si no
+  const getColorForExtra = (predictedValue, realValue) => {
+    const same =
+      typeof predictedValue === "boolean"
+        ? predictedValue === realValue
+        : Number(predictedValue) === Number(realValue);
+    return same ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
   if (loading) {
@@ -171,132 +91,180 @@ const ProdeRaceResultPage = () => {
     );
   }
 
+  const predictedNames = {
+    P1: getLastName(userDrivers.p1),
+    P2: getLastName(userDrivers.p2),
+    P3: getLastName(userDrivers.p3),
+    P4: getLastName(userDrivers.p4),
+    P5: getLastName(userDrivers.p5),
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
+
       <main className="flex-grow pt-12 px-4 pb-8">
-        {/* Pronóstico del usuario */}
         <SessionHeader
-          countryName={sessionDetails?.countryName}
-          flagUrl={sessionDetails?.flagUrl}
-          sessionName={sessionDetails?.sessionName}
-          sessionType={sessionDetails?.sessionType}
+          countryName={sessionInfo?.countryName}
+          flagUrl={sessionInfo?.flagUrl}
+          sessionName={sessionInfo?.sessionName}
+          sessionType={sessionInfo?.sessionType}
           className="mt-4"
         />
+
         <div className="mt-4 p-2 bg-white rounded-lg shadow-md">
-          {prodeData ? (
+          {prode ? (
             <>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2 mb-2 ml-4">
-                Tu Pronóstico
+              <h3 className="text-lg font-semibold text-gray-800 mt-2 mb-4 ml-4">
+                Tu Pronóstico vs Resultado real
               </h3>
-              <div className="flex flex-col gap-4">
-                <DriverResultDisplay
-                  position="P1"
-                  driverName={userPrediction.p1}
-                />
-                <DriverResultDisplay
-                  position="P2"
-                  driverName={userPrediction.p2}
-                />
-                <DriverResultDisplay
-                  position="P3"
-                  driverName={userPrediction.p3}
-                />
-                <DriverResultDisplay
-                  position="P4"
-                  driverName={userPrediction.p4}
-                />
-                <DriverResultDisplay
-                  position="P5"
-                  driverName={userPrediction.p5}
-                />
-                <div className="flex flex-row gap-14 ml-4 mb-1">
-                  <YesNoButton
-                    label="Virtual Safety Car"
-                    value={userPrediction.vsc}
-                    onChange={() => {}}
-                    disabled={true}
-                  />
-                  <YesNoButton
-                    label="Safety Car"
-                    value={userPrediction.sc}
-                    onChange={() => {}}
-                    disabled={true}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black mt-2 mb-1 ml-4">
-                    DNF
-                  </label>
-                  <input
-                    type="number"
-                    value={userPrediction.dnf}
-                    disabled={true}
-                    className="border border-gray-300 p-2 rounded w-24 ml-4 bg-gray-100"
-                  />
+
+              <div className="flex flex-col gap-2">
+                {positionLabels.map((posLabel, idx) => {
+                  const predictedName = predictedNames[posLabel] || "—";
+                  const actualName = realDriversList[idx]?.full_name
+                    ? getLastName(realDriversList[idx].full_name)
+                    : "No disponible";
+                  const colorClasses = getColorForPrediction(idx);
+
+                  return (
+                    <div
+                      key={posLabel}
+                      className={`
+                        flex items-center justify-between p-3 rounded-md border
+                        ${colorClasses}
+                      `}
+                    >
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="w-12 font-bold flex-shrink-0">
+                          {posLabel}
+                        </div>
+                        <div className="flex flex-col overflow-hidden">
+                          <div className="text-sm text-gray-700 truncate">
+                            <span className="font-medium">Tu:</span>{" "}
+                            {predictedName}
+                          </div>
+                          <div className="text-sm text-gray-600 truncate">
+                            <span className="font-medium">Real:</span>{" "}
+                            {actualName}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-36 flex-shrink-0 text-right">
+                        {colorClasses.includes("green") && (
+                          <div className="text-sm font-semibold text-green-800">
+                            Acierto exacto
+                          </div>
+                        )}
+                        {colorClasses.includes("yellow") && (
+                          <div className="text-sm font-semibold text-yellow-800">
+                            Piloto en top5
+                          </div>
+                        )}
+                        {colorClasses.includes("red") && (
+                          <div className="text-sm font-semibold text-red-800">
+                            Fallaste
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Extras: VSC / SC / DNF con Tu/Real debajo del título, cajas iguales */}
+              <div className="mt-6">
+                <h4 className="text-md font-semibold mb-2 ml-4">Otros</h4>
+                <div className="flex gap-4 ml-4">
+                  {/* VSC */}
+                  <div
+                    className={`
+                      flex flex-col justify-between p-3 rounded-md font-semibold
+                      ${getColorForExtra(prode?.vsc, realRaceExtras.vsc)}
+                      w-48 h-20
+                    `}
+                  >
+                    <div className="text-base">VSC</div>
+                    <div className="text-xs mt-1">
+                      <div>
+                        <span className="font-medium">Tu:</span>{" "}
+                        {prode?.vsc ? "Sí" : "No"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Real:</span>{" "}
+                        {realRaceExtras.vsc ? "Sí" : "No"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SC */}
+                  <div
+                    className={`
+                      flex flex-col justify-between p-3 rounded-md font-semibold
+                      ${getColorForExtra(prode?.sc, realRaceExtras.sc)}
+                      w-48 h-20
+                    `}
+                  >
+                    <div className="text-base">SC</div>
+                    <div className="text-xs mt-1">
+                      <div>
+                        <span className="font-medium">Tu:</span>{" "}
+                        {prode?.sc ? "Sí" : "No"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Real:</span>{" "}
+                        {realRaceExtras.sc ? "Sí" : "No"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* DNF */}
+                  <div
+                    className={`
+                      flex flex-col justify-between p-3 rounded-md font-semibold
+                      ${getColorForExtra(prode?.dnf, realRaceExtras.dnf)}
+                      w-48 h-20
+                    `}
+                  >
+                    <div className="text-base">DNF</div>
+                    <div className="text-xs mt-1">
+                      <div>
+                        <span className="font-medium">Tu:</span>{" "}
+                        {prode?.dnf ?? "—"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Real:</span>{" "}
+                        {realRaceExtras.dnf ?? "—"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              {prodeData?.score !== null && prodeData?.score !== undefined && (
+
+              {prode?.score != null && (
                 <div className="mt-4 text-center">
                   <p className="text-lg font-semibold text-gray-800">
-                    Puntaje obtenido: {prodeData.score} puntos
+                    Puntaje obtenido: {prode.score} puntos
                   </p>
                 </div>
               )}
             </>
           ) : (
-            !showMissingProdeModal && (
+            !missingProde && (
               <p className="text-center text-gray-600">
                 No hay pronóstico disponible para esta carrera.
               </p>
             )
           )}
         </div>
-
-        {/* Resultados reales */}
-        <div className="mt-4 p-2 bg-white rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-800 mt-2 mb-4 ml-4">
-            Resultados
-          </h3>
-          <div className="flex flex-col gap-4">
-            <DriverResultDisplay position="P1" driverName={realResults.p1} />
-            <DriverResultDisplay position="P2" driverName={realResults.p2} />
-            <DriverResultDisplay position="P3" driverName={realResults.p3} />
-            <DriverResultDisplay position="P4" driverName={realResults.p4} />
-            <DriverResultDisplay position="P5" driverName={realResults.p5} />
-            <div className="flex flex-row gap-14 ml-4 mb-1">
-              <YesNoButton
-                label="Virtual Safety Car"
-                value={realResults.vsc}
-                onChange={() => {}}
-                disabled={true}
-              />
-              <YesNoButton
-                label="Safety Car"
-                value={realResults.sc}
-                onChange={() => {}}
-                disabled={true}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-black mt-2 mb-1 ml-4">
-                DNF
-              </label>
-              <input
-                type="number"
-                value={realResults.dnf}
-                disabled={true}
-                className="border border-gray-300 p-2 rounded w-24 ml-4 bg-gray-100"
-              />
-            </div>
-          </div>
-        </div>
       </main>
+
       <MissingProdeSession
-        isOpen={showMissingProdeModal}
+        isOpen={missingProde}
         onClose={handleCloseMissingProdeModal}
       />
+
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
       </footer>
