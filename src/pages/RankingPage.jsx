@@ -18,14 +18,18 @@ const RankingPage = () => {
   const { groups, loading: loadingGroups, error: groupsError } =
     useUserGroups(userId);
 
-  // calcular posición del usuario en scoreboard general
+    // calcular posición del usuario en scoreboard general
   const userGeneralPosition = useMemo(() => {
     if (!scoreboard || !user?.username) return null;
+    const target = user.username.toLowerCase();
     const sorted = [...scoreboard].sort((a, b) => b.score - a.score);
-    const idx = sorted.findIndex((r) => r.username === user.username);
+    const idx = sorted.findIndex(
+      (r) => String(r.username).toLowerCase() === target
+    );
     return idx >= 0 ? idx + 1 : null;
   }, [scoreboard, user]);
-
+  
+  
   const isLoading = loadingScoreboard || loadingGroups;
   const error = scoreboardError || groupsError;
 

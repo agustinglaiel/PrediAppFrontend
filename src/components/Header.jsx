@@ -68,11 +68,6 @@ const Header = () => {
     setShowSignOutModal(true);
   };
 
-  // const onClickScoreboard = () => {
-  //   setShowMenu(false);
-  //   navigate("/scoreboard");
-  // };
-
   const onClickAdmin = () => {
     setShowMenu(false);
     navigate("/admin");
@@ -125,7 +120,13 @@ const Header = () => {
                     className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-1.5 shadow-sm flex items-center space-x-1 text-sm font-semibold hover:bg-white/15 transition-colors duration-200"
                     title="Menú usuario"
                   >
-                    <span>{user.username}</span>
+                    <div
+                      className="overflow-hidden truncate max-w-[80px]"
+                      style={{ minWidth: 0 }}
+                      title={user.username}
+                    >
+                      {user.username}
+                    </div>
                     <svg
                       className={`w-4 h-4 text-white transition-transform duration-200 ${
                         showMenu ? "rotate-180" : ""
@@ -159,12 +160,6 @@ const Header = () => {
                       >
                         Mi Perfil
                       </button>
-                      {/* <button
-                        onClick={onClickScoreboard}
-                        className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        Tabla de Clasificación
-                      </button> */}
                       <button
                         onClick={onClickSignOut}
                         className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
@@ -186,7 +181,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-      {/* Reutilizamos SignOutAlert para confirmación */}
       <SignOutAlert
         isOpen={showSignOutModal}
         onClose={() => setShowSignOutModal(false)}

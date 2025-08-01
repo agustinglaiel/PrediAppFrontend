@@ -4,9 +4,8 @@ import { AuthContext } from "../contexts/AuthContext";
 
 const Leaderboard = ({ entries }) => {
   const { user } = useContext(AuthContext);
-  const usernameLogged = user?.username;
+  const usernameLogged = user?.username?.toLowerCase();
 
-  // Ordenar las entradas por score de mayor a menor
   const sortedEntries = useMemo(
     () => [...(entries || [])].sort((a, b) => b.score - a.score),
     [entries]
@@ -17,7 +16,8 @@ const Leaderboard = ({ entries }) => {
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-6 text-center">Tabla de posiciones</h2>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
+            <colgroup><col style={{ width: 60 }} /><col style={{ width: 180 }} /><col style={{ width: 100 }} /></colgroup>
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="pb-3 font-semibold text-gray-700 text-center">Puesto</th>
@@ -27,7 +27,8 @@ const Leaderboard = ({ entries }) => {
             </thead>
             <tbody>
               {sortedEntries.map((entry, index) => {
-                const isLoggedUser = entry.username === usernameLogged;
+                const isLoggedUser =
+                  entry.username?.toLowerCase() === usernameLogged && !!usernameLogged;
                 return (
                   <tr
                     key={entry.user_id}
@@ -37,7 +38,15 @@ const Leaderboard = ({ entries }) => {
                     `}
                   >
                     <td className="py-3 text-center">{index + 1}</td>
-                    <td className="py-3 text-center">{entry.username}</td>
+                    <td className="py-3 text-center">
+                      <div
+                        className="truncate mx-auto"
+                        style={{ maxWidth: "160px" }}
+                        title={entry.username}
+                      >
+                        {entry.username}
+                      </div>
+                    </td>
                     <td className="py-3 text-center font-medium">{entry.score}</td>
                   </tr>
                 );

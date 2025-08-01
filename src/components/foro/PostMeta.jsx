@@ -7,7 +7,7 @@ export default function PostMeta({ createdAt, author, loadingAuthor }) {
       {loadingAuthor ? (
         <span>Cargando autor…</span>
       ) : (
-        <span className="font-medium">
+        <span className="font-medium truncate max-w-[80px]">
           u/{author?.username || "Usuario desconocido"}
         </span>
       )}

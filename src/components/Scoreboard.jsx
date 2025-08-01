@@ -1,31 +1,32 @@
-// src/components/Scoreboard.jsx
 import React, { useContext, useMemo } from "react";
 import PropTypes from "prop-types";
 import { AuthContext } from "../contexts/AuthContext";
 
 export default function Scoreboard({ data, loading, error }) {
   const { user } = useContext(AuthContext);
-  const username = user?.username;
+  const username = user?.username?.toLowerCase();
 
-  // Orden completo por score descendente
   const sortedFull = useMemo(() => {
     return [...(data || [])].sort((a, b) => b.score - a.score);
   }, [data]);
 
-  // Top 100 y posible fila extra del usuario si está fuera
   const top100 = sortedFull.slice(0, 100);
-  const userInTop100 = top100.findIndex((r) => r.username === username);
+  const userInTop100 = top100.findIndex(
+    (r) => r.username?.toLowerCase() === username
+  );
   const userRow =
-    userInTop100 === -1 ? sortedFull.find((r) => r.username === username) : null;
+    userInTop100 === -1
+      ? sortedFull.find((r) => r.username?.toLowerCase() === username)
+      : null;
   const rows = userRow ? [...top100, userRow] : top100;
 
-  // Si está cargando o error, puedes delegar la UI hacia quien llame (ScoreboardPage)
   return (
     <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden max-w-full">
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-6 text-center">Tabla de posiciones</h2>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
+            <colgroup><col style={{ width: 60 }} /><col style={{ width: 180 }} /><col style={{ width: 100 }} /></colgroup>
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="pb-3 font-semibold text-gray-700 text-center">Puesto</th>
@@ -35,16 +36,17 @@ export default function Scoreboard({ data, loading, error }) {
             </thead>
             <tbody>
               {rows.map((row, idx) => {
-                // Calcular posición real: si es el usuario fuera del top100, buscar en sortedFull
                 let position;
-                if (row.username === username && userRow) {
-                  position = sortedFull.findIndex((r) => r.username === username) + 1;
+                if (row.username?.toLowerCase() === username && userRow) {
+                  position =
+                    sortedFull.findIndex(
+                      (r) => r.username?.toLowerCase() === username
+                    ) + 1;
                 } else {
-                  // Si backend trae position úsalo, sino índice en la lista (que para top100 es correcto)
                   position = row.position ?? idx + 1;
                 }
 
-                const isUser = row.username === username;
+                const isUser = row.username?.toLowerCase() === username;
                 return (
                   <tr
                     key={row.username}
@@ -54,7 +56,15 @@ export default function Scoreboard({ data, loading, error }) {
                     `}
                   >
                     <td className="py-3 text-center">{position}</td>
-                    <td className="py-3 text-center">{row.username}</td>
+                    <td className="py-3 text-center">
+                      <div
+                        className="truncate mx-auto"
+                        style={{ maxWidth: "160px" }}
+                        title={row.username}
+                      >
+                        {row.username}
+                      </div>
+                    </td>
                     <td className="py-3 text-center font-medium">{row.score}</td>
                   </tr>
                 );
