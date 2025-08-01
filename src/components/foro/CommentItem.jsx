@@ -1,12 +1,22 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { AuthContext } from "../../contexts/AuthContext";
 import CommentPost from "./CommentPost";
+import useUsersMap from "../../hooks/useUsersMap";
+import PostMeta from "./PostMeta";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
-export default function CommentItem({ comment, level = 0, onCommentCreated }) {
+export default function CommentItem({
+  comment,
+  level = 0,
+  onCommentCreated,
+}) {
   const { isAuthenticated } = useContext(AuthContext);
   const [showReply, setShowReply] = useState(false);
   const indent = level * 16; // px por nivel
+
+  const { usersMap, loading: usersLoading } = useUsersMap([comment.user_id]);
+  const author = usersMap[String(comment.user_id)];
 
   const handleReplyCreated = () => {
     setShowReply(false);
@@ -29,7 +39,6 @@ export default function CommentItem({ comment, level = 0, onCommentCreated }) {
       )}
 
       <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 relative">
-        {/* Solo muestro el botón de respuesta si está autenticado */}
         {isAuthenticated && (
           <button
             onClick={() => setShowReply((prev) => !prev)}
@@ -44,12 +53,14 @@ export default function CommentItem({ comment, level = 0, onCommentCreated }) {
         <p className="text-gray-800 whitespace-pre-wrap break-words">
           {comment.body}
         </p>
-        <div className="text-xs text-gray-500 mt-2">
-          {new Date(comment.created_at).toLocaleString()}
-        </div>
+
+        <PostMeta
+          createdAt={comment.created_at}
+          author={author}
+          loadingAuthor={usersLoading}
+        />
       </div>
 
-      {/* Form de respuesta inline */}
       {showReply && isAuthenticated && (
         <CommentPost
           parentPostId={comment.id}
@@ -57,7 +68,6 @@ export default function CommentItem({ comment, level = 0, onCommentCreated }) {
         />
       )}
 
-      {/* Hijos recursivos */}
       {comment.children?.map((child) => (
         <CommentItem
           key={child.id}
@@ -75,6 +85,8 @@ CommentItem.propTypes = {
     id:         PropTypes.number.isRequired,
     body:       PropTypes.string.isRequired,
     created_at: PropTypes.string.isRequired,
+    user_id:    PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+      .isRequired,
     children:   PropTypes.array,
   }).isRequired,
   level:            PropTypes.number,

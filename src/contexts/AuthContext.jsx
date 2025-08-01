@@ -1,29 +1,29 @@
 import React, { createContext, useState, useEffect, useCallback } from "react";
-import { parseJwt, logout, setAuthToken, getUserById } from "../api/users"; // asumí que exportás getUserById
-// si getUserById está en otro archivo, importalo correctamente
+import {
+  parseJwt,
+  logout as apiLogout,
+  setAuthToken,
+  getUserById,
+} from "../api/users"; // asegúrate de que estas funciones estén exportadas correctamente
 
 export const AuthContext = createContext();
+
+const normalizeUser = (data) => ({
+  id: data.id,
+  firstName: data.first_name,
+  lastName: data.last_name,
+  username: data.username,
+  email: data.email,
+  role: data.role,
+  score: data.score,
+  avatarUrl: data.avatar_url || null,
+});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Helper para mapear respuesta del backend al shape esperado
-  const normalizeUser = (data) => {
-    return {
-      id: data.id,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      username: data.username,
-      email: data.email,
-      role: data.role,
-      score: data.score,
-      // si tenés otros campos como imagen, etc., los podés agregar aquí
-    };
-  };
-
-  // Refrescar user desde el backend (no depende del token)
   const refreshUser = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -32,19 +32,25 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
     } catch (err) {
       console.warn("Error refrescando user:", err);
-      // opcional: podrías invalidar sesión si da 401
+      // opcional: si 401, hacer logout automático
     }
   }, [user?.id]);
 
-  // Al montar, si hay token, decodifícalo para poblar user
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (token) {
       setAuthToken(token);
       const payload = parseJwt(token);
       if (payload) {
-        const { user_id, first_name, last_name, username, email, role, score } =
-          payload;
+        const {
+          user_id,
+          first_name,
+          last_name,
+          username,
+          email,
+          role,
+          score,
+        } = payload;
         setUser({
           id: user_id,
           firstName: first_name,
@@ -66,11 +72,17 @@ export const AuthProvider = ({ children }) => {
     const { token } = userData;
     localStorage.setItem("jwtToken", token);
     setAuthToken(token);
-
     const payload = parseJwt(token);
     if (payload) {
-      const { user_id, first_name, last_name, username, email, role, score } =
-        payload;
+      const {
+        user_id,
+        first_name,
+        last_name,
+        username,
+        email,
+        role,
+        score,
+      } = payload;
       setUser({
         id: user_id,
         firstName: first_name,
@@ -86,9 +98,9 @@ export const AuthProvider = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await apiLogout();
     } catch {
-      // Ignorar fallo remoto
+      // ignorar error remoto
     } finally {
       setUser(null);
       setIsAuthenticated(false);
@@ -105,7 +117,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout: handleLogout,
         loading,
-        refreshUser, // <-- lo exponemos
+        refreshUser,
       }}
     >
       {children}
