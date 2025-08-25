@@ -1,5 +1,5 @@
 // src/components/UserCardInfo.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
 /**
@@ -11,32 +11,54 @@ import PropTypes from "prop-types";
 const UserCardInfo = ({ user, onSave, onImageUpload }) => {
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ ...user });
+
+  // Preview inmediato: se muestra al instante sin esperar al backend
   const [previewImage, setPreviewImage] = useState(user.profileImageUrl);
   const fileInputRef = useRef(null);
 
-  // mantener formulario sincronizado
+  // Mantener el preview sincronizado si cambia lo que viene del padre
+  useEffect(() => {
+    setPreviewImage(user.profileImageUrl || null);
+  }, [user.profileImageUrl]);
+
+  // Mantener formulario sincronizado si cambia el usuario desde arriba
+  useEffect(() => {
+    setForm({ ...user });
+  }, [user]);
+
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  // cuando seleccionan imagen
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file || !file.type.startsWith("image/")) {
-      return alert("Selecciona una imagen válida.");
+      alert("Selecciona una imagen válida.");
+      return;
     }
-    onImageUpload(file);
+
+    // URL local para preview inmediato
+    const localUrl = URL.createObjectURL(file);
+    setPreviewImage(localUrl);
+
+    try {
+      await onImageUpload(file); // El padre hace la subida real
+      // Si querés liberar el objeto local para evitar fugas:
+      // URL.revokeObjectURL(localUrl); // (hacerlo después de que el <img> haya renderizado)
+    } catch (err) {
+      // Si falla la subida, volvemos al valor previo
+      setPreviewImage(user.profileImageUrl || null);
+    }
   };
 
-  // alternar modo edición
   const toggleEdit = () => {
     if (editMode) {
       setForm({ ...user });
+      setPreviewImage(user.profileImageUrl || null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
     setEditMode((e) => !e);
   };
 
-  // guardar cambios texto
   const handleSaveClick = () => {
     onSave(form);
     setEditMode(false);
@@ -50,16 +72,16 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
       <div className="bg-red-700 px-6 pt-6 pb-4">
         <div className="flex justify-center">
           <div className="relative">
-            {user.profileImageUrl ? (
+            {previewImage ? (
               <img
-                src={user.profileImageUrl}
+                src={previewImage}
                 alt={`${user.firstName} avatar`}
                 className={`w-24 h-24 rounded-full object-cover ${
                   editMode
                     ? "cursor-pointer hover:opacity-80 transition-opacity"
                     : ""
                 }`}
-                onClick={() => editMode && fileInputRef.current.click()}
+                onClick={() => editMode && fileInputRef.current?.click()}
               />
             ) : (
               <div
@@ -68,7 +90,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                     ? "cursor-pointer hover:bg-gray-300 transition-colors"
                     : ""
                 }`}
-                onClick={() => editMode && fileInputRef.current.click()}
+                onClick={() => editMode && fileInputRef.current?.click()}
               >
                 <span className="text-gray-400 text-xl">👤</span>
               </div>
@@ -95,7 +117,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
       <div className="px-6 pb-6">
         {editMode ? (
           <div className="space-y-4 mt-4">
-            {/** Nombre */}
+            {/* Nombre */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Nombre:
@@ -107,7 +129,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            {/** Apellido */}
+            {/* Apellido */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Apellido:
@@ -119,7 +141,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            {/** Username */}
+            {/* Username */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Usuario:
@@ -131,7 +153,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            {/** Email */}
+            {/* Email */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Email:
@@ -144,7 +166,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                 className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
               />
             </div>
-            {/** Score solo lectura */}
+            {/* Score solo lectura */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Puntos:
@@ -153,7 +175,7 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
                 {user.score}
               </span>
             </div>
-            {/** Teléfono */}
+            {/* Teléfono */}
             <div className="flex items-center">
               <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
                 Teléfono:
@@ -246,15 +268,15 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
 UserCardInfo.propTypes = {
   user: PropTypes.shape({
     profileImageUrl: PropTypes.string,
-    firstName:       PropTypes.string.isRequired,
-    lastName:        PropTypes.string.isRequired,
-    username:        PropTypes.string.isRequired,
-    email:           PropTypes.string.isRequired,
-    score:           PropTypes.number.isRequired,
-    phoneNumber:     PropTypes.string,
+    firstName: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    score: PropTypes.number.isRequired,
+    phoneNumber: PropTypes.string,
   }).isRequired,
-  onSave:          PropTypes.func.isRequired,
-  onImageUpload:   PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onImageUpload: PropTypes.func.isRequired,
 };
 
 export default UserCardInfo;
