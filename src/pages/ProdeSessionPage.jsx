@@ -33,14 +33,6 @@ const ProdeSessionPage = () => {
         sessionName: state.sessionName || "Qualifying",
         dateStart: state.dateStart || "2025-12-02T04:00:00-03:00",
       };
-    } else {
-      return {
-        countryName: "Hungary",
-        flagUrl: "/images/flags/hungary.jpg",
-        sessionType: "Qualifying",
-        sessionName: "Qualifying",
-        dateStart: "2025-12-02T04:00:00-03:00",
-      };
     }
   }, [state]);
 

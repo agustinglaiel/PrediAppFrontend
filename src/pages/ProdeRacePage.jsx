@@ -2,7 +2,6 @@
 import React, { useContext, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import SessionHeader from "../components/pronosticos/SessionHeader";
@@ -11,7 +10,6 @@ import DriverSelect from "../components/pronosticos/DriverSelect";
 import YesNoButton from "../components/pronosticos/YesNoButton";
 import SubmitButton from "../components/pronosticos/SubmitButton";
 import WarningModal from "../components/pronosticos/WarningModal";
-
 import useRaceProde from "../hooks/useRaceProde";
 
 const isRaceSession = (sessionName, sessionType) => {
@@ -77,6 +75,7 @@ const ProdeRacePage = () => {
   if (loadingDrivers) {
     return <div>Cargando pilotos...</div>;
   }
+
   if (driversError) {
     return <div>{driversError}</div>;
   }
@@ -91,7 +90,6 @@ const ProdeRacePage = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <NavigationBar />
-
       <main className="flex-grow pt-12 px-4 pb-8">
         <SessionHeader
           countryName={sessionDetails.countryName}
@@ -100,7 +98,6 @@ const ProdeRacePage = () => {
           sessionType={sessionDetails.sessionType}
           className="mt-6"
         />
-
         {isRace && (
           <div className="mt-4 p-4 bg-white rounded-lg shadow-md">
             <Top5FormHeader sessionType={sessionDetails.sessionType} />
@@ -141,7 +138,7 @@ const ProdeRacePage = () => {
                 drivers={driversFor.P5}
               />
 
-              <div className="flex flex-row gap-14 ml-4 mb-4">
+              <div className="flex flex-row gap-8 justify-center mb-4">
                 <YesNoButton
                   label="Virtual Safety Car"
                   value={formData.vsc}
@@ -156,19 +153,29 @@ const ProdeRacePage = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-black mb-1 ml-4">
-                  DNF
+              {/* Campo DNF centrado */}
+              <div className="flex flex-col items-center mb-2">
+                <label className="block text-xs font-medium text-black mb-1">
+                  DNF (No terminan)
                 </label>
                 <input
                   type="number"
                   min="0"
                   max="20"
-                  className="border border-gray-300 p-2 rounded w-24 ml-4"
-                  value={formData.dnf}
-                  onChange={(e) =>
-                    handleDnfChange(parseInt(e.target.value, 10) || 0)
-                  }
+                  className="border-2 border-gray-300 p-2 rounded-lg w-24 text-center text-base font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  value={formData.dnf === 0 ? "" : formData.dnf}
+                  placeholder="0"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      handleDnfChange(0);
+                    } else {
+                      const numValue = parseInt(value, 10);
+                      if (!isNaN(numValue) && numValue >= 0 && numValue <= 20) {
+                        handleDnfChange(numValue);
+                      }
+                    }
+                  }}
                   disabled={showWarningModal || submitting}
                 />
               </div>
@@ -184,7 +191,6 @@ const ProdeRacePage = () => {
         )}
         <WarningModal isOpen={showWarningModal} onClose={closeWarningModal} />
       </main>
-
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
         <p>© 2025 PrediApp</p>
       </footer>
