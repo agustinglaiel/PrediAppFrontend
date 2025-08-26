@@ -1,8 +1,10 @@
+// src/components/Header.jsx
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOutAlert from "./SignOutAlert";
 import { logout } from "../api/users";
 import { AuthContext } from "../contexts/AuthContext";
+import useUser from "../hooks/useUser";
 
 const Header = () => {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
@@ -10,10 +12,19 @@ const Header = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useContext(AuthContext);
+
+  // Renombro para evitar sombra de variables
+  const { user: authUser, isAuthenticated } = useContext(AuthContext);
+
+  // Traigo el usuario "vivo" desde backend
+  const { user: freshUser, loading: userLoading, error: userError } = useUser(authUser?.id);
+
+  // Usuario que se muestra: prefiero el fresco; si aún carga o falla, uso el del contexto
+  const displayUser = freshUser ?? authUser ?? null;
+
   const menuRef = useRef(null);
 
-  // Manejo de scroll para mostrar/ocultar header
+  // Manejo de scroll para mostrar/ocultar header (sin cambios)
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -39,7 +50,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", throttled);
   }, [lastScrollY]);
 
-  // Cerrar menú al hacer click fuera
+  // Cerrar menú al hacer click fuera (sin cambios)
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -50,17 +61,14 @@ const Header = () => {
     if (showMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMenu]);
 
   const toggleMenu = () => setShowMenu((prev) => !prev);
 
   const onClickProfile = () => {
     setShowMenu(false);
-    navigate(`/profile/${user.id}`);
+    if (displayUser?.id) navigate(`/profile/${displayUser.id}`);
   };
 
   const onClickSignOut = () => {
@@ -85,6 +93,15 @@ const Header = () => {
     }
   };
 
+  // Helpers de UI
+  const scoreText = (() => {
+    if (!isAuthenticated || !displayUser) return null;
+    if (userLoading) return "Actualizando…";
+    // Si no es número, muestro 0 por seguridad
+    const val = typeof displayUser.score === "number" ? displayUser.score : 0;
+    return `${val} Puntos`;
+  })();
+
   return (
     <div className="relative">
       <header
@@ -107,13 +124,17 @@ const Header = () => {
               Predi
             </button>
           </div>
-          {/* Score y menú desplegable */}
+
+          {/* Score y menú */}
           <div className="flex items-center h-full space-x-6 relative">
-            {isAuthenticated && user ? (
+            {isAuthenticated && displayUser ? (
               <>
-                <span className="text-sm font-semibold">
-                  {typeof user.score === "number" ? user.score : 0} Puntos
-                </span>
+                {scoreText && (
+                  <span className="text-sm font-semibold">
+                    {scoreText}
+                  </span>
+                )}
+
                 <div className="relative" ref={menuRef}>
                   <button
                     onClick={toggleMenu}
@@ -123,9 +144,9 @@ const Header = () => {
                     <div
                       className="overflow-hidden truncate max-w-[80px]"
                       style={{ minWidth: 0 }}
-                      title={user.username}
+                      title={displayUser.username}
                     >
-                      {user.username}
+                      {displayUser.username}
                     </div>
                     <svg
                       className={`w-4 h-4 text-white transition-transform duration-200 ${
@@ -143,10 +164,11 @@ const Header = () => {
                       />
                     </svg>
                   </button>
+
                   {/* Dropdown */}
                   {showMenu && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-50 overflow-hidden">
-                      {user.role === "admin" && (
+                      {displayUser.role === "admin" && (
                         <button
                           onClick={onClickAdmin}
                           className="block w-full text-left px-3 py-1.5 text-sm font-semibold text-black hover:bg-gray-100 transition-colors duration-200"
@@ -181,6 +203,7 @@ const Header = () => {
           </div>
         </div>
       </header>
+
       <SignOutAlert
         isOpen={showSignOutModal}
         onClose={() => setShowSignOutModal(false)}
