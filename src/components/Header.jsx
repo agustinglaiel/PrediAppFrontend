@@ -2,9 +2,9 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOutAlert from "./SignOutAlert";
-import { logout } from "../api/users";
+// import { logout } from "../api/users";
 import { AuthContext } from "../contexts/AuthContext";
-import useUser from "../hooks/useUser";
+import useStoredScore from "../hooks/useStoredScore";
 
 const Header = () => {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
@@ -13,14 +13,12 @@ const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
-  // Renombro para evitar sombra de variables
-  const { user: authUser, isAuthenticated } = useContext(AuthContext);
+  // Usuario desde contexto (no pegamos a backend para el header)
+  const { user: authUser, isAuthenticated, logout } = useContext(AuthContext);
+  const displayUser = authUser ?? null;
 
-  // Traigo el usuario "vivo" desde backend
-  const { user: freshUser, loading: userLoading, error: userError } = useUser(authUser?.id);
-
-  // Usuario que se muestra: prefiero el fresco; si aún carga o falla, uso el del contexto
-  const displayUser = freshUser ?? authUser ?? null;
+  // Score desde localStorage (sin latencia y sincronizado entre pestañas)
+  const storedScore = useStoredScore();
 
   const menuRef = useRef(null);
 
@@ -96,9 +94,7 @@ const Header = () => {
   // Helpers de UI
   const scoreText = (() => {
     if (!isAuthenticated || !displayUser) return null;
-    if (userLoading) return "Actualizando…";
-    // Si no es número, muestro 0 por seguridad
-    const val = typeof displayUser.score === "number" ? displayUser.score : 0;
+    const val = Number.isFinite(storedScore) ? storedScore : 0;
     return `${val} Puntos`;
   })();
 
@@ -130,9 +126,7 @@ const Header = () => {
             {isAuthenticated && displayUser ? (
               <>
                 {scoreText && (
-                  <span className="text-sm font-semibold">
-                    {scoreText}
-                  </span>
+                  <span className="text-sm font-semibold">{scoreText}</span>
                 )}
 
                 <div className="relative" ref={menuRef}>

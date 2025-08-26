@@ -92,6 +92,10 @@ export const login = async (userData) => {
 export const logout = () => {
   localStorage.removeItem("jwtToken");
   setAuthToken(null);
+  try{
+    clearStoredScore();
+  }catch{
+  }
   window.location.reload();
 };
 

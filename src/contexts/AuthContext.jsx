@@ -1,10 +1,18 @@
+// src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import {
   parseJwt,
   logout as apiLogout,
   setAuthToken,
   getUserById,
-} from "../api/users"; // asegúrate de que estas funciones estén exportadas correctamente
+} from "../api/users";
+import {
+  setStoredScore,
+  clearStoredScore,
+  getStoredScore,
+  SCORE_UPDATED_EVENT,
+  SCORE_KEY,
+} from "../utils/scoreStorage";
 
 export const AuthContext = createContext();
 
@@ -24,12 +32,29 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Mantener user.score sincronizado cuando el storage cambie "en caliente"
+  useEffect(() => {
+    const onScoreUpdated = () => {
+      setUser((prev) => {
+        if (!prev) return prev;
+        const current = getStoredScore();
+        if (prev.score === current) return prev;
+        return { ...prev, score: current };
+      });
+    };
+    window.addEventListener(SCORE_UPDATED_EVENT, onScoreUpdated);
+    return () => window.removeEventListener(SCORE_UPDATED_EVENT, onScoreUpdated);
+  }, []);
+
   const refreshUser = useCallback(async () => {
     if (!user?.id) return;
     try {
       const fresh = await getUserById(user.id);
       setUser(normalizeUser(fresh));
       setIsAuthenticated(true);
+      if (typeof fresh?.score === "number") {
+        setStoredScore(fresh.score);
+      }
     } catch (err) {
       console.warn("Error refrescando user:", err);
       // opcional: si 401, hacer logout automático
@@ -51,6 +76,8 @@ export const AuthProvider = ({ children }) => {
           role,
           score,
         } = payload;
+
+        // 1) Seteamos el usuario del JWT
         setUser({
           id: user_id,
           firstName: first_name,
@@ -61,6 +88,18 @@ export const AuthProvider = ({ children }) => {
           score,
         });
         setIsAuthenticated(true);
+
+        // 2) Semilla de score en storage SOLO si no hay uno ya persistido
+        const already = localStorage.getItem(SCORE_KEY);
+        if (already === null) {
+          setStoredScore(score ?? 0);
+        }
+
+        // 3) Alinear user.score en memoria al valor del storage si difiere
+        const stored = getStoredScore();
+        if (typeof stored === "number" && stored !== (score ?? 0)) {
+          setUser((prev) => (prev ? { ...prev, score: stored } : prev));
+        }
       } else {
         localStorage.removeItem("jwtToken");
       }
@@ -83,6 +122,8 @@ export const AuthProvider = ({ children }) => {
         role,
         score,
       } = payload;
+
+      // 1) Seteamos el usuario del JWT
       setUser({
         id: user_id,
         firstName: first_name,
@@ -93,6 +134,18 @@ export const AuthProvider = ({ children }) => {
         score,
       });
       setIsAuthenticated(true);
+
+      // 2) Semilla en storage SOLO si no existe aún
+      const already = localStorage.getItem(SCORE_KEY);
+      if (already === null) {
+        setStoredScore(score ?? 0);
+      }
+
+      // 3) Alinear user.score en memoria al valor del storage si difiere
+      const stored = getStoredScore();
+      if (typeof stored === "number" && stored !== (score ?? 0)) {
+        setUser((prev) => (prev ? { ...prev, score: stored } : prev));
+      }
     }
   };
 
@@ -100,12 +153,12 @@ export const AuthProvider = ({ children }) => {
     try {
       await apiLogout();
     } catch {
-      // ignorar error remoto
     } finally {
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem("jwtToken");
       setAuthToken(null);
+      clearStoredScore();
     }
   };
 

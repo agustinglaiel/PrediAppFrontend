@@ -1,4 +1,6 @@
 import axios from "axios";
+import { getUserFromToken, getUserScoreByUserId, getUserById } from "../api/users";
+import { setStoredScore } from "../utils/scoreStorage";
 
 // axios.defaults.baseURL = "http://localhost:8080/api";
 axios.defaults.baseURL = "/api";
@@ -82,78 +84,6 @@ export const getProdeSessionByID = async (id) => {
   }
 };
 
-// Actualizar un prode de carrera
-// export const updateProdeCarrera = async (id, prodeData) => {
-//   try {
-//     const response = await axios.put(
-//       `${API_URL}/prode-carrera/${id}`,
-//       prodeData
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw new Error(
-//       error.response.data.message || "Error updating race prediction."
-//     );
-//   }
-// };
-
-// // Actualizar un prode de sesión
-// export const updateProdeSession = async (id, prodeData) => {
-//   try {
-//     const response = await axios.put(
-//       `${API_URL}/prode-session/${id}`,
-//       prodeData
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw new Error(
-//       error.response.data.message || "Error updating session prediction."
-//     );
-//   }
-// };
-
-// Eliminar un prode por ID
-// export const deleteProdeByID = async (id, userId) => {
-//   try {
-//     await axios.delete(`${API_URL}/prode/${id}`, {
-//       params: { userID: userId },
-//     });
-//   } catch (error) {
-//     throw new Error(
-//       error.response?.data?.message || "Error deleting prediction."
-//     );
-//   }
-// };
-
-// Obtener un prode de carrera por user_id y session_id
-// export const getRaceProdeByUserAndSession = async (userId, sessionId) => {
-//   try {
-//     const { data } = await axios.get(
-//       `${API_URL}/prodes/carrera/user/${userId}/session/${sessionId}`,
-//       { validateStatus: (status) => status === 200 }
-//     );
-
-//     // Si viene vacío o todos los campos null/"", devolvemos null
-//     if (
-// !data ||
-//       (typeof data === "object" &&
-//         Object.values(data).every((v) => v === null || v === ""))
-//     ) {
-//       return null;
-//     }
-//     return data;
-//   } catch (error) {
-//     // Silenciar 404/400
-//     if (error.response && [400, 404].includes(error.response.status)) {
-//       return null;
-//     }
-//     console.error(
-//       `Unexpected error fetching race prode for user ${userId}, session ${sessionId}:`,
-//       error
-//     );
-//     throw new Error(error.message || "Error fetching race prediction.");
-//   }
-// };
 
 // Obtener un prode de sesión por user_id y session_id
 export const getProdeByUserAndSession = async (userId, sessionId) => {
@@ -176,13 +106,35 @@ export const getProdeByUserAndSession = async (userId, sessionId) => {
   }
 };
 
+// #################################
+
+// Helper: refresca el score real y lo guarda en localStorage
+async function refreshAndPersistScore() {
+  const me = getUserFromToken?.();
+  if (!me?.id) return; 
+  try {
+    const { status, data } = await getUserScoreByUserId(me.id);
+    if (status === 200 && data && typeof data.score === "number") {
+      setStoredScore(data.score);
+      return;
+    }
+  } catch {
+  }
+
+  try {
+    const fresh = await getUserById(me.id);
+    if (typeof fresh?.score === "number") {
+      setStoredScore(fresh.score);
+    }
+  } catch {
+  }
+}
+
 // Actualizar puntajes de pronósticos de carrera
 export const updateRaceProdeScores = async (sessionId) => {
   try {
     const token = localStorage.getItem("jwtToken");
-    if (!token) {
-      throw new Error("Authentication token not found. Please log in.");
-    }
+    if (!token) throw new Error("Authentication token not found. Please log in.");
 
     const response = await axios.post(
       `/prodes/carrera/${sessionId}/score`,
@@ -194,7 +146,11 @@ export const updateRaceProdeScores = async (sessionId) => {
         },
       }
     );
-    return response.data;
+
+    // Tras el OK, refrescar y persistir el nuevo score
+    await refreshAndPersistScore();
+
+    return response.data; // { message: "Scores updated successfully" }
   } catch (error) {
     console.error("Error updating race prode scores:", error);
     const errorMsg =
@@ -207,9 +163,7 @@ export const updateRaceProdeScores = async (sessionId) => {
 export const updateSessionProdeScores = async (sessionId) => {
   try {
     const token = localStorage.getItem("jwtToken");
-    if (!token) {
-      throw new Error("Authentication token not found. Please log in.");
-    }
+    if (!token) throw new Error("Authentication token not found. Please log in.");
 
     const response = await axios.post(
       `/prodes/session/${sessionId}/score`,
@@ -221,7 +175,11 @@ export const updateSessionProdeScores = async (sessionId) => {
         },
       }
     );
-    return response.data;
+
+    // Tras el OK, refrescar y persistir el nuevo score
+    await refreshAndPersistScore();
+
+    return response.data; // { message: "Scores updated successfully" }
   } catch (error) {
     console.error("Error updating session prode scores:", error);
     const errorMsg =
