@@ -28,9 +28,9 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
   });
   const [realDriversList, setRealDriversList] = useState([]); // [{ driver_id, full_name }]
   const [realRaceExtras, setRealRaceExtras] = useState({
-    vsc: false,
-    sc: false,
-    dnf: 0,
+    vsc: null,
+    sc: null,
+    dnf: null,
   });
   const [missingProde, setMissingProde] = useState(false);
 
@@ -45,10 +45,13 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
         setMissingProde(false);
 
         const parsedSessionId = parseInt(sessionId, 10);
+
         // Cargar sesión y prode en paralelo (prode puede ser null)
         const [sessionData, userProde] = await Promise.all([
           getSessionById(parsedSessionId),
-          userId ? getProdeByUserAndSession(parseInt(userId, 10), parsedSessionId) : Promise.resolve(null),
+          userId
+            ? getProdeByUserAndSession(parseInt(userId, 10), parsedSessionId)
+            : Promise.resolve(null),
         ]);
 
         if (cancelled) return;
@@ -58,7 +61,6 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
           sessionData.session_type !== "Race" ||
           sessionData.session_name !== "Race"
         ) {
-          // no setear error, la página puede decidir redirigir
           setSessionInfo({
             countryName: sessionData.country_name || "Unknown",
             flagUrl: sessionData.country_name
@@ -71,10 +73,11 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
           setProde(null);
           setMissingProde(true);
           setRealDriversList([]);
+          // Normalización SIN defaults
           setRealRaceExtras({
-            vsc: sessionData.vsc || false,
-            sc: sessionData.sc || false,
-            dnf: sessionData.dnf || 0,
+            vsc: sessionData.vsc ?? null,
+            sc: (sessionData.sc ?? sessionData.sf ?? null),
+            dnf: Number.isFinite(sessionData.dnf) ? sessionData.dnf : null,
           });
           return;
         }
@@ -90,11 +93,17 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
           dateStart: sessionData.date_start || null,
         });
 
-        // Real extras (vsc/sc/dnf) vienen de sessionData
+        // Real extras (vsc/sc/dnf) vienen de sessionData (SIN forzar booleanos)
+        const realVsc = sessionData.vsc ?? null;
+        const realSc = (sessionData.sc ?? sessionData.sf ?? null);
+        const realDnf = Number.isFinite(sessionData.dnf)
+          ? sessionData.dnf
+          : null;
+
         setRealRaceExtras({
-          vsc: !!sessionData.vsc,
-          sc: !!sessionData.sc,
-          dnf: typeof sessionData.dnf === "number" ? sessionData.dnf : 0,
+          vsc: realVsc,
+          sc: realSc,
+          dnf: realDnf,
         });
 
         // Prode del usuario
@@ -110,13 +119,8 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
             userProde.p4 ? getDriverById(userProde.p4) : Promise.resolve(null),
             userProde.p5 ? getDriverById(userProde.p5) : Promise.resolve(null),
           ];
-          const [
-            driverP1,
-            driverP2,
-            driverP3,
-            driverP4,
-            driverP5,
-          ] = await Promise.all(userDriverPromises);
+          const [driverP1, driverP2, driverP3, driverP4, driverP5] =
+            await Promise.all(userDriverPromises);
           if (cancelled) return;
           setUserDrivers({
             p1: driverP1 ? driverP1.full_name : null,
@@ -161,9 +165,9 @@ export default function useRaceProdeResult({ sessionId, userId, topN = 5 }) {
     error,
     sessionInfo,
     prode,
-    userDrivers, // nombres pronosticados
-    realDriversList, // array topN reales
-    realRaceExtras, // { vsc, sc, dnf }
+    userDrivers,      // nombres pronosticados
+    realDriversList,  // array topN reales
+    realRaceExtras,   // { vsc, sc, dnf } con null si falta dato
     missingProde,
   };
 }

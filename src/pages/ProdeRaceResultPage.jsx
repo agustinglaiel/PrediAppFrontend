@@ -66,12 +66,21 @@ const ProdeRaceResultPage = () => {
     return "bg-red-100 text-red-800";
   };
 
-  // Coloreado para extras: verde si coincide, rojo si no
+  // Coloreado para extras; si falta dato en alguno (pred/real) => gris
   const getColorForExtra = (predictedValue, realValue) => {
+    const noData =
+      realValue === null ||
+      realValue === undefined ||
+      predictedValue === null ||
+      predictedValue === undefined;
+
+    if (noData) return "bg-gray-100 text-gray-800";
+
     const same =
       typeof predictedValue === "boolean"
         ? predictedValue === realValue
         : Number(predictedValue) === Number(realValue);
+
     return same ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
@@ -173,7 +182,7 @@ const ProdeRaceResultPage = () => {
                 })}
               </div>
 
-              {/* Extras: VSC / SC / DNF con Tu/Real debajo del título, cajas iguales */}
+              {/* Extras: VSC / SC / DNF */}
               <div className="mt-6">
                 <h4 className="text-md font-semibold mb-2 ml-4">Otros</h4>
                 <div className="flex gap-4 ml-4">
@@ -193,7 +202,11 @@ const ProdeRaceResultPage = () => {
                       </div>
                       <div>
                         <span className="font-medium">Real:</span>{" "}
-                        {realRaceExtras.vsc ? "Sí" : "No"}
+                        {realRaceExtras.vsc === true
+                          ? "Sí"
+                          : realRaceExtras.vsc === false
+                          ? "No"
+                          : "—"}
                       </div>
                     </div>
                   </div>
@@ -214,7 +227,11 @@ const ProdeRaceResultPage = () => {
                       </div>
                       <div>
                         <span className="font-medium">Real:</span>{" "}
-                        {realRaceExtras.sc ? "Sí" : "No"}
+                        {realRaceExtras.sc === true
+                          ? "Sí"
+                          : realRaceExtras.sc === false
+                          ? "No"
+                          : "—"}
                       </div>
                     </div>
                   </div>
