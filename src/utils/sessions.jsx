@@ -1,7 +1,7 @@
 // src/utils/sessions.js
 
 import { HashRouter } from "react-router-dom";
-import { formatArgTime } from "./date"; // tu helper de date.js
+import { formatArgTime } from "./date"; 
 
 /**
  * Agrupa un array de sesiones por weekend_id en la forma que usan tus componentes.
@@ -37,17 +37,8 @@ export function groupSessionsByWeekend(sessions = []) {
         .toUpperCase(),
       sessionName: s.session_name,
       sessionType: s.session_type,
-      // Estos campos serán sobreescritos por withArgentinaTimes
-      startTime: start.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      endTime: end.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
+      startTime: formatArgTime(s.date_start),
+      endTime: formatArgTime(s.date_end), 
       date_start: s.date_start,
       date_end: s.date_end,
       hasPronostico: true,
