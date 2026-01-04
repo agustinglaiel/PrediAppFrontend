@@ -105,7 +105,10 @@ const HomePage = () => {
             isLoggedIn={!!user}
           />
         ) : (
-          <PastEvents events={past} onPronosticoClick={handlePronosticoClick} />
+          <PastEvents
+            events={past}
+            onPronosticoClick={handlePronosticoClick}
+          />
         )}
       </main>
 

@@ -9,30 +9,44 @@ const PastEvents = ({
   onCloseModal,
   onContinueToLogin,
 }) => {
-  return (
-    <div className="px-4 mt-8">
-      {/* <h2 className="text-2xl font-bold mb-4">Eventos anteriores</h2> */}
-      {events.length === 0 ? (
+  const hasEvents = events.some((group) => group.events.length > 0);
+
+  if (!hasEvents) {
+    return (
+      <div className="px-4 mt-8">
         <p className="text-gray-500 text-sm italic">
           No hay eventos pasados registrados.
         </p>
-      ) : (
-        events.map((event, index) => (
-          <EventCard
-            key={index}
-            country={event.country}
-            circuit={event.circuit}
-            sessions={event.sessions}
-            flagUrl={event.flagUrl}
-            circuitLayoutUrl={event.circuitLayoutUrl}
-            isPastEvent={true}
-            onPronosticoClick={onPronosticoClick}
-            isModalOpen={isModalOpen}
-            onCloseModal={onCloseModal}
-            onContinueToLogin={onContinueToLogin}
-          />
-        ))
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 mt-8 space-y-8">
+      {events.map((group) => (
+        <div key={group.year}>
+          <h3 className="text-center text-lg font-semibold text-gray-700 mb-4">
+            {group.year}
+          </h3>
+          <div className="space-y-6">
+            {group.events.map((event, index) => (
+              <EventCard
+                key={`${group.year}-${event.weekendId ?? index}`}
+                country={event.country}
+                circuit={event.circuit}
+                sessions={event.sessions}
+                flagUrl={event.flagUrl}
+                circuitLayoutUrl={event.circuitLayoutUrl}
+                isPastEvent={true}
+                onPronosticoClick={onPronosticoClick}
+                isModalOpen={isModalOpen}
+                onCloseModal={onCloseModal}
+                onContinueToLogin={onContinueToLogin}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

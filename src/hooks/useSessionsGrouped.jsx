@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUpcomingSessions, getPastSessionsByYear } from "../api/sessions";
+import { getUpcomingSessions, getPastSessions } from "../api/sessions";
 import { groupSessionsByWeekend } from "../utils/sessions";
 
 export default function useSessionsGrouped(year) {
@@ -11,10 +11,12 @@ export default function useSessionsGrouped(year) {
   const fetchSessions = async () => {
     setLoading(true);
     try {
-      const [upcomingRaw, pastRaw] = await Promise.all([
+      const [upcomingRaw, pastPayload] = await Promise.all([
         getUpcomingSessions(),
-        getPastSessionsByYear(year),
+        getPastSessions(),
       ]);
+
+      const pastRaw = (pastPayload.find((block) => block.year === year)?.sessions) || [];
 
       const filteredUpcoming = upcomingRaw.filter(
         (s) => new Date(s.date_start).getFullYear() === year

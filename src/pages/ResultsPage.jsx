@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import PastResultsEvents from "../components/results/PastResultsEvents";
-import { getPastSessionsByYear } from "../api/sessions";
+import { getPastSessions } from "../api/sessions";
 import {
   groupSessionsByWeekend,
   withArgentinaTimes,
@@ -20,23 +20,25 @@ const ResultsPage = () => {
     const fetchPastSessions = async () => {
       try {
         setLoading(true);
-        const currentYear = new Date().getFullYear();
-        const raw = await getPastSessionsByYear(currentYear);
+        const payload = await getPastSessions();
 
-        // 1) Agrupo por fin de semana
-        const grouped = groupSessionsByWeekend(raw || []);
+        const perYear = payload.map((yearBlock) => {
+          const grouped = groupSessionsByWeekend(yearBlock.sessions || []);
+          grouped.sort(
+            (a, b) =>
+              new Date(b.sessions[0]?.date_start || 0) -
+              new Date(a.sessions[0]?.date_start || 0)
+          );
+          const events = withArgentinaTimes(grouped);
+          return {
+            year: yearBlock.year,
+            events,
+          };
+        });
 
-        // 2) Aplico formateo de hora Argentina
-        const withTimes = withArgentinaTimes(grouped);
+        perYear.sort((a, b) => b.year - a.year);
 
-        // 3) Ordeno de más reciente a más antiguo según la primer sesión
-        withTimes.sort(
-          (a, b) =>
-            new Date(b.sessions[0]?.date_start || 0) -
-            new Date(a.sessions[0]?.date_start || 0)
-        );
-
-        setEvents(withTimes);
+        setEvents(perYear);
       } catch (err) {
         if (err.response?.status === 403) {
           setError(

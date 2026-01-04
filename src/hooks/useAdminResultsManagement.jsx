@@ -1,6 +1,6 @@
 // src/hooks/useAdminResultsManagement.js
 import { useState, useEffect, useRef } from "react";
-import { getPastSessionsByYear } from "../api/sessions";
+import { getPastSessions } from "../api/sessions";
 import { getAllDrivers } from "../api/drivers";
 import {
   getResultsOrderedByPosition,
@@ -111,10 +111,13 @@ export default function useAdminResultsManagement() {
         setError(null);
 
         // 1) Traer sesiones + drivers en paralelo
-        const [sessionsData, driversData] = await Promise.all([
-          getPastSessionsByYear(selectedYear),
+        const [sessionsPayload, driversData] = await Promise.all([
+          getPastSessions(),
           getAllDrivers(),
         ]);
+
+        const sessionsData =
+          sessionsPayload.find((block) => block.year === selectedYear)?.sessions || [];
 
         // 2) Armar estructura y mostrar rápido
         const groupedEvents = await processSessions(sessionsData);

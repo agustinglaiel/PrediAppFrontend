@@ -19,9 +19,9 @@ export const getUpcomingSessions = async () => {
   }
 };
 
-export const getPastSessionsByYear = async (year) => {
+export const getPastSessions = async () => {
   try {
-    const response = await axios.get(`/sessions/lasts/${year}`);
+    const response = await axios.get(`/sessions/lasts`);
     return response.data;
   } catch (error) {
     throw new Error("Error fetching past sessions: " + error.message);
