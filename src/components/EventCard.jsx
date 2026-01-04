@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import SessionItem from "./SessionItem";
 
-const dayFormatter = new Intl.DateTimeFormat("es-AR", { day: "2-digit" });
-const monthFormatter = new Intl.DateTimeFormat("es-AR", { month: "long" });
-
-const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
+const pad = (value) => value.toString().padStart(2, "0");
+const formatShortDate = (date) =>
+  `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date
+    .getFullYear()
+    .toString()
+    .slice(-2)}`;
 
 const formatWeekendRange = (sessions = []) => {
   if (!sessions.length) return null;
@@ -19,18 +21,10 @@ const formatWeekendRange = (sessions = []) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  const sameMonth =
-    start.getMonth() === end.getMonth() &&
-    start.getFullYear() === end.getFullYear();
+  const formattedStart = formatShortDate(start);
+  const formattedEnd = formatShortDate(end);
 
-  const startDay = dayFormatter.format(start);
-  const endDay = dayFormatter.format(end);
-  const startMonth = capitalize(monthFormatter.format(start));
-  const endMonth = capitalize(monthFormatter.format(end));
-
-  return sameMonth
-    ? `Del ${startDay} al ${endDay} de ${endMonth}`
-    : `Del ${startDay} de ${startMonth} al ${endDay} de ${endMonth}`;
+  return `${formattedStart} - ${formattedEnd}`;
 };
 
 const EventCard = ({
@@ -102,7 +96,7 @@ const EventCard = ({
         onClick={() => setIsOpen((prev) => !prev)}
         className="w-full p-4 flex items-center text-left bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
       >
-        <div className="bg-gray-100 w-16 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+  <div className="w-16 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
           {flagUrl && (
             <img
               src={flagUrl}
@@ -112,10 +106,10 @@ const EventCard = ({
           )}
         </div>
         <div className="ml-4 flex-grow">
-          <h3 className="font-bold text-xl text-gray-900">{country}</h3>
-          <p className="text-sm text-gray-600">{displayLocation}</p>
+          <h3 className="font-bold text-xl text-black">{country}</h3>
+          <p className="text-sm text-black">{displayLocation}</p>
           {weekendRange && (
-            <p className="text-xs text-gray-500 mt-1">{weekendRange}</p>
+            <p className="text-sm text-black">{weekendRange}</p>
           )}
         </div>
         <div className="ml-auto flex items-center">

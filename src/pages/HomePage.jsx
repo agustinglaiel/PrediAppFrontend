@@ -18,6 +18,13 @@ const HomePage = () => {
   
   // Estado para controlar qué pestaña está activa
   const [activeTab, setActiveTab] = useState("upcoming");
+  const currentYear = new Date().getFullYear();
+  const currentSeasonPast = past
+    .filter((group) => group.year === currentYear)
+    .map((group) => ({
+      ...group,
+      events: group.events ?? [],
+    }));
 
   /** Navegación según tipo de sesión ------------------------------------ */
   const handlePronosticoClick = (sessionData) => {
@@ -53,10 +60,10 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
-      <NavigationBar />
+    <Header />
+    <NavigationBar />
 
-      <main className="flex-grow pt-20 pb-4">
+    <main className="flex-grow pt-20 pb-24">
         {/* Selector de pestañas moderno */}
         <div className="max-w-6xl mx-auto px-4 mb-6">
           <div className="relative bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm border border-white/20 shadow-xl rounded-xl p-1.5 overflow-hidden max-w-md mx-auto">
@@ -106,8 +113,9 @@ const HomePage = () => {
           />
         ) : (
           <PastEvents
-            events={past}
+            events={currentSeasonPast}
             onPronosticoClick={handlePronosticoClick}
+            emptyMessage="Actualmente no hay eventos que hayan transcurrido esta temporada"
           />
         )}
       </main>

@@ -8,14 +8,15 @@ const PastEvents = ({
   isModalOpen,
   onCloseModal,
   onContinueToLogin,
+  emptyMessage = "No hay eventos pasados registrados.",
 }) => {
   const hasEvents = events.some((group) => group.events.length > 0);
 
   if (!hasEvents) {
     return (
       <div className="px-4 mt-8">
-        <p className="text-gray-500 text-sm italic">
-          No hay eventos pasados registrados.
+        <p className="text-gray-500 text-sm italic text-center">
+          {emptyMessage}
         </p>
       </div>
     );

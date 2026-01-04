@@ -39,6 +39,14 @@ const SessionItem = ({
 
   const [isFetching, setIsFetching] = useState(false);
 
+  const normalizedName = sessionName?.toLowerCase();
+  const normalizedType = sessionType?.toLowerCase();
+  const isPracticeOrTest =
+    (normalizedName === "test" && normalizedType === "testing") ||
+    (normalizedName === "practice 1" && normalizedType === "practice") ||
+    (normalizedName === "practice 2" && normalizedType === "practice") ||
+    (normalizedName === "practice 3" && normalizedType === "practice");
+
   const handleGetResultsClick = async () => {
     if (!onGetResults) return;
     try {
@@ -70,14 +78,14 @@ const SessionItem = ({
         </div>
       </div>
 
-      {!isAdmin && isPastEvent && isSessionEnded ? (
+      {!isPracticeOrTest && !isAdmin && isPastEvent && isSessionEnded ? (
         <button
           onClick={onPronosticoClick}
           className="px-4 py-1 rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
         >
           {score != null ? `${score} Puntos` : "Ver"}
         </button>
-      ) : !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
+      ) : !isPracticeOrTest && !isAdmin && !isPastEvent && hasPronostico !== undefined ? (
         <button
           onClick={isLoggedIn ? onPronosticoClick : null}
           disabled={!isLoggedIn}

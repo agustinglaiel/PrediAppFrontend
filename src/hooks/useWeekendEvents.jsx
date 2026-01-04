@@ -151,16 +151,21 @@ export default function useWeekendEvents(userId) {
 
         if (!userId) return;
         groupedByYear.forEach((block) => {
-          enrichEventList(block.events, (updated) => {
-            if (cancelled) return null;
+          const updateYearEvents = (updater) => {
+            if (cancelled) return;
             setPast((prev) =>
-              prev.map((yearBlock) =>
-                yearBlock.year === block.year
-                  ? { ...yearBlock, events: updated }
-                  : yearBlock
-              )
+              prev.map((yearBlock) => {
+                if (yearBlock.year !== block.year) return yearBlock;
+                const nextEvents =
+                  typeof updater === "function"
+                    ? updater(yearBlock.events)
+                    : updater;
+                return { ...yearBlock, events: nextEvents };
+              })
             );
-          });
+          };
+
+          enrichEventList(block.events, updateYearEvents);
         });
       })
       .catch((err) => !cancelled && setError(err));
