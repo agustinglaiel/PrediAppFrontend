@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
 
-// axios.defaults.baseURL = "http://localhost:8080/api";
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
+// axios.defaults.baseURL = "/api";
 
 // Función para establecer el token JWT en el encabezado de autorización
 export const setAuthToken = (token) => {

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// axios.defaults.baseURL = "http://localhost:8080/api";
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
+// axios.defaults.baseURL = "/api";
 
 // New function to get results ordered by position for a session
 export const getResultsOrderedByPosition = async (sessionID) => {
