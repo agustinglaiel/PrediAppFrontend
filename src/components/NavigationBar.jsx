@@ -14,6 +14,11 @@ const NavigationBar = () => {
   const navItems = [
     { path: "/", label: "Inicio", icon: <IoIosHome className="text-xl" /> },
     {
+      path: "/resultados",
+      label: "Resultados",
+      icon: <IoIosFlag className="text-xl" />,
+    },
+    {
       path: "/ranking",
       label: "Ranking",
       icon: <IoIosStats className="text-xl" />,
@@ -22,16 +27,6 @@ const NavigationBar = () => {
       path: "/grupos",
       label: "Grupos",
       icon: <IoIosPeople className="text-xl" />,
-    },
-    {
-      path: "/resultados",
-      label: "Resultados",
-      icon: <IoIosFlag className="text-xl" />,
-    },
-    {
-      path: "/foro",
-      label: "Foro",
-      icon: <IoIosChatboxes className="text-xl" />,
     },
   ];
 

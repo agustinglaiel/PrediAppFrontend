@@ -111,9 +111,11 @@ const AdminProdesManagementPage = () => {
                   key={index}
                   country={event.country}
                   circuit={event.circuit}
+                  location={event.location}
                   sessions={event.sessions}
                   flagUrl={event.flagUrl}
                   circuitLayoutUrl={event.circuitLayoutUrl}
+                  weekendId={event.weekendId}
                   isAdmin={true}
                   isPastEvent={true}
                   onUpdateProdeClick={handleUpdateProdeClick}

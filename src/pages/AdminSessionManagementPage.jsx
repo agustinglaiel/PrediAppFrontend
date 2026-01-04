@@ -153,9 +153,11 @@ const AdminSessionManagementPage = () => {
                   key={index}
                   country={event.country}
                   circuit={event.circuit}
+                  location={event.location}
                   sessions={event.sessions}
                   flagUrl={event.flagUrl}
                   circuitLayoutUrl={event.circuitLayoutUrl}
+                  weekendId={event.weekendId}
                   isAdmin={true}
                   onEditClick={handleEditClick}
                 />
@@ -179,9 +181,11 @@ const AdminSessionManagementPage = () => {
                   key={index}
                   country={event.country}
                   circuit={event.circuit}
+                  location={event.location}
                   sessions={event.sessions}
                   flagUrl={event.flagUrl}
                   circuitLayoutUrl={event.circuitLayoutUrl}
+                  weekendId={event.weekendId}
                   isAdmin={true}
                   onEditClick={handleEditClick}
                   isPastEvent={true}

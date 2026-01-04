@@ -25,9 +25,11 @@ const PastResultsEvents = ({ events, onResultClick }) => {
                     key={`${group.year}-${event.weekendId ?? index}`}
                     country={event.country}
                     circuit={event.circuit}
+                    location={event.location}
                     sessions={event.sessions}
                     flagUrl={event.flagUrl}
                     circuitLayoutUrl={event.circuitLayoutUrl}
+                    weekendId={event.weekendId}
                     onPronosticoClick={onResultClick}
                     isPastEvent={true}
                   />
