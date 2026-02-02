@@ -142,3 +142,55 @@ export const fetchResultsFromExternalAPI = async (sessionID) => {
     );
   }
 };
+
+// Obtener clasificación de pilotos por año
+export const getDriversClassification = async (year) => {
+  try {
+    const response = await axios.get(`/results/drivers/classification/season/${year}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      console.warn(`No hay resultados de clasificación de pilotos para el año ${year}`);
+      return { year, classification: [], total_drivers: 0 };
+    }
+    console.error(`Error fetching drivers classification for year ${year}:`, {
+      message: error.message,
+      response: error.response?.data,
+    });
+    throw new Error(
+      error.response?.data?.message ||
+        `Error fetching drivers classification for year ${year}.`
+    );
+  }
+};
+
+// Obtener clasificación de equipos/constructores por año
+export const getTeamsClassification = async (year) => {
+  try {
+    const response = await axios.get(`/results/teams/classification/season/${year}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      console.warn(`No hay resultados de clasificación de equipos para el año ${year}`);
+      return { year, classification: [], total_teams: 0 };
+    }
+    console.error(`Error fetching teams classification for year ${year}:`, {
+      message: error.message,
+      response: error.response?.data,
+    });
+    throw new Error(
+      error.response?.data?.message ||
+        `Error fetching teams classification for year ${year}.`
+    );
+  }
+};

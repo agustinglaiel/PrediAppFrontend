@@ -90,7 +90,7 @@ const ProdeRacePage = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-12 px-4 pb-8">
+      <main className="flex-grow pt-12 pb-24 px-4">
         <SessionHeader
           countryName={sessionDetails.countryName}
           flagUrl={sessionDetails.flagUrl}
@@ -191,9 +191,6 @@ const ProdeRacePage = () => {
         )}
         <WarningModal isOpen={showWarningModal} onClose={closeWarningModal} />
       </main>
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

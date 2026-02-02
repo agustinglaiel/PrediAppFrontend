@@ -88,7 +88,7 @@ const GroupsPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-24 px-4">
+      <main className="flex-grow pt-24 pb-24 px-4">
         {/* título + botón */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Grupos</h1>
@@ -157,10 +157,6 @@ const GroupsPage = () => {
           </div>
         )}
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
 
       {/* modal crear grupo */}
       {isModalOpen && (

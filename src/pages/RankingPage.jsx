@@ -38,7 +38,7 @@ const RankingPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-24 px-4">
+      <main className="flex-grow pt-24 pb-24 px-4">
         <h1 className="text-3xl font-bold mb-6">Ranking</h1>
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
@@ -72,10 +72,6 @@ const RankingPage = () => {
           </div>
         )}
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

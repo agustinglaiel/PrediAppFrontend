@@ -97,7 +97,7 @@ const ProdeSessionResultPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-12 px-4 pb-8">
+      <main className="flex-grow pt-12 pb-24 px-4">
         <SessionHeader
           countryName={sessionInfo?.countryName}
           flagUrl={sessionInfo?.flagUrl}
@@ -195,10 +195,6 @@ const ProdeSessionResultPage = () => {
         isOpen={missingProde}
         onClose={handleCloseMissingProdeModal}
       />
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

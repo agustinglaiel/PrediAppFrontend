@@ -18,7 +18,7 @@ const PostPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-20 px-4">
+      <main className="flex-grow pt-20 pb-24 px-4">
         {loading && <p>Cargando post…</p>}
         {error && (
           <p className="text-red-600">Error cargando post: {error.message}</p>
@@ -48,10 +48,6 @@ const PostPage = () => {
           </>
         )}
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

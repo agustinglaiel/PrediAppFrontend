@@ -49,7 +49,7 @@ const LoginForm = () => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-md font-medium text-black mb-1"
           >
             Email
           </label>
@@ -68,7 +68,7 @@ const LoginForm = () => {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-md font-medium text-black mb-"
           >
             Contraseña
           </label>

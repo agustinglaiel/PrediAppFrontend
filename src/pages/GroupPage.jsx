@@ -80,7 +80,7 @@ const GroupPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-24 px-4">
+      <main className="flex-grow pt-24 pb-24 px-4">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold mb-4">{group?.group_name}</h1>
@@ -103,10 +103,6 @@ const GroupPage = () => {
         {/* Leaderboard */}
         <Leaderboard entries={userScores} />
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
 
       {showRequestsModal && (
         <GroupRequests

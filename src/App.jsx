@@ -24,6 +24,7 @@ import MyProfilePage from "./pages/MyProfilePage";
 import PostPage from "./pages/PostPage";
 import ScoreboardPage from "./pages/ScoreboardPage";
 import RankingPage from "./pages/RankingPage";
+import ClasificationPage from "./pages/ClasificationPage";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/ranking" element={<RankingPage />} />
+        <Route path="/clasificacion" element={<ClasificationPage />} />
         <Route path="/scoreboard/general" element={<ScoreboardPage />} />       
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />
         <Route path="/foro" element={<ForoPage />} />

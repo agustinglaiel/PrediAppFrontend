@@ -82,7 +82,7 @@ const MyProfilePage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-16 px-4 text-center">
+      <main className="flex-grow pt-16 pb-24 px-4 text-center">
         {userLoading && <p>Cargando perfil…</p>}
         {userError && (
           <p className="text-red-600">Error: {userError.message}</p>
@@ -95,10 +95,6 @@ const MyProfilePage = () => {
           />
         )}
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
 
       {/* Mensaje de estado */}
       {msgText && (

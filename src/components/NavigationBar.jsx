@@ -5,7 +5,7 @@ import {
   IoIosStats,
   IoIosPeople,
   IoIosFlag,
-  IoIosChatboxes,
+  IoIosTrophy,
 } from "react-icons/io";
 
 const NavigationBar = () => {
@@ -17,6 +17,11 @@ const NavigationBar = () => {
       path: "/resultados",
       label: "Resultados",
       icon: <IoIosFlag className="text-xl" />,
+    },
+    {
+      path: "/clasificacion",
+      label: "Clasificación",
+      icon: <IoIosTrophy className="text-xl" />,
     },
     {
       path: "/ranking",

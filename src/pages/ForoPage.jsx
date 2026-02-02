@@ -55,7 +55,7 @@ const ForoPage = () => {
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-20 pb-8 px-4">
+      <main className="flex-grow pt-20 pb-24 px-4">
         {/* 1) Input de búsqueda */}
         {showSearch && (
           <div className="mb-4">
@@ -114,10 +114,6 @@ const ForoPage = () => {
           />
         )}
       </main>
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };
