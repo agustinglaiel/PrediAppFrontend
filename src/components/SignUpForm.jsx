@@ -45,9 +45,9 @@ const SignupForm = () => {
 
   return (
     <div className="w-full max-w-sm p-6 bg-white rounded-2xl shadow-2xl border border-gray-100">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-5">
+      {/* <h2 className="text-2xl font-semibold text-center text-gray-800 mb-5">
         Registrarse
-      </h2>
+      </h2> */}
       {error && (
         <p className="text-red-600 text-center mb-4 text-sm font-medium">
           {error}

@@ -14,7 +14,7 @@ const SignupPage = () => {
       </main>
 
       <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2025 PrediApp</p>
+        <p>© 2026 PrediApp</p>
       </footer>
     </div>
   );

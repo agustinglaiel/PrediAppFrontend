@@ -37,9 +37,9 @@ const LoginForm = () => {
 
   return (
     <div className="w-full max-w-sm p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+      {/* <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
         Iniciar Sesión
-      </h2>
+      </h2> */}
       {error && (
         <p className="text-red-600 text-center mb-4 text-sm font-medium">
           {error}
