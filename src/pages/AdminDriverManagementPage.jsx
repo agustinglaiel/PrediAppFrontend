@@ -9,7 +9,6 @@ import {
   getAllDrivers,
   createDriver,
   updateDriver,
-  fetchAllDriversFromExternalAPI,
 } from "../api/drivers";
 
 const AdminDriverManagementPage = () => {
@@ -71,24 +70,6 @@ const AdminDriverManagementPage = () => {
     }
   };
 
-  const handleFetchExternalDrivers = async () => {
-    try {
-      setLoading(true);
-      const newDrivers = await fetchAllDriversFromExternalAPI();
-      if (newDrivers.length > 0) {
-        setDrivers((prev) => [...prev, ...newDrivers]); // Añadir los nuevos pilotos a la lista existente
-        setError(null);
-      } else {
-        setError("No se encontraron nuevos pilotos para agregar.");
-      }
-    } catch (err) {
-      console.error("Error al obtener pilotos de la API externa:", err);
-      setError(err.message || "Error al obtener pilotos de la API externa.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEditDriver = (driver) => {
     setSelectedDriver(driver);
     setIsModalOpen(true);
@@ -108,12 +89,12 @@ const AdminDriverManagementPage = () => {
   }
 
   // Filtrar pilotos activos e inactivos
-  const activeDrivers = Array.isArray(drivers) 
-  ? drivers.filter((d) => d.activo) 
-  : [];
-const inactiveDrivers = Array.isArray(drivers) 
-  ? drivers.filter((d) => !d.activo) 
-  : [];
+  const activeDrivers = Array.isArray(drivers)
+    ? drivers.filter((d) => (d.active ?? d.activo ?? true) === true)
+    : [];
+  const inactiveDrivers = Array.isArray(drivers)
+    ? drivers.filter((d) => (d.active ?? d.activo ?? true) === false)
+    : [];
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -129,12 +110,6 @@ const inactiveDrivers = Array.isArray(drivers)
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
             Añadir Piloto
-          </button>
-          <button
-            onClick={handleFetchExternalDrivers}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Cargar Pilotos desde API Externa
           </button>
         </div>
         <div className="px-4 mt-12">

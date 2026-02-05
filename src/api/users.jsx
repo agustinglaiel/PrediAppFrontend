@@ -33,7 +33,7 @@ export function parseJwt(token) {
 export const signUp = async (userData) => {
   try {
     const { data } = await axios.post('/signup', userData);
-    // data = { id, first_name, last_name, username, email, role, token, created_at }
+  // data = { id, first_name, last_name, username, email, role, score, token, created_at }
     const { token } = data;
     if (!token) throw new Error("No se recibió token en signup");
 
@@ -42,9 +42,19 @@ export const signUp = async (userData) => {
     setAuthToken(token);
 
     // Devolver la info pública (sin token)
-    const { id, first_name, last_name, username, email, role, created_at } =
+    const { id, first_name, last_name, username, email, role, score, created_at } =
       data;
-    return { token, id, first_name, last_name, username, email, role, created_at };
+    return {
+      token,
+      id,
+      first_name,
+      last_name,
+      username,
+      email,
+      role,
+      score,
+      created_at,
+    };
   } catch (err) {
     console.error("Signup error:", err.response?.data || err.message);
     throw new Error(err.response?.data?.error || "Error al registrarse");
@@ -55,7 +65,7 @@ export const signUp = async (userData) => {
 export const login = async (userData) => {
   try {
     const { data } = await axios.post('/login', userData);
-    // data = { id, first_name, last_name, username, email, role, token, created_at }
+    // data = { id, first_name, last_name, username, email, role, score, token, created_at }
     const {
       token,
       id,
@@ -64,6 +74,7 @@ export const login = async (userData) => {
       username,
       email,
       role,
+      score,
       created_at,
     } = data;
     if (!token) throw new Error("No se recibió token en login");
@@ -81,6 +92,7 @@ export const login = async (userData) => {
       username,
       email,
       role,
+      score,
       created_at,
     };
   } catch (err) {

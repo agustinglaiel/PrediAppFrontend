@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getScoreboard } from "../api/users";
 
 export default function useScoreboard() {
-  const [scoreboard, setScoreboard] = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [seasons, setSeasons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchScoreboard = useCallback(() => {
     let cancelled = false;
@@ -12,12 +12,12 @@ export default function useScoreboard() {
     setError(null);
 
     getScoreboard()
-      .then(data => {
+      .then((data) => {
         if (!cancelled) {
-          setScoreboard(data);
+          setSeasons(Array.isArray(data) ? data : []);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (!cancelled) {
           setError(err);
         }
@@ -36,5 +36,22 @@ export default function useScoreboard() {
     return cleanup;
   }, [fetchScoreboard]);
 
-  return { scoreboard, loading, error, refresh: fetchScoreboard };
+  const sortedSeasons = useMemo(() => {
+    return [...seasons].sort((a, b) => b.season_year - a.season_year);
+  }, [seasons]);
+
+  const currentSeason = sortedSeasons[0] || null;
+  const pastSeasons = sortedSeasons.slice(1);
+  const scoreboard = currentSeason?.scoreboard || [];
+
+  return {
+    scoreboard,
+    seasons: sortedSeasons,
+    currentSeason,
+    currentSeasonYear: currentSeason?.season_year ?? null,
+    pastSeasons,
+    loading,
+    error,
+    refresh: fetchScoreboard,
+  };
 }

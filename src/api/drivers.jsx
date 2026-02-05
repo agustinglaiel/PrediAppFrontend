@@ -84,23 +84,3 @@ export const updateDriver = async (driverId, driverData) => {
   }
 };
 
-export const fetchAllDriversFromExternalAPI = async () => {
-  try {
-    const response = await axios.get("/drivers/external", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
-    });
-    return response.data; // Retorna la lista de pilotos nuevos insertados
-  } catch (error) {
-    console.error("Error fetching drivers from external API - Detalle:", {
-      message: error.message,
-      code: error.code,
-      config: error.config,
-      request: error.request,
-      response: error.response,
-    });
-    throw new Error(
-      error.response?.data?.message ||
-        "Error fetching drivers from external API."
-    );
-  }
-};

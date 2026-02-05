@@ -14,7 +14,7 @@ const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
     name_acronym: "",
     headshot_url: "",
     team_name: "",
-    activo: true,
+    active: true,
   });
   const [error, setError] = useState(null);
 
@@ -30,8 +30,8 @@ const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
         full_name: driver.full_name || "",
         name_acronym: driver.name_acronym || "",
         headshot_url: driver.headshot_url || "",
-        team_name: driver.team_name || "",
-        activo: driver.activo ?? true,
+        team_name: driver.team_name || driver.current_team?.team_name || "",
+        active: driver.active ?? driver.activo ?? true,
       });
     }
   }, [isEditing, driver]);
@@ -69,7 +69,7 @@ const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
       name_acronym: formData.name_acronym,
       headshot_url: formData.headshot_url,
       team_name: formData.team_name,
-      activo: formData.activo,
+      active: formData.active,
     };
 
     // Si estamos editando, eliminamos campos vacíos para cumplir con UpdateDriverDTO
@@ -218,8 +218,8 @@ const DriverFormModal = ({ isOpen, onClose, onSubmit, driver = null }) => {
             </label>
             <input
               type="checkbox"
-              name="activo"
-              checked={formData.activo}
+              name="active"
+              checked={formData.active}
               onChange={handleChange}
               className="mt-1"
             />

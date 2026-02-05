@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    const { token } = userData;
+    const { token, score: responseScore } = userData;
     localStorage.setItem("jwtToken", token);
     setAuthToken(token);
     const payload = parseJwt(token);
@@ -123,6 +123,8 @@ export const AuthProvider = ({ children }) => {
         score,
       } = payload;
 
+      const resolvedScore = typeof score === "number" ? score : responseScore;
+
       // 1) Seteamos el usuario del JWT
       setUser({
         id: user_id,
@@ -131,19 +133,19 @@ export const AuthProvider = ({ children }) => {
         username,
         email,
         role,
-        score,
+        score: resolvedScore,
       });
       setIsAuthenticated(true);
 
       // 2) Semilla en storage SOLO si no existe aún
       const already = localStorage.getItem(SCORE_KEY);
       if (already === null) {
-        setStoredScore(score ?? 0);
+        setStoredScore(resolvedScore ?? 0);
       }
 
       // 3) Alinear user.score en memoria al valor del storage si difiere
       const stored = getStoredScore();
-      if (typeof stored === "number" && stored !== (score ?? 0)) {
+      if (typeof stored === "number" && stored !== (resolvedScore ?? 0)) {
         setUser((prev) => (prev ? { ...prev, score: stored } : prev));
       }
     }

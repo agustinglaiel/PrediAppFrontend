@@ -43,12 +43,18 @@ const DriversClassificationTable = ({ drivers, driversById }) => {
                 driver.driver_id ?? driver.id
               );
               const fullName =
+                driver.full_name ||
                 `${driver.first_name ?? ""} ${driver.last_name ?? ""}`.trim() ||
+                directoryDriver?.full_name ||
                 `${directoryDriver?.first_name ?? ""} ${
                   directoryDriver?.last_name ?? ""
                 }`.trim();
               const teamName =
-                driver.team_name || directoryDriver?.team_name || "";
+                driver.current_team?.team_name ||
+                driver.team_name ||
+                directoryDriver?.current_team?.team_name ||
+                directoryDriver?.team_name ||
+                "";
               const points = driver.points ?? driver.total_points ?? 0;
               const headshotUrl = resolveHeadshotUrl(driver, directoryDriver);
 

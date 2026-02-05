@@ -1,5 +1,6 @@
 // src/pages/RankingPage.jsx
 import React, { useContext, useMemo } from "react";
+import { FaTrophy } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
@@ -13,8 +14,13 @@ const RankingPage = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
 
-  const { scoreboard, loading: loadingScoreboard, error: scoreboardError } =
-    useScoreboard();
+  const {
+    scoreboard,
+    loading: loadingScoreboard,
+    error: scoreboardError,
+    currentSeasonYear,
+    pastSeasons,
+  } = useScoreboard();
   const { groups, loading: loadingGroups, error: groupsError } =
     useUserGroups(userId);
 
@@ -39,10 +45,20 @@ const RankingPage = () => {
       <NavigationBar />
 
       <main className="flex-grow pt-24 pb-24 px-4">
-        <h1 className="text-3xl font-bold mb-6">Ranking</h1>
+        <div className="sticky top-24 z-20 mb-6 flex justify-center">
+          <div className="bg-white/90 backdrop-blur rounded-full px-2 py-2 shadow-sm border border-gray-100">
+            <button
+              onClick={() => navigate("/ganadores-historicos")}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <FaTrophy className="text-sm" />
+              Ganadores
+            </button>
+          </div>
+        </div>
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            {error}
+            {error.message || error.toString()}
           </div>
         )}
 
@@ -51,24 +67,27 @@ const RankingPage = () => {
             <p className="text-gray-600">Cargando rankings...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {/* General */}
-            <ScoreboardOverviewCard
-              title="Ranking General"
-              position={userGeneralPosition || "—"}
-              isGeneral
-              onClick={() => navigate("/scoreboard/general")}
-            />
-
-            {/* Por cada grupo */}
-            {groups.map(({ group, userPosition }) => (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {/* General */}
               <ScoreboardOverviewCard
-                key={group.id}
-                title={group.group_name || "Grupo"}
-                position={userPosition || "—"}
-                onClick={() => navigate(`/grupos/${group.id}`)}
+                title="Ranking General"
+                position={userGeneralPosition || "—"}
+                isGeneral
+                onClick={() => navigate("/scoreboard/general")}
               />
-            ))}
+
+              {/* Por cada grupo */}
+              {groups.map(({ group, userPosition }) => (
+                <ScoreboardOverviewCard
+                  key={group.id}
+                  title={group.group_name || "Grupo"}
+                  position={userPosition || "—"}
+                  onClick={() => navigate(`/grupos/${group.id}`)}
+                />
+              ))}
+            </div>
+
           </div>
         )}
       </main>

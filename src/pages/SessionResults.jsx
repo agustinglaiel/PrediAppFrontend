@@ -92,7 +92,9 @@ const SessionResult = () => {
                       {result.driver.last_name}
                     </td>
                     <td className="py-2 px-4 border-b">
-                      {result.driver.team_name}
+                      {result.driver.current_team?.team_name ||
+                        result.driver.team_name ||
+                        ""}
                     </td>
                   </tr>
                 ))}
