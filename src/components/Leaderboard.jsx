@@ -1,5 +1,6 @@
 import React, { useContext, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { IoIosTrophy, IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { AuthContext } from "../contexts/AuthContext";
 
 const Leaderboard = ({ entries }) => {
@@ -13,106 +14,144 @@ const Leaderboard = ({ entries }) => {
     [entries]
   );
 
-  // Calculate pagination
   const totalPages = Math.ceil(sortedEntries.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedEntries = sortedEntries.slice(startIndex, startIndex + rowsPerPage);
 
-  // Handle page navigation
   const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4 text-left">Tabla de posiciones</h2>
-      <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden max-w-full">
-        <div className="p-6">
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
-              <colgroup>
-                <col style={{ width: "25%" }} />
-                <col style={{ width: "50%" }} />
-                <col style={{ width: "25%" }} />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-3 font-semibold text-gray-700 text-center align-middle">Puesto</th>
-                  <th className="pb-3 font-semibold text-gray-700 text-center align-middle">Usuario</th>
-                  <th className="pb-3 font-semibold text-gray-700 text-center align-middle">Puntos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedEntries.map((entry, index) => {
-                  const isLoggedUser =
-                    entry.username?.toLowerCase() === usernameLogged && !!usernameLogged;
-                  return (
-                    <tr
-                      key={entry.user_id}
-                      className={`
-                        border-b border-gray-100 last:border-b-0
-                        ${isLoggedUser ? "bg-red-100 font-semibold" : "hover:bg-gray-50"}
-                      `}
-                    >
-                      <td className="py-3 text-center align-middle">{startIndex + index + 1}</td>
-                      <td className="py-3 text-center align-middle">
-                        <div
-                          className="truncate mx-auto"
-                          style={{ maxWidth: "90%" }}
-                          title={entry.username}
-                        >
-                          {entry.username}
-                        </div>
-                      </td>
-                      <td className="py-3 text-center font-medium align-middle">{entry.score}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {!entries?.length && (
-              <div className="mt-4 text-gray-600 text-center">
-                No hay datos para mostrar.
-              </div>
-            )}
-          </div>
-          {sortedEntries.length > 0 && (
-            <div className="mt-4 flex justify-center items-center space-x-2">
-              <button
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
-                className={`
-                  text-lg font-semibold
-                  ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-500 hover:text-blue-700"}
-                `}
-              >
-                &lt;
-              </button>
-              <span className="text-sm text-gray-700">
-                {currentPage}/{totalPages}
-              </span>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-                className={`
-                  text-lg font-semibold
-                  ${currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "text-blue-500 hover:text-blue-700"}
-                `}
-              >
-                &gt;
-              </button>
-            </div>
-          )}
-        </div>
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      {/* Header de la sección */}
+      <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+        <IoIosTrophy className="text-red-500 text-xl" />
+        <h2 className="text-lg font-bold text-gray-900">Tabla de posiciones</h2>
       </div>
+
+      {/* Encabezados de columna */}
+      <div className="grid grid-cols-[40px_1fr_56px] items-center gap-3 px-5 py-2 border-b border-gray-100">
+        <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-center">#</span>
+        <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Jugador</span>
+        <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-center">Pts</span>
+      </div>
+
+      {/* Lista de jugadores */}
+      <div className="divide-y divide-gray-100">
+        {paginatedEntries.map((entry, index) => {
+          const globalPos = startIndex + index + 1;
+          const isLoggedUser =
+            entry.username?.toLowerCase() === usernameLogged && !!usernameLogged;
+
+          return (
+            <div
+              key={entry.user_id}
+              className={`
+                grid grid-cols-[40px_1fr_56px] items-center gap-3 px-5 py-3
+                transition-colors duration-150
+                ${isLoggedUser
+                  ? "bg-red-50/70 border-l-[3px] border-l-red-500"
+                  : "hover:bg-gray-50/60 border-l-[3px] border-l-transparent"
+                }
+              `}
+            >
+              {/* Posición */}
+              <div className="flex justify-center">
+                <span className={`text-sm font-semibold w-8 text-center ${
+                  isLoggedUser ? "text-red-600" : "text-gray-400"
+                }`}>
+                  {globalPos}
+                </span>
+              </div>
+
+              {/* Username */}
+              <div className="min-w-0">
+                <span
+                  className={`truncate block text-sm ${
+                    isLoggedUser ? "font-bold text-gray-900" : "font-medium text-gray-700"
+                  }`}
+                  title={entry.username}
+                >
+                  {entry.username}
+                  {isLoggedUser && (
+                    <span className="ml-1.5 text-[10px] font-semibold text-red-500 uppercase">Tú</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Score */}
+              <div className="text-center">
+                <span
+                  className={`inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-lg text-sm font-bold ${
+                    isLoggedUser
+                      ? "bg-red-100 text-red-700"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {entry.score}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Empty state */}
+      {!entries?.length && (
+        <div className="py-10 text-center">
+          <IoIosTrophy className="mx-auto text-3xl text-gray-300 mb-2" />
+          <p className="text-sm text-gray-400 font-medium">No hay datos para mostrar.</p>
+        </div>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 px-5 py-3 border-t border-gray-100">
+          <button
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className={`p-1.5 rounded-lg transition-all duration-200 ${
+              currentPage === 1
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700 active:scale-95"
+            }`}
+          >
+            <IoIosArrowBack className="text-base" />
+          </button>
+
+          {/* Page indicators */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                page === currentPage
+                  ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md shadow-red-500/25"
+                  : "text-gray-500 hover:bg-gray-100"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className={`p-1.5 rounded-lg transition-all duration-200 ${
+              currentPage === totalPages
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700 active:scale-95"
+            }`}
+          >
+            <IoIosArrowForward className="text-base" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

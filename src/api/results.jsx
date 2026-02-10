@@ -4,6 +4,7 @@ axios.defaults.baseURL = "http://localhost:8080/api";
 // axios.defaults.baseURL = "/api";
 
 // New function to get results ordered by position for a session
+// Returns { session: {...}, results: [...] }
 export const getResultsOrderedByPosition = async (sessionID) => {
   try {
     const response = await axios.get(
@@ -15,7 +16,7 @@ export const getResultsOrderedByPosition = async (sessionID) => {
       }
     );
 
-    return response.data; // Returns array of ResponseResultDTO
+    return response.data; // Returns { session: {...}, results: [...] }
   } catch (error) {
     console.error(`Error fetching ordered results for session ${sessionID}:`, {
       message: error.message,

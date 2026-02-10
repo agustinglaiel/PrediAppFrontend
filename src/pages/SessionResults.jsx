@@ -15,15 +15,25 @@ const SessionResult = () => {
   const [sessionData, setSessionData] = useState(null);
 
   useEffect(() => {
-    if (location.state) {
-      setSessionData(location.state);
-    }
-
     const fetchResults = async () => {
       try {
         setLoading(true);
         const data = await getResultsOrderedByPosition(sessionId);
-        setResults(data);
+        setResults(data.results || []);
+
+        // Usar datos de la sesión del backend, con fallback a location.state
+        if (data.session) {
+          setSessionData({
+            countryName: data.session.country_name || location.state?.countryName,
+            flagUrl: data.session.country_name
+              ? `/images/flags/${data.session.country_name.toLowerCase()}.jpg`
+              : location.state?.flagUrl || "/images/flags/default.jpg",
+            sessionName: data.session.session_name || location.state?.sessionName,
+            sessionType: data.session.session_type || location.state?.sessionType,
+          });
+        } else if (location.state) {
+          setSessionData(location.state);
+        }
       } catch (err) {
         setError("Error al cargar los resultados: " + err.message);
       } finally {

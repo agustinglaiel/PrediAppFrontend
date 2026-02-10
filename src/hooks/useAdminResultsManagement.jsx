@@ -139,7 +139,8 @@ export default function useAdminResultsManagement() {
           if (!item) return;
 
           try {
-            const res = await getResultsOrderedByPosition(item.id);
+            const data = await getResultsOrderedByPosition(item.id);
+            const res = data.results || [];
             if (!cancelledRef.current) {
               updateSessionHasResults(item.id, Array.isArray(res) && res.length > 0);
             }
@@ -186,7 +187,8 @@ export default function useAdminResultsManagement() {
   // Refresca hasResults SOLO para una sesión (sin bloquear toda la página)
   const refreshSingleSessionHasResults = async (sessionId) => {
     try {
-      const res = await getResultsOrderedByPosition(sessionId);
+      const data = await getResultsOrderedByPosition(sessionId);
+      const res = data.results || [];
       updateSessionHasResults(sessionId, Array.isArray(res) && res.length > 0);
     } catch {
       updateSessionHasResults(sessionId, false);

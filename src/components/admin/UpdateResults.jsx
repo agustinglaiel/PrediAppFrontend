@@ -13,8 +13,9 @@ const UpdateResults = ({ session, drivers, onSave, onCancel }) => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const existingResults = await getResultsOrderedByPosition(session.id);
-        if (existingResults && existingResults.length > 0) {
+        const data = await getResultsOrderedByPosition(session.id);
+        const existingResults = data.results || [];
+        if (existingResults.length > 0) {
           // Mapear los resultados existentes al formato del estado
           const formattedResults = Array.from({ length: 20 }, (_, index) => {
             const result = existingResults.find(

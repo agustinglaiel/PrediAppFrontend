@@ -22,14 +22,24 @@ const SessionResultPage = () => {
         setLoading(true);
         setError(null);
 
-        if (location.state) {
+        const data = await getResultsOrderedByPosition(sessionId);
+        setResults(data.results || []);
+
+        // Usar datos de la sesión del backend, con fallback a location.state
+        if (data.session) {
+          setSessionData({
+            countryName: data.session.country_name || location.state?.countryName,
+            flagUrl: data.session.country_name
+              ? `/images/flags/${data.session.country_name.toLowerCase()}.jpg`
+              : location.state?.flagUrl || "/images/flags/default.jpg",
+            sessionName: data.session.session_name || location.state?.sessionName,
+            sessionType: data.session.session_type || location.state?.sessionType,
+          });
+        } else if (location.state) {
           setSessionData(location.state);
         } else {
           throw new Error("No se encontraron datos de la sesión.");
         }
-
-        const data = await getResultsOrderedByPosition(sessionId);
-        setResults(data);
       } catch (err) {
         if (
           err.message?.includes("No results found") ||

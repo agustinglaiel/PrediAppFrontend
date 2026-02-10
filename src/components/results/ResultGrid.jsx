@@ -9,8 +9,9 @@ const TEAM_COLORS = {
   "Aston Martin": { accent: "#229971", bg: "rgba(34,153,113,0.08)" },
   "Alpine": { accent: "#0093CC", bg: "rgba(0,147,204,0.08)" },
   "Williams": { accent: "#64C4FF", bg: "rgba(100,196,255,0.08)" },
-  "RB": { accent: "#6692FF", bg: "rgba(102,146,255,0.08)" },
+  "Racing Bulls": { accent: "#6692FF", bg: "rgba(102,146,255,0.08)" },
   "Kick Sauber": { accent: "#52E252", bg: "rgba(82,226,82,0.08)" },
+  "Audi": { accent: "#000000", bg: "rgba(0,0,0,0.08)" },
   "Haas F1 Team": { accent: "#B6BABD", bg: "rgba(182,186,189,0.08)" },
   "Cadillac": { accent: "#1E3D6F", bg: "rgba(30,61,111,0.08)" },
 };
@@ -39,7 +40,7 @@ const ResultGrid = ({ results = [], sessionType = "Race", sessionName = "Race" }
   return (
     <div className="w-full max-w-2xl mx-auto px-2">
       {/* Lista de resultados estilo cards */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         {displayResults.map((result, index) => {
           const pos = parseInt(result.position, 10);
           const isDNF = result.status === "DNF";
@@ -58,42 +59,39 @@ const ResultGrid = ({ results = [], sessionType = "Race", sessionName = "Race" }
             <div
               key={result.id || index}
               className={`
-                relative flex items-center rounded-xl px-4 py-3 transition-all duration-200
-                ${isTopThree ? "shadow-md" : "shadow-sm"}
+                relative flex items-center rounded-lg px-3 py-2 transition-all duration-200 shadow-sm
                 ${isRetired ? "opacity-60" : "hover:shadow-md hover:-translate-y-0.5"}
               `}
               style={{
                 background: isRetired
                   ? "linear-gradient(135deg, #fef2f2, #fff5f5)"
-                  : isTopThree
-                  ? `linear-gradient(135deg, ${teamColor.bg}, white)`
                   : "#ffffff",
-                border: `1px solid ${isRetired ? "#fecaca" : isTopThree ? teamColor.accent + "30" : "#e5e7eb"}`,
+                border: `1px solid ${isRetired ? "#fecaca" : "#e5e7eb"}`,
               }}
             >
               {/* Barra lateral de color del equipo */}
               <div
-                className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+                className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full"
                 style={{ backgroundColor: teamColor.accent }}
               />
 
               {/* Posición */}
-              <div className="flex items-center justify-center w-12 flex-shrink-0 ml-2">
+              <div className="flex items-center justify-center w-8 flex-shrink-0 ml-1.5">
                 {isRetired ? (
-                  <span className="text-xs font-bold text-red-500 bg-red-50 border border-red-200 rounded-md px-2 py-1">
+                  <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded px-1.5 py-0.5">
                     {positionDisplay}
                   </span>
                 ) : (
-                  <span className="text-lg font-bold text-gray-400">
+                  <span className="text-sm font-bold text-gray-400">
                     {positionDisplay}
                   </span>
                 )}
               </div>
 
               {/* Número del piloto */}
-              <div className="flex-shrink-0 mx-3">
+              <div className="flex-shrink-0 mx-2">
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-sm"
+                  className="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs text-white"
                   style={{ backgroundColor: teamColor.accent }}
                 >
                   {result.driver?.driver_number || "–"}
@@ -101,18 +99,18 @@ const ResultGrid = ({ results = [], sessionType = "Race", sessionName = "Race" }
               </div>
 
               {/* Info del piloto */}
-              <div className="flex-grow min-w-0">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">
+              <div className="flex-grow min-w-0 leading-none">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-bold text-gray-900 text-sm truncate">
                     {result.driver?.first_name || ""}
                   </span>
-                </div>
-                <div className="font-bold text-gray-900 text-base leading-tight truncate">
-                  {result.driver?.last_name || "N/A"}
+                  <span className="font-bold text-gray-900 text-sm truncate">
+                    {result.driver?.last_name || "N/A"}
+                  </span>
                 </div>
                 {teamName && (
                   <span
-                    className="text-[11px] font-medium mt-0.5 inline-block"
+                    className="text-[10px] font-medium inline-block mt-px"
                     style={{ color: teamColor.accent }}
                   >
                     {teamName}
@@ -121,29 +119,23 @@ const ResultGrid = ({ results = [], sessionType = "Race", sessionName = "Race" }
               </div>
 
               {/* Acrónimo */}
-              <div className="flex-shrink-0 mx-2 hidden sm:block">
-                <span className="text-xs font-semibold text-gray-400 tracking-widest">
+              <div className="flex-shrink-0 mx-1.5 hidden sm:block">
+                <span className="text-[10px] font-semibold text-gray-400 tracking-widest">
                   {result.driver?.name_acronym || ""}
                 </span>
               </div>
 
               {/* Puntos */}
-              {showPointsColumn && (
-                <div className="flex-shrink-0 ml-2 w-14 text-right">
-                  {isPointsFinish && !isRetired ? (
-                    <div className="inline-flex items-center justify-center">
-                      <span className="text-lg font-bold text-gray-800">
-                        {points}
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-medium ml-0.5 mt-1">
-                        pts
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-gray-300 font-medium">
-                      {isRetired ? "–" : "0"}
+              {showPointsColumn && isPointsFinish && !isRetired && (
+                <div className="flex-shrink-0 ml-1.5 w-12 text-right">
+                  <div className="inline-flex items-center justify-center">
+                    <span className="text-sm font-bold text-gray-800">
+                      {points}
                     </span>
-                  )}
+                    <span className="text-[9px] text-gray-400 font-medium ml-0.5">
+                      pts
+                    </span>
+                  </div>
                 </div>
               )}
             </div>

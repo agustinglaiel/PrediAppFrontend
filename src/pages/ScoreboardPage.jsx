@@ -11,12 +11,14 @@ const ScoreboardPage = () => {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-20 px-4 pb-20 flex flex-col overflow-hidden">
-        <Scoreboard
-          data={scoreboard}
-          loading={loading}
-          error={error}
-        />
+      <main className="flex-grow pt-20 pb-20 flex flex-col overflow-hidden">
+        <div className="max-w-2xl w-full mx-auto px-4 flex flex-col overflow-hidden min-h-0 flex-1">
+          <Scoreboard
+            data={scoreboard}
+            loading={loading}
+            error={error}
+          />
+        </div>
       </main>
     </div>
   );
