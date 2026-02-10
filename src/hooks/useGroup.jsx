@@ -1,15 +1,15 @@
 // src/hooks/useGroup.js
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getGroupById } from "../api/groups";
-import { getUserScoreByUserId } from "../api/users";
+import { getUserById } from "../api/users";
 
 /**
  * Devuelve:
  *  - group: el grupo completo
  *  - leaderboard: array ordenado por score desc ({ user_id, username, score })
  *  - userPosition: posición 1-based del userId dentro del leaderboard (null si no está)
- *  - isCreator: si loggedUserId es el creador del grupo
- *  - creatorId: id del creador
+ *  - isCreator: si loggedUserId es admin del grupo
+ *  - creatorId: id del admin
  */
 export default function useGroup(groupId, loggedUserId) {
   const [group, setGroup] = useState(null);
@@ -25,23 +25,25 @@ export default function useGroup(groupId, loggedUserId) {
       const { data: grp } = await getGroupById(groupId);
       setGroup(grp);
 
-      const validUsers = (grp.users || []).filter((u) => u.role !== "invited");
+  const validUsers = (grp.users || []).filter((u) => u.role !== "Invited");
 
       const scores = await Promise.all(
         validUsers.map(async (u) => {
           try {
-            const { data } = await getUserScoreByUserId(u.user_id);
+            const username = u.username
+              ? u.username
+              : (await getUserById(u.user_id))?.username;
             return {
               user_id: u.user_id,
-              username: data.username,
-              score: typeof data.score === "number" ? data.score : 0,
+              username: username || "—",
+              score: typeof u.score === "number" ? u.score : 0,
             };
           } catch (e) {
-            // degradado: si falla una consulta, igual lo mostramos con 0
+            // degradado: si falla una consulta, igual lo mostramos con score
             return {
               user_id: u.user_id,
               username: u.username || "—",
-              score: 0,
+              score: typeof u.score === "number" ? u.score : 0,
             };
           }
         })
@@ -64,7 +66,7 @@ export default function useGroup(groupId, loggedUserId) {
   }, [fetchGroup]);
 
   const creatorId = useMemo(
-    () => group?.users?.find((u) => u.role === "creator")?.user_id,
+    () => group?.users?.find((u) => u.role === "Admin")?.user_id,
     [group]
   );
   const isCreator = creatorId === loggedUserId;

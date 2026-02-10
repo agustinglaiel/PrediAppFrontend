@@ -3,15 +3,25 @@ import axios from "axios";
 axios.defaults.baseURL = "http://localhost:8080/api";
 // axios.defaults.baseURL = "/api";
 
-export const getGroupById = async (groupId) => {
+const buildAuthConfig = (config = {}) => ({
+  ...config,
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+    ...(config.headers || {}),
+  },
+});
+
+const isCanceledError = (error) =>
+  error?.code === "ERR_CANCELED" ||
+  error?.name === "CanceledError" ||
+  (typeof axios.isCancel === "function" && axios.isCancel(error));
+
+export const getGroupById = async (groupId, config = {}) => {
   try{
-    const res = await axios.get(`/groups/${groupId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    });
+    const res = await axios.get(`/groups/${groupId}`, buildAuthConfig(config));
     return { status: res.status, data: res.data };
   } catch (error) {
+    if (isCanceledError(error)) throw error;
     if (error.response?.status === 404) {
       return { status: 404, data: null };
     }
@@ -25,15 +35,15 @@ export const getGroupById = async (groupId) => {
   }
 }
 
-export const getGroupByUserId = async (userId) => {
+export const getGroupByUserId = async (userId, config = {}) => {
   try {
-    const res = await axios.get(`/groups/user/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    });
+    const res = await axios.get(
+      `/groups/user/${userId}`,
+      buildAuthConfig(config)
+    );
     return { status: res.status, data: res.data };
   } catch (error) {
+    if (isCanceledError(error)) throw error;
     if (error.response?.status === 404) {
       return { status: 404, data: [] };
     }
@@ -47,15 +57,15 @@ export const getGroupByUserId = async (userId) => {
   }
 };
 
-export const getJoinRequestByGroupId = async (groupId) => {
+export const getJoinRequestByGroupId = async (groupId, config = {}) => {
   try {
-    const res = await axios.get(`/groups/${groupId}/join-requests`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },  
-  });
+    const res = await axios.get(
+      `/groups/${groupId}/join-requests`,
+      buildAuthConfig(config)
+    );
   return { status: res.status, data: res.data };
   } catch (error) {
+    if (isCanceledError(error)) throw error;
     if (error.response?.status === 404) {
       return { status: 404, data: [] };
     }
@@ -146,6 +156,36 @@ export const manageGroupInvitation = async ({
     const err = new Error(
       error.response?.data?.message ||
         "Error al gestionar la invitación. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+};
+
+export const getGroups = async (config = {}) => {
+  try {
+    const res = await axios.get(`/groups`, buildAuthConfig(config));
+    return { status: res.status, data: res.data };
+  } catch (error) {
+    console.error("Error fetching groups list:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al obtener los grupos disponibles. Intenta nuevamente."
+    );
+    err.status = error.response?.status ?? 500;
+    throw err;
+  }
+};
+
+export const deleteGroup = async (groupId, config = {}) => {
+  try {
+    const res = await axios.delete(`/groups/${groupId}`, buildAuthConfig(config));
+    return { status: res.status };
+  } catch (error) {
+    console.error("Error deleting group:", error);
+    const err = new Error(
+      error.response?.data?.message ||
+        "Error al eliminar el grupo. Intenta nuevamente."
     );
     err.status = error.response?.status ?? 500;
     throw err;

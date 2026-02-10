@@ -35,7 +35,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/ranking" element={<RankingPage />} />
-  <Route path="/ganadores-historicos" element={<HistoricalWinnersPage />} />
+        <Route path="/ganadores-historicos" element={<HistoricalWinnersPage />} />
         <Route path="/clasificacion" element={<ClasificationPage />} />
         <Route path="/scoreboard/general" element={<ScoreboardPage />} />       
         <Route path="/pronosticos/:session_id" element={<ProdeDispatcher />} />

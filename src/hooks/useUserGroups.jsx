@@ -1,15 +1,15 @@
 // src/hooks/useUserGroups.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getGroupByUserId } from "../api/groups";
-import { getUserScoreByUserId } from "../api/users";
+import { getUserById } from "../api/users";
 
 /**
- * Devuelve los grupos a los que pertenece el usuario, junto con por cada uno:
+ * Devuelve los grupos activos a los que pertenece el usuario (excluye invitaciones), junto con por cada uno:
  *  - group: el objeto del grupo original
  *  - leaderboard: lista de miembros con username/score/user_id ordenada desc.
  *  - userPosition: posición (1-based) del usuario logueado dentro de ese grupo (null si no está)
- *  - creatorId: id del creador del grupo
- *  - isCreator: si el userId es el creador
+ *  - creatorId: id del admin del grupo
+ *  - isCreator: si el userId es admin
  *  - error?: error específico al enriquecer ese grupo (no rompe los demás)
  */
 export default function useUserGroups(userId) {
@@ -21,25 +21,27 @@ export default function useUserGroups(userId) {
   // Helper que enriquece un solo grupo (no es un hook)
   const enrichGroup = async (grp, userId, signal) => {
     try {
-      // filtrar usuarios válidos
-      const validUsers = (grp.users || []).filter((u) => u.role !== "invited");
+  // filtrar usuarios válidos
+  const validUsers = (grp.users || []).filter((u) => u.role !== "Invited");
 
-      // obtener score y username de cada uno
+      // obtener username (si falta) y usar score del grupo
       const scores = await Promise.all(
         validUsers.map(async (u) => {
           if (signal.aborted) throw new DOMException("Aborted", "AbortError");
           try {
-            const { data } = await getUserScoreByUserId(u.user_id);
+            const username = u.username
+              ? u.username
+              : (await getUserById(u.user_id))?.username;
             return {
               user_id: u.user_id,
-              username: data.username,
-              score: typeof data.score === "number" ? data.score : 0,
+              username: username || "—",
+              score: typeof u.score === "number" ? u.score : 0,
             };
           } catch (e) {
             return {
               user_id: u.user_id,
               username: u.username || "—",
-              score: 0,
+              score: typeof u.score === "number" ? u.score : 0,
             };
           }
         })
@@ -51,7 +53,7 @@ export default function useUserGroups(userId) {
       );
       const userPosition = userEntryIndex >= 0 ? userEntryIndex + 1 : null;
 
-      const creatorId = grp.users?.find((u) => u.role === "creator")?.user_id;
+      const creatorId = grp.users?.find((u) => u.role === "Admin")?.user_id;
       const isCreator =
         creatorId != null && String(creatorId) === String(userId);
 
@@ -66,7 +68,7 @@ export default function useUserGroups(userId) {
       // Si se abortó, propaga para que se ignore fuera
       if (e.name === "AbortError") throw e;
       // Degradado: devolver info mínima con el error
-      const creatorId = grp.users?.find((u) => u.role === "creator")?.user_id;
+      const creatorId = grp.users?.find((u) => u.role === "Admin")?.user_id;
       const isCreator =
         creatorId != null && String(creatorId) === String(userId);
       return {
@@ -101,9 +103,16 @@ export default function useUserGroups(userId) {
         signal: controller.signal,
       }); // suponemos array de grupos
 
+      const visibleGroups = userGroups.filter((grp) => {
+        const membership = grp.users?.find(
+          (u) => String(u.user_id) === String(userId)
+        );
+        return !membership || membership.role !== "Invited";
+      });
+
       // Enriquecer todos en paralelo (no limitado; si necesitás throttling podés agregarlo)
       const enriched = await Promise.all(
-        userGroups.map((grp) =>
+        visibleGroups.map((grp) =>
           enrichGroup(grp, userId, controller.signal).catch((e) => {
             if (e.name === "AbortError") throw e;
             // ya manejado en enrichGroup, pero por si acaso
@@ -111,10 +120,10 @@ export default function useUserGroups(userId) {
               group: grp,
               leaderboard: [],
               userPosition: null,
-              creatorId: grp.users?.find((u) => u.role === "creator")?.user_id,
+              creatorId: grp.users?.find((u) => u.role === "Admin")?.user_id,
               isCreator:
                 String(
-                  grp.users?.find((u) => u.role === "creator")?.user_id
+                  grp.users?.find((u) => u.role === "Admin")?.user_id
                 ) === String(userId),
               error: e.message || "Error desconocido",
             };
@@ -124,7 +133,11 @@ export default function useUserGroups(userId) {
 
       setGroups(enriched);
     } catch (err) {
-      if (err.name === "AbortError") {
+      if (
+        err.name === "AbortError" ||
+        err.name === "CanceledError" ||
+        err.code === "ERR_CANCELED"
+      ) {
         // ignorar, es cancelación intencional
         return;
       }

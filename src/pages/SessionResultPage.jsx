@@ -61,8 +61,9 @@ const SessionResultPage = () => {
   // Renderizamos el estado de carga
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <p className="text-gray-600">Cargando resultados...</p>
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 gap-3">
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-red-500 rounded-full animate-spin" />
+        <p className="text-gray-500 text-sm font-medium">Cargando resultados...</p>
       </div>
     );
   }
@@ -91,14 +92,23 @@ const SessionResultPage = () => {
       <Header />
       <NavigationBar />
       <main className="flex-grow pt-12 pb-24 px-4">
-        <div className="mt-12">
+        <div className="max-w-2xl mx-auto mt-8">
           <SessionHeader
             countryName={sessionData.countryName || "Unknown"}
             flagUrl={sessionData.flagUrl || "/images/flags/default.jpg"}
             sessionName={sessionData.sessionName || "Unknown Session"}
             sessionType={sessionData.sessionType || "Unknown Type"}
-            className="mb-4"
+            className="mb-5"
           />
+
+          {/* Título de la tabla */}
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              Clasificación
+            </h3>
+            <div className="flex-grow h-px bg-gray-200" />
+          </div>
+
           <ResultGrid
             results={results}
             sessionType={sessionData.sessionType || "Unknown Type"}

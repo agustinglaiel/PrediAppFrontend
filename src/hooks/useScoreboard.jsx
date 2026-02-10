@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getScoreboard } from "../api/users";
 
-export default function useScoreboard() {
+export default function useScoreboard(options = {}) {
+  const { enabled = true } = options;
   const [seasons, setSeasons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,9 +33,15 @@ export default function useScoreboard() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      setSeasons([]);
+      return undefined;
+    }
     const cleanup = fetchScoreboard();
     return cleanup;
-  }, [fetchScoreboard]);
+  }, [fetchScoreboard, enabled]);
 
   const sortedSeasons = useMemo(() => {
     return [...seasons].sort((a, b) => b.season_year - a.season_year);
