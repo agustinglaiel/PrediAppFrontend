@@ -172,7 +172,7 @@ const GroupsPage = () => {
                     <div className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-4 py-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 active:scale-[0.99]">
                       {/* Avatar con iniciales */}
                       <div
-                        className="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center shadow-sm"
+                        className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-md shadow-red-500/20"
                       >
                         <span className="text-white font-bold text-sm tracking-wide">
                           {initials}

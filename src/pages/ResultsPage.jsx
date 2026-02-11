@@ -46,9 +46,9 @@ const ResultsPage = () => {
         );
 
         const defaultYear =
-          allowedYears.find((year) =>
-            nonEmptyYears.some((block) => block.year === year)
-          ) ?? allowedYears[0];
+          (allowedYears.includes(currentYear) ? currentYear : null) ??
+          nonEmptyYears[0]?.year ??
+          allowedYears[0];
 
         setEventsByYear(nonEmptyYears);
         setSelectedYear(defaultYear);
@@ -84,25 +84,32 @@ const ResultsPage = () => {
 
   const yearSelector =
     years.length > 0 ? (
-      <label className="flex items-center gap-3 text-sm font-medium text-gray-600">
-        Temporada
-        <div className="relative">
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="appearance-none pl-4 pr-10 py-2 rounded-full border border-red-200 bg-white text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-          >
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-            ▼
-          </span>
+      <div className="max-w-xs mx-auto w-full">
+        <div className="flex items-center gap-3">
+          {years.map((year) => {
+            const isActive = selectedYear === year;
+            return (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`relative flex-1 py-2 text-center text-sm font-semibold tracking-wide transition-all duration-300 ease-in-out
+                  ${isActive
+                    ? "text-red-600"
+                    : "text-gray-400 hover:text-gray-600"
+                  }`}
+              >
+                <span className="relative z-10">{year}</span>
+                {/* Active underline indicator */}
+                <span
+                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full transition-all duration-300 ease-in-out ${
+                    isActive ? "w-8 opacity-100" : "w-0 opacity-0"
+                  }`}
+                />
+              </button>
+            );
+          })}
         </div>
-      </label>
+      </div>
     ) : null;
 
   if (loading) {
@@ -125,11 +132,17 @@ const ResultsPage = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-12 pb-24">
+      <main className="flex-grow pt-20 pb-24">
+        {/* Year selector */}
+        <div className="max-w-6xl mx-auto px-4 mb-6">
+          {yearSelector}
+        </div>
+
         <PastResultsEvents
+          title=""
           events={filteredEvents}
           onResultClick={handleResultClick}
-          headerControls={yearSelector}
+          headerControls={null}
           showYearHeadings={false}
           emptyMessage={
             eventsByYear.length === 0

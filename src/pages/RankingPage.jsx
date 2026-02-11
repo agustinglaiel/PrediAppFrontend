@@ -120,7 +120,7 @@ const RankingPage = () => {
         <button
           onClick={handleWinnersClick}
           aria-label="Ver ganadores históricos"
-          className={`inline-flex items-center rounded-full bg-red-700 text-white font-semibold shadow-md hover:bg-red-800 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+          className={`inline-flex items-center rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:from-red-600 hover:to-red-700 active:scale-[0.97] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
             showWinnersLabel ? "gap-2 px-6 py-2.5" : "h-12 w-12 justify-center p-0"
           }`}
         >
@@ -135,7 +135,7 @@ const RankingPage = () => {
         </button>
       </div>
 
-      <main className="flex-grow pt-24 pb-24 px-4">
+      <main className="flex-grow pt-20 pb-24 px-4">
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
             {error.message || error.toString()}
