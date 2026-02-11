@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FiPlus } from "react-icons/fi";
 import Header from "../components/Header";
 import EventCard from "../components/EventCard";
 import SessionForm from "../components/admin/SessionForm";
@@ -10,10 +11,14 @@ import {
 import useSessionsGrouped from "../hooks/useSessionsGrouped";
 
 const AdminSessionManagementPage = () => {
+  const currentYear = new Date().getFullYear();
+  const allowedYears = [currentYear, currentYear - 1];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [activeTab, setActiveTab] = useState("upcoming");
   const [error, setError] = useState(null);
 
   const {
@@ -54,18 +59,15 @@ const AdminSessionManagementPage = () => {
       const transformedSession = {
         id: fetchedSession.id,
         weekend_id: fetchedSession.weekend_id,
-        circuit_key: fetchedSession.circuit_key,
         circuit_short_name: fetchedSession.circuit_short_name,
         country_code: fetchedSession.country_code,
         country_name: fetchedSession.country_name,
         location: fetchedSession.location,
-        session_key: fetchedSession.session_key,
         session_name: fetchedSession.session_name,
         session_type: fetchedSession.session_type,
         date_start: fetchedSession.date_start,
         date_end: fetchedSession.date_end,
         year: fetchedSession.year,
-        d_fast_lap: fetchedSession.d_fast_lap,
         vsc: fetchedSession.vsc,
         sf: fetchedSession.sf,
         dnf: fetchedSession.dnf,
@@ -82,10 +84,6 @@ const AdminSessionManagementPage = () => {
     setIsModalOpen(false);
     setSelectedSession(null);
     setIsEditing(false);
-  };
-
-  const handleYearChange = (e) => {
-    setSelectedYear(parseInt(e.target.value, 10));
   };
 
   if (loading) {
@@ -106,79 +104,128 @@ const AdminSessionManagementPage = () => {
     );
   }
 
+  const displayEvents = activeTab === "upcoming" ? upcoming : past;
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-grow pt-24 px-4">
-        <h1 className="text-3xl font-bold mb-6">Gestión de Sesiones</h1>
 
+      {/* Floating "+" button */}
+      <div className="fixed bottom-20 right-6 z-50">
         <button
-          onClick={() => setIsModalOpen(true)}
-          className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          onClick={() => {
+            setIsEditing(false);
+            setSelectedSession(null);
+            setIsModalOpen(true);
+          }}
+          aria-label="Crear nueva sesión"
+          className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:from-red-600 hover:to-red-700 active:scale-[0.97] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
-          Crear Nueva Sesión
+          <FiPlus className="text-xl" />
         </button>
+      </div>
 
-        <div className="mb-4">
-          <label className="mr-2 text-gray-700">Seleccionar Año:</label>
-          <select
-            value={selectedYear}
-            onChange={handleYearChange}
-            className="p-2 border rounded"
-            disabled={loading}
-          >
-            {[...Array(10).keys()].map((i) => {
-              const year = new Date().getFullYear() - i;
-              return (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-
-        <div className="px-4 mt-12">
-          <h2 className="text-2xl font-bold mb-4">
-            Próximos eventos: {selectedYear}
-          </h2>
-          {upcoming.length === 0 ? (
-            <p className="text-gray-600">
-              No hay eventos próximos para este año.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {upcoming.map((event, index) => (
-                <EventCard
-                  key={index}
-                  country={event.country}
-                  circuit={event.circuit}
-                  location={event.location}
-                  sessions={event.sessions}
-                  flagUrl={event.flagUrl}
-                  circuitLayoutUrl={event.circuitLayoutUrl}
-                  weekendId={event.weekendId}
-                  isAdmin={true}
-                  onEditClick={handleEditClick}
-                />
-              ))}
+      <main className="flex-grow pt-20 pb-24">
+        {/* Year selector — underline style */}
+        <div className="max-w-6xl mx-auto px-4 mb-4">
+          <div className="max-w-xs mx-auto">
+            <div className="flex items-center gap-3">
+              {allowedYears.map((year) => {
+                const isActive = selectedYear === year;
+                return (
+                  <button
+                    key={year}
+                    onClick={() => setSelectedYear(year)}
+                    className={`relative flex-1 py-2 text-center text-sm font-semibold tracking-wide transition-all duration-300 ease-in-out ${
+                      isActive
+                        ? "text-red-600"
+                        : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    <span className="relative z-10">{year}</span>
+                    <span
+                      className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full transition-all duration-300 ease-in-out ${
+                        isActive
+                          ? "w-8 opacity-100"
+                          : "w-0 opacity-0"
+                      }`}
+                    />
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>
 
-        <div className="px-4 mt-12">
-          <h2 className="text-2xl font-bold mb-4">
-            Sesiones pasadas: {selectedYear}
-          </h2>
-          {past.length === 0 ? (
-            <p className="text-gray-600">
-              No hay sesiones pasadas para este año.
-            </p>
+        {/* Tab selector — upcoming / past */}
+        <div className="max-w-6xl mx-auto px-4 mb-6">
+          <div className="relative bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm border border-white/20 shadow-xl rounded-xl p-1.5 overflow-hidden max-w-md mx-auto">
+            <div
+              className={`absolute top-1.5 bottom-1.5 bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-lg transition-all duration-300 ease-in-out ${
+                activeTab === "upcoming"
+                  ? "left-1.5 right-1/2 mr-0.75"
+                  : "left-1/2 right-1.5 ml-0.75"
+              }`}
+            />
+            <div className="relative flex">
+              <button
+                onClick={() => setActiveTab("upcoming")}
+                className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
+                  activeTab === "upcoming"
+                    ? "text-white"
+                    : "text-gray-700 hover:text-red-600"
+                }`}
+              >
+                <span className="relative z-10">Próximas sesiones</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("past")}
+                className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
+                  activeTab === "past"
+                    ? "text-white"
+                    : "text-gray-700 hover:text-red-600"
+                }`}
+              >
+                <span className="relative z-10">Sesiones pasadas</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Events */}
+        <div className="px-4 mt-8">
+          {displayEvents.length === 0 ? (
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-1.5 rounded-full mb-4 border border-gray-200/50">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    {selectedYear}
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  No hay sesiones
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {activeTab === "upcoming"
+                    ? "No hay sesiones próximas para este año"
+                    : "No hay sesiones pasadas para este año"}
+                </p>
+                <div className="mt-6 flex items-center justify-center gap-2">
+                  <span className="w-8 h-0.5 bg-gradient-to-r from-transparent to-red-200 rounded-full"></span>
+                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                  <span className="w-8 h-0.5 bg-gradient-to-l from-transparent to-red-200 rounded-full"></span>
+                </div>
+                <p className="mt-4 text-xs text-gray-400">
+                  Puedes crear sesiones con el botón +
+                </p>
+              </div>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {past.map((event, index) => (
+            <div className="space-y-6">
+              {displayEvents.map((event, index) => (
                 <EventCard
-                  key={index}
+                  key={`${event.weekendId ?? index}`}
                   country={event.country}
                   circuit={event.circuit}
                   location={event.location}
@@ -188,7 +235,7 @@ const AdminSessionManagementPage = () => {
                   weekendId={event.weekendId}
                   isAdmin={true}
                   onEditClick={handleEditClick}
-                  isPastEvent={true}
+                  isPastEvent={activeTab === "past"}
                 />
               ))}
             </div>
@@ -196,9 +243,10 @@ const AdminSessionManagementPage = () => {
         </div>
       </main>
 
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
-          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">
             <SessionForm
               session={selectedSession}
               onSubmit={isEditing ? handleUpdateSession : handleCreateSession}
@@ -208,10 +256,6 @@ const AdminSessionManagementPage = () => {
           </div>
         </div>
       )}
-
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

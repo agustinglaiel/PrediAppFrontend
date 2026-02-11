@@ -46,13 +46,16 @@ export const createSession = async (sessionData) => {
         Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
     });
-    return { data: response.data, status: response.status }; // Devolvemos datos y estado
+    return { data: response.data, status: response.status };
   } catch (error) {
     console.error("Error creating session:", error);
-    throw new Error(
-      error.response?.data?.message ||
-        "Error al crear la sesión. Contacta al soporte."
-    );
+    const causes = error.response?.data?.cause;
+    const message =
+      causes && Array.isArray(causes) && causes.length > 0
+        ? causes.join(". ")
+        : error.response?.data?.message ||
+          "Error al crear la sesión. Contacta al soporte.";
+    throw new Error(message);
   }
 };
 
@@ -71,9 +74,12 @@ export const updateSession = async (sessionId, sessionData) => {
     return { data: response.data, status: response.status };
   } catch (error) {
     console.error("Error updating session:", error);
-    throw new Error(
-      error.response?.data?.message ||
-        "Error al actualizar la sesión. Contacta al soporte."
-    );
+    const causes = error.response?.data?.cause;
+    const message =
+      causes && Array.isArray(causes) && causes.length > 0
+        ? causes.join(". ")
+        : error.response?.data?.message ||
+          "Error al actualizar la sesión. Contacta al soporte.";
+    throw new Error(message);
   }
 };
