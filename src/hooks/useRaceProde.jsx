@@ -29,7 +29,7 @@ export default function useRaceProde({
     P4: null,
     P5: null,
     vsc: false,
-    sc: false,
+    sf: false,
     dnf: 0,
   });
 
@@ -78,7 +78,7 @@ export default function useRaceProde({
             P4: prode.p4 ?? null,
             P5: prode.p5 ?? null,
             vsc: !!prode.vsc,
-            sc: !!prode.sc,
+            sf: !!prode.sf,
             dnf: typeof prode.dnf === "number" ? prode.dnf : 0,
           });
         }
@@ -163,7 +163,7 @@ export default function useRaceProde({
           p4: formData.P4,
           p5: formData.P5,
           vsc: formData.vsc,
-          sc: formData.sc,
+          sf: formData.sf,
           dnf: formData.dnf,
         };
         await createProdeCarrera(userId, payload);

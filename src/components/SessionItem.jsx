@@ -30,6 +30,7 @@ const SessionItem = ({
   showGetResultsButton,
   onUpdateProdeClick,
   isLoggedIn,
+  showAllSessionButtons = false,
 }) => {
   const hasProde =
     (sessionType !== "Race" && prodeSession) ||
@@ -41,11 +42,12 @@ const SessionItem = ({
 
   const normalizedName = sessionName?.toLowerCase();
   const normalizedType = sessionType?.toLowerCase();
-  const isPracticeOrTest =
-    (normalizedName === "test" && normalizedType === "testing") ||
-    (normalizedName === "practice 1" && normalizedType === "practice") ||
-    (normalizedName === "practice 2" && normalizedType === "practice") ||
-    (normalizedName === "practice 3" && normalizedType === "practice");
+  const isPracticeOrTest = showAllSessionButtons
+    ? false
+    : (normalizedName === "test" && normalizedType === "testing") ||
+      (normalizedName === "practice 1" && normalizedType === "practice") ||
+      (normalizedName === "practice 2" && normalizedType === "practice") ||
+      (normalizedName === "practice 3" && normalizedType === "practice");
 
   const handleGetResultsClick = async () => {
     if (!onGetResults) return;

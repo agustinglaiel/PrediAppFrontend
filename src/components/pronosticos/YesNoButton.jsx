@@ -3,50 +3,44 @@ import React from "react";
 
 export default function YesNoButton({
   label,
-  value, // boolean: true o false
-  onChange, // (bool) => void
+  value,
+  onChange,
   disabled = false,
 }) {
   const handleYes = () => {
-    if (!disabled && onChange) {
-      onChange(true); // Al hacer clic en “Sí”, seteamos true
-    }
+    if (!disabled && onChange) onChange(true);
   };
 
   const handleNo = () => {
-    if (!disabled && onChange) {
-      onChange(false); // Al hacer clic en “No”, seteamos false
-    }
+    if (!disabled && onChange) onChange(false);
   };
 
-  // Si value === true => resaltar el botón “Sí”; si value === false => resaltar “No”.
   return (
-    <div className="mb-4 ml-4">
+    <div className="flex flex-col items-center gap-1.5">
       {label && (
-        <label className="block text-sm font-medium text-black mb-1">
+        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
           {label}
         </label>
       )}
-      <div className="inline-flex items-center rounded-full border border-gray-300 overflow-hidden">
+      <div className="inline-flex rounded-lg overflow-hidden border border-gray-200">
         <button
           type="button"
-          className={`
-            px-4 py-2 text-sm focus:outline-none
-            ${value === true ? "bg-blue-200" : "bg-white"}
-            ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-          `}
+          className={`px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+            value === true
+              ? "bg-red-500 text-white"
+              : "bg-white text-gray-600 hover:bg-gray-50"
+          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={handleYes}
         >
-          Sí
+          Si
         </button>
-
         <button
           type="button"
-          className={`
-            px-4 py-2 text-sm focus:outline-none
-            ${value === false ? "bg-blue-200" : "bg-white"}
-            ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-          `}
+          className={`px-4 py-1.5 text-sm font-medium transition-all duration-150 border-l border-gray-200 ${
+            value === false
+              ? "bg-gray-700 text-white"
+              : "bg-white text-gray-600 hover:bg-gray-50"
+          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={handleNo}
         >
           No

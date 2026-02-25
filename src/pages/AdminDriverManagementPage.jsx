@@ -1,8 +1,8 @@
 // src/pages/AdminDriverManagementPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiPlus } from "react-icons/fi";
 import Header from "../components/Header";
-import NavigationBar from "../components/NavigationBar";
 import DriverDisplay from "../components/admin/DriverDisplay";
 import DriverFormModal from "../components/admin/DriverFormModal";
 import {
@@ -16,7 +16,7 @@ const AdminDriverManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState(null); // Para manejar el piloto en edición
+  const [selectedDriver, setSelectedDriver] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,7 +88,6 @@ const AdminDriverManagementPage = () => {
     );
   }
 
-  // Filtrar pilotos activos e inactivos
   const activeDrivers = Array.isArray(drivers)
     ? drivers.filter((d) => (d.active ?? d.activo ?? true) === true)
     : [];
@@ -99,22 +98,33 @@ const AdminDriverManagementPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-grow pt-24 px-4">
-        <h1 className="text-3xl font-bold mb-4 ml-3">Gestión de Pilotos</h1>
-        <div className="flex gap-4 mb-4 ml-3">
-          <button
-            onClick={() => {
-              setSelectedDriver(null);
-              setIsModalOpen(true);
-            }}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Añadir Piloto
-          </button>
-        </div>
-        <div className="px-4 mt-12">
-          <h2 className="text-2xl font-bold mb-4">Lista de Pilotos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
+      {/* Floating "+" button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => {
+            setSelectedDriver(null);
+            setIsModalOpen(true);
+          }}
+          aria-label="Añadir piloto"
+          className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:from-red-600 hover:to-red-700 active:scale-[0.97] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          <FiPlus className="text-xl" />
+        </button>
+      </div>
+
+      <main className="flex-grow pt-20 pb-24">
+        {error && (
+          <div className="max-w-6xl mx-auto px-4 mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Pilotos Activos</h2>
+          <div className="space-y-3">
             {activeDrivers.map((driver) => (
               <DriverDisplay
                 key={driver.id}
@@ -125,9 +135,9 @@ const AdminDriverManagementPage = () => {
           </div>
 
           {inactiveDrivers.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold mb-4">Pilotos Inactivos</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="mt-10">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">Pilotos Inactivos</h2>
+              <div className="space-y-3">
                 {inactiveDrivers.map((driver) => (
                   <DriverDisplay
                     key={driver.id}
@@ -140,6 +150,7 @@ const AdminDriverManagementPage = () => {
           )}
         </div>
       </main>
+
       {isModalOpen && (
         <DriverFormModal
           isOpen={isModalOpen}
@@ -148,9 +159,6 @@ const AdminDriverManagementPage = () => {
           driver={selectedDriver}
         />
       )}
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm mt-4">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

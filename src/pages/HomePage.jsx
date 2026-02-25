@@ -19,12 +19,9 @@ const HomePage = () => {
   // Estado para controlar qué pestaña está activa
   const [activeTab, setActiveTab] = useState("upcoming");
   const currentYear = new Date().getFullYear();
-  const currentSeasonPast = past
+  const currentSeasonPastEvents = past
     .filter((group) => group.year === currentYear)
-    .map((group) => ({
-      ...group,
-      events: group.events ?? [],
-    }));
+    .flatMap((group) => group.events ?? []);
 
   /** Navegación según tipo de sesión ------------------------------------ */
   const handlePronosticoClick = (sessionData) => {
@@ -113,9 +110,10 @@ const HomePage = () => {
           />
         ) : (
           <PastEvents
-            events={currentSeasonPast}
+            events={currentSeasonPastEvents}
             onPronosticoClick={handlePronosticoClick}
             emptyMessage="Actualmente no hay eventos que hayan transcurrido esta temporada"
+            showYearHeading={false}
           />
         )}
       </main>

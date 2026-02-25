@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import PastResultsEvents from "../components/results/PastResultsEvents";
+import YearSelector from "../components/YearSelector";
 import { getPastSessions } from "../api/sessions";
 import {
   groupSessionsByWeekend,
@@ -82,36 +83,6 @@ const ResultsPage = () => {
     (block) => block.year === selectedYear
   );
 
-  const yearSelector =
-    years.length > 0 ? (
-      <div className="max-w-xs mx-auto w-full">
-        <div className="flex items-center gap-3">
-          {years.map((year) => {
-            const isActive = selectedYear === year;
-            return (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`relative flex-1 py-2 text-center text-sm font-semibold tracking-wide transition-all duration-300 ease-in-out
-                  ${isActive
-                    ? "text-red-600"
-                    : "text-gray-400 hover:text-gray-600"
-                  }`}
-              >
-                <span className="relative z-10">{year}</span>
-                {/* Active underline indicator */}
-                <span
-                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full transition-all duration-300 ease-in-out ${
-                    isActive ? "w-8 opacity-100" : "w-0 opacity-0"
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    ) : null;
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -135,7 +106,14 @@ const ResultsPage = () => {
       <main className="flex-grow pt-20 pb-24">
         {/* Year selector */}
         <div className="max-w-6xl mx-auto px-4 mb-6">
-          {yearSelector}
+          <div className="flex items-center justify-between max-w-lg mx-auto">
+            <h2 className="text-xl font-semibold text-black">Seleccionar temporada:</h2>
+            <YearSelector
+              selectedYear={selectedYear}
+              years={years}
+              onChange={(year) => setSelectedYear(year)}
+            />
+          </div>
         </div>
 
         <PastResultsEvents

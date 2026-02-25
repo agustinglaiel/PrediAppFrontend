@@ -80,6 +80,7 @@ const PastResultsEvents = ({
                     weekendId={event.weekendId}
                     onPronosticoClick={onResultClick}
                     isPastEvent={true}
+                    showAllSessionButtons={true}
                   />
                 ))}
               </div>

@@ -3,20 +3,16 @@ import axios from "axios";
 axios.defaults.baseURL = "http://localhost:8080/api";
 // axios.defaults.baseURL = "/api";
 
-// New function to get results ordered by position for a session
+// Obtener resultados de una sesión ordenados por posición
 // Returns { session: {...}, results: [...] }
 export const getResultsOrderedByPosition = async (sessionID) => {
   try {
-    const response = await axios.get(
-      `/results/session/${sessionID}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response.data; // Returns { session: {...}, results: [...] }
+    const response = await axios.get(`/results/session/${sessionID}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
   } catch (error) {
     console.error(`Error fetching ordered results for session ${sessionID}:`, {
       message: error.message,
@@ -29,11 +25,10 @@ export const getResultsOrderedByPosition = async (sessionID) => {
   }
 };
 
-// New function to get top N drivers in a session
-// frontendnuevo/src/api/results.jsx
+// Obtener los mejores N pilotos de una sesión
+// Returns TopDriverDTO[] -> { position, driver_id }
 export const getTopNDriversInSession = async (sessionID, n) => {
   try {
-    // Validate inputs
     if (!sessionID || !n) {
       throw new Error("Session ID and number of drivers are required");
     }
@@ -49,10 +44,10 @@ export const getTopNDriversInSession = async (sessionID, n) => {
         },
       }
     );
-    return response.data; // Returns array of TopDriverDTO
+    return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
-      return []; // Devolver array vacío en lugar de lanzar error
+      return [];
     }
     console.error(`Error fetching top ${n} drivers for session ${sessionID}:`, {
       message: error.message,
@@ -65,26 +60,29 @@ export const getTopNDriversInSession = async (sessionID, n) => {
   }
 };
 
-// Guardar resultados masivamente (usando el endpoint /results/admin)
+// Guardar resultados masivamente (POST /results/admin)
+// Statuses válidos: FINISHED, DNF, DNS, DSQ
+// Posiciones válidas: 1–22, sin duplicados; driver_id sin duplicados
 export const saveSessionResultsAdmin = async (sessionId, results) => {
   try {
     const payload = {
-      session_id: parseInt(sessionId), // Aseguramos que sea un entero
+      session_id: parseInt(sessionId),
       results: results.map((result) => ({
         driver_id: result.driver_id,
-        position: result.status === "FINISHED" ? result.position : null, // null si no es "FINISHED"
-        status: result.status || "DNF", // Por defecto "DNF" si no se proporciona
-        fastest_lap_time: result.fastest_lap_time || 0, // Por defecto 0 si no se proporciona
+        position: result.position,
+        status: result.status || "DNF",
       })),
     };
+
+    console.log("Saving results payload:", JSON.stringify(payload, null, 2));
 
     const response = await axios.post(`/results/admin`, payload, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`, // Añadimos token si es necesario
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
       },
     });
-    return response.data; // Devuelve array de ResponseResultDTO
+    return response.data;
   } catch (error) {
     console.error(`Error saving results for session ${sessionId}:`, {
       message: error.message,
@@ -96,50 +94,50 @@ export const saveSessionResultsAdmin = async (sessionId, results) => {
   }
 };
 
-export const FetchNonRaceResultsExternalAPI = async (sessionID) => {
+// Listar todos los resultados existentes
+export const getAllResults = async () => {
   try {
-    const response = await axios.get(
-      `/results/session/api/${sessionID}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  } catch (error) {
-    console.error(
-      `Error fetching non race results from external API for session ${sessionID}:`,
-      {
-        message: error.message,
-        response: error.response?.data,
-      }
-    );
-    throw new Error(
-      error.response?.data?.message ||
-        "Error fetching non race results from external API for the session."
-    );
-  }
-};
-
-export const fetchResultsFromExternalAPI = async (sessionID) => {
-  try {
-    const response = await axios.get(`/results/api/${sessionID}`, {
+    const response = await axios.get(`/results`, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    return response.data; // Devuelve array de ResponseResultDTO
+    return response.data;
   } catch (error) {
-    console.error(
-      `Error fetching results from external API for session ${sessionID}:`,
-      {
-        message: error.message,
-        response: error.response?.data,
-      }
+    if (error.response?.status === 404) {
+      return [];
+    }
+    console.error("Error fetching all results:", {
+      message: error.message,
+      response: error.response?.data,
+    });
+    throw new Error(
+      error.response?.data?.message || "Error fetching all results."
     );
+  }
+};
+
+// Eliminar todos los resultados de una sesión (DELETE /results/session/:sessionID)
+export const deleteSessionResults = async (sessionID) => {
+  try {
+    await axios.delete(`/results/session/${sessionID}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    });
+  } catch (error) {
+    if (error.response?.status === 404) {
+      console.warn(`No results found to delete for session ${sessionID}`);
+      return;
+    }
+    console.error(`Error deleting results for session ${sessionID}:`, {
+      message: error.message,
+      response: error.response?.data,
+    });
     throw new Error(
       error.response?.data?.message ||
-        "Error fetching results from external API for the session."
+        `Error deleting results for session ${sessionID}.`
     );
   }
 };
@@ -147,16 +145,21 @@ export const fetchResultsFromExternalAPI = async (sessionID) => {
 // Obtener clasificación de pilotos por año
 export const getDriversClassification = async (year) => {
   try {
-    const response = await axios.get(`/results/drivers/classification/season/${year}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    });
+    const response = await axios.get(
+      `/results/drivers/classification/season/${year}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
-      console.warn(`No hay resultados de clasificación de pilotos para el año ${year}`);
+      console.warn(
+        `No hay resultados de clasificación de pilotos para el año ${year}`
+      );
       return { year, classification: [], total_drivers: 0 };
     }
     console.error(`Error fetching drivers classification for year ${year}:`, {
@@ -173,16 +176,21 @@ export const getDriversClassification = async (year) => {
 // Obtener clasificación de equipos/constructores por año
 export const getTeamsClassification = async (year) => {
   try {
-    const response = await axios.get(`/results/teams/classification/season/${year}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    });
+    const response = await axios.get(
+      `/results/teams/classification/season/${year}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error.response?.status === 404) {
-      console.warn(`No hay resultados de clasificación de equipos para el año ${year}`);
+      console.warn(
+        `No hay resultados de clasificación de equipos para el año ${year}`
+      );
       return { year, classification: [], total_teams: 0 };
     }
     console.error(`Error fetching teams classification for year ${year}:`, {

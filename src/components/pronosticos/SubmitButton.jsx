@@ -2,18 +2,17 @@ import React from "react";
 
 const SubmitButton = ({
   isDisabled,
-  onClick,
   label = "Enviar pronóstico",
   className,
 }) => {
   return (
     <button
-      onClick={onClick}
+      type="submit"
       disabled={isDisabled}
-      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+      className={`w-full py-3.5 rounded-xl text-base font-bold tracking-wide transition-all duration-200 ${
         isDisabled
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-          : "bg-indigo-600 text-white hover:bg-indigo-700"
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98] shadow-lg shadow-red-600/30"
       } ${className || ""}`}
     >
       {label}

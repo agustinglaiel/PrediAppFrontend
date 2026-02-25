@@ -9,8 +9,22 @@ const PastEvents = ({
   onCloseModal,
   onContinueToLogin,
   emptyMessage = "No hay eventos pasados registrados.",
+  showYearHeading = true,
 }) => {
-  const hasEvents = events.some((group) => group.events.length > 0);
+  // Support two formats:
+  // 1) Year-grouped: [{ year, events: [...] }, ...]
+  // 2) Flat events:  [{ country, circuit, sessions, ... }, ...]
+  const isYearGrouped =
+    Array.isArray(events) &&
+    events.length > 0 &&
+    events[0]?.year !== undefined &&
+    Array.isArray(events[0]?.events);
+
+  const flatEvents = isYearGrouped
+    ? events.flatMap((group) => group.events || [])
+    : events;
+
+  const hasEvents = flatEvents.length > 0;
 
   if (!hasEvents) {
     return (
@@ -50,34 +64,62 @@ const PastEvents = ({
     );
   }
 
-  return (
-    <div className="px-4 mt-8 space-y-8">
-      {events.map((group) => (
-        <div key={group.year}>
-          <h3 className="text-center text-lg font-semibold text-gray-700 mb-4">
-            {group.year}
-          </h3>
-          <div className="space-y-6">
-            {group.events.map((event, index) => (
-              <EventCard
-                key={`${group.year}-${event.weekendId ?? index}`}
-                country={event.country}
-                circuit={event.circuit}
-                location={event.location}
-                sessions={event.sessions}
-                flagUrl={event.flagUrl}
-                circuitLayoutUrl={event.circuitLayoutUrl}
-                weekendId={event.weekendId}
-                isPastEvent={true}
-                onPronosticoClick={onPronosticoClick}
-                isModalOpen={isModalOpen}
-                onCloseModal={onCloseModal}
-                onContinueToLogin={onContinueToLogin}
-              />
-            ))}
+  // If year-grouped and showYearHeading, render with year headers
+  if (isYearGrouped && showYearHeading) {
+    return (
+      <div className="px-4 mt-8 space-y-8">
+        {events.map((group) => (
+          <div key={group.year}>
+            <h3 className="text-center text-lg font-semibold text-gray-700 mb-4">
+              {group.year}
+            </h3>
+            <div className="space-y-6">
+              {(group.events || []).map((event, index) => (
+                <EventCard
+                  key={`${group.year}-${event.weekendId ?? index}`}
+                  country={event.country}
+                  circuit={event.circuit}
+                  location={event.location}
+                  sessions={event.sessions}
+                  flagUrl={event.flagUrl}
+                  circuitLayoutUrl={event.circuitLayoutUrl}
+                  weekendId={event.weekendId}
+                  isPastEvent={true}
+                  onPronosticoClick={onPronosticoClick}
+                  isModalOpen={isModalOpen}
+                  onCloseModal={onCloseModal}
+                  onContinueToLogin={onContinueToLogin}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+    );
+  }
+
+  // Flat rendering (no year headings)
+  return (
+    <div className="px-4 mt-8">
+      <div className="space-y-6">
+        {flatEvents.map((event, index) => (
+          <EventCard
+            key={event.weekendId ?? index}
+            country={event.country}
+            circuit={event.circuit}
+            location={event.location}
+            sessions={event.sessions}
+            flagUrl={event.flagUrl}
+            circuitLayoutUrl={event.circuitLayoutUrl}
+            weekendId={event.weekendId}
+            isPastEvent={true}
+            onPronosticoClick={onPronosticoClick}
+            isModalOpen={isModalOpen}
+            onCloseModal={onCloseModal}
+            onContinueToLogin={onContinueToLogin}
+          />
+        ))}
+      </div>
     </div>
   );
 };

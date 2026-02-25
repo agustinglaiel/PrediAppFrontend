@@ -19,7 +19,7 @@ export const createProdeCarrera = async (userId, prodeData) => {
       p4: +prodeData.p4,
       p5: +prodeData.p5,
       vsc: !!prodeData.vsc,
-      sc: !!prodeData.sc,
+      sf: !!prodeData.sf,
       dnf: +prodeData.dnf,
     };
 
@@ -114,9 +114,12 @@ async function refreshAndPersistScore() {
   if (!me?.id) return; 
   try {
     const { status, data } = await getUserScoreByUserId(me.id);
-    if (status === 200 && data && typeof data.score === "number") {
-      setStoredScore(data.score);
-      return;
+    if (status === 200 && data) {
+      const score = typeof data.total_score === "number" ? data.total_score : (typeof data.score === "number" ? data.score : null);
+      if (score !== null) {
+        setStoredScore(score, data.season_year);
+        return;
+      }
     }
   } catch {
   }

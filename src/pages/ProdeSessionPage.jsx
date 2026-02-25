@@ -6,10 +6,10 @@ import { AuthContext } from "../contexts/AuthContext";
 import Header from "../components/Header";
 import NavigationBar from "../components/NavigationBar";
 import SessionHeader from "../components/pronosticos/SessionHeader";
-import Top3FormHeader from "../components/pronosticos/Top3FormHeader";
 import DriverSelect from "../components/pronosticos/DriverSelect";
 import SubmitButton from "../components/pronosticos/SubmitButton";
 import WarningModal from "../components/pronosticos/WarningModal";
+import Top3FormHeader from "../components/pronosticos/Top3FormHeader";
 
 import useSessionProde from "../hooks/useSessionProde";
 
@@ -63,8 +63,34 @@ const ProdeSessionPage = () => {
     sessionDetails.sessionType
   );
 
-  if (loadingDrivers) return <div>Cargando pilotos...</div>;
-  if (driversError) return <div>{driversError}</div>;
+  if (loadingDrivers) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <NavigationBar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-3 border-gray-300 border-t-red-500 rounded-full animate-spin" />
+            <span className="text-sm text-gray-500">Cargando pilotos...</span>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (driversError) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <NavigationBar />
+        <main className="flex-grow flex items-center justify-center px-4">
+          <div className="text-center p-6 bg-red-50 rounded-xl border border-red-200">
+            <p className="text-red-600 font-medium">{driversError}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const submitLabel = submitting
     ? "Enviando..."
@@ -73,10 +99,10 @@ const ProdeSessionPage = () => {
     : "Enviar pronóstico";
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
-      <main className="flex-grow pt-12 pb-24 px-4">
+      <main className="flex-grow pt-12 pb-28 px-4 max-w-lg mx-auto w-full">
         <SessionHeader
           countryName={sessionDetails.countryName}
           flagUrl={sessionDetails.flagUrl}
@@ -86,39 +112,30 @@ const ProdeSessionPage = () => {
         />
 
         {!isRace && (
-          <div className="mt-4 p-4 bg-white rounded-lg shadow-md">
+          <form onSubmit={submit} className="mt-5 space-y-4">
+            {/* Instrucciones */}
             <Top3FormHeader sessionType={sessionDetails.sessionType} />
-            <form onSubmit={submit} className="flex flex-col gap-4">
-              <DriverSelect
-                position="P1"
-                value={formData.P1}
-                onChange={(val) => handleDriverChange("P1", val)}
-                disabled={showWarningModal || submitting}
-                drivers={driversFor.P1}
-              />
-              <DriverSelect
-                position="P2"
-                value={formData.P2}
-                onChange={(val) => handleDriverChange("P2", val)}
-                disabled={showWarningModal || submitting}
-                drivers={driversFor.P2}
-              />
-              <DriverSelect
-                position="P3"
-                value={formData.P3}
-                onChange={(val) => handleDriverChange("P3", val)}
-                disabled={showWarningModal || submitting}
-                drivers={driversFor.P3}
-              />
 
-              <SubmitButton
-                isDisabled={!isFormComplete || showWarningModal || submitting}
-                onClick={submit}
-                label={submitLabel}
-                className="mt-4"
-              />
-            </form>
-          </div>
+            {/* Selecciones de pilotos */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-1">
+              {["P1", "P2", "P3"].map((pos) => (
+                <DriverSelect
+                  key={pos}
+                  position={pos}
+                  value={formData[pos]}
+                  onChange={(val) => handleDriverChange(pos, val)}
+                  disabled={showWarningModal || submitting}
+                  drivers={driversFor[pos]}
+                />
+              ))}
+            </div>
+
+            {/* Botón Enviar */}
+            <SubmitButton
+              isDisabled={!isFormComplete || showWarningModal || submitting}
+              label={submitLabel}
+            />
+          </form>
         )}
 
         <WarningModal isOpen={showWarningModal} onClose={closeWarningModal} />

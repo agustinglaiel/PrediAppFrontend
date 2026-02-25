@@ -4,8 +4,6 @@ import { getPastSessions } from "../api/sessions";
 import { getAllDrivers } from "../api/drivers";
 import {
   getResultsOrderedByPosition,
-  fetchResultsFromExternalAPI,
-  FetchNonRaceResultsExternalAPI,
   saveSessionResultsAdmin,
 } from "../api/results";
 
@@ -195,34 +193,6 @@ export default function useAdminResultsManagement() {
     }
   };
 
-  // Obtener resultados desde API externa (por sesión).
-  // No usamos setLoading(true) global para no bloquear el resto de la UI.
-  const handleGetResults = async (sessionId, isNonRace = false) => {
-    try {
-      setError(null);
-      // feedback local (undefined = "cargando/checando")
-      updateSessionHasResults(sessionId, undefined);
-
-      if (isNonRace) {
-        await FetchNonRaceResultsExternalAPI(sessionId);
-      } else {
-        await fetchResultsFromExternalAPI(sessionId);
-      }
-
-      // Luego de traerlos, refrescamos SOLO esa sesión
-      await refreshSingleSessionHasResults(sessionId);
-    } catch (err) {
-      setError(
-        err.message ||
-          (isNonRace
-            ? "Error al obtener los resultados no de carrera desde la API externa."
-            : "Error al obtener los resultados desde la API externa.")
-      );
-      setTimeout(() => setError(null), 5000);
-      updateSessionHasResults(sessionId, false);
-    }
-  };
-
   const handleSaveResults = async (results) => {
     const sessionId = selectedSession?.id;
     try {
@@ -234,8 +204,10 @@ export default function useAdminResultsManagement() {
       // Refrescamos SOLO esa sesión
       await refreshSingleSessionHasResults(sessionId);
     } catch (err) {
-      setError(err.message || "Error al guardar los resultados.");
+      const msg = err.message || "Error al guardar los resultados.";
+      setError(msg);
       setTimeout(() => setError(null), 5000);
+      throw err; // re-throw so the modal knows it failed
     }
   };
 
@@ -254,7 +226,6 @@ export default function useAdminResultsManagement() {
     drivers,
     handleYearChange,
     handleEditClick,
-    handleGetResults,
     handleSaveResults,
     handleCancel,
   };

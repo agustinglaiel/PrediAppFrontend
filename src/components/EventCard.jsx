@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { FiChevronDown } from "react-icons/fi";
 import SessionItem from "./SessionItem";
 
 const pad = (value) => value.toString().padStart(2, "0");
@@ -48,6 +49,7 @@ const EventCard = ({
   onUpdateProdeClick,
   isLoggedIn,
   initiallyExpanded,
+  showAllSessionButtons = false,
 }) => {
   const sortedSessions = [...sessions].sort((a, b) => {
     const dateA = new Date(a.date_start);
@@ -56,7 +58,7 @@ const EventCard = ({
   });
 
   const defaultExpanded =
-    typeof initiallyExpanded === "boolean" ? initiallyExpanded : !!isAdmin;
+    typeof initiallyExpanded === "boolean" ? initiallyExpanded : false;
   const [isOpen, setIsOpen] = useState(defaultExpanded);
 
   useEffect(() => {
@@ -88,45 +90,55 @@ const EventCard = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden max-w-full border border-gray-100">
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        aria-controls={accordionContentId}
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="w-full p-4 flex items-center text-left bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
-      >
-  <div className="w-16 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-          {flagUrl && (
-            <img
-              src={flagUrl}
-              alt={`${country} flag`}
-              className="w-full h-auto"
-            />
-          )}
-        </div>
-        <div className="ml-4 flex-grow">
-          <h3 className="font-bold text-xl text-black">{country}</h3>
-          <p className="text-sm text-black">{displayLocation}</p>
-          {weekendRange && (
-            <p className="text-sm text-black">{weekendRange}</p>
-          )}
-        </div>
-        <div className="ml-auto flex items-center">
-          {circuitLayoutUrl && (
-            <div className="bg-white rounded-lg p-2 w-28 h-20 flex items-center justify-center">
+    <div className="relative mb-6 max-w-full">
+      <div className="relative bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={accordionContentId}
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="w-full p-4 flex items-center text-left bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-500"
+        >
+          <div className="w-16 h-12 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+            {flagUrl && (
               <img
-                src={circuitLayoutUrl}
-                alt={`${circuit} layout`}
-                className="w-full h-full object-contain"
+                src={flagUrl}
+                alt={`${country} flag`}
+                className="w-full h-auto"
               />
-            </div>
-          )}
-        </div>
-      </button>
+            )}
+          </div>
+          <div className="ml-4 flex-grow">
+            <h3 className="font-bold text-xl text-black">{country}</h3>
+            <p className="text-sm text-black">{displayLocation}</p>
+            {weekendRange && (
+              <p className="text-sm text-black">{weekendRange}</p>
+            )}
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            {circuitLayoutUrl && (
+              <div className="bg-white rounded-lg p-2 w-28 h-20 flex items-center justify-center">
+                <img
+                  src={circuitLayoutUrl}
+                  alt={`${circuit} layout`}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+            <FiChevronDown
+              className={`text-gray-400 text-xl flex-shrink-0 transition-transform duration-300 ${
+                isOpen ? "rotate-180" : "rotate-0"
+              }`}
+            />
+          </div>
+        </button>
 
-      {isOpen && (
-        <div id={accordionContentId} className="border-t border-gray-100">
+        <div
+          id={accordionContentId}
+          className={`border-t border-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 border-t-0"
+          }`}
+        >
           {sortedSessions.map((session, index) => (
             <SessionItem
               key={index}
@@ -154,10 +166,11 @@ const EventCard = ({
               showGetResultsButton={showGetResultsButton}
               onUpdateProdeClick={onUpdateProdeClick}
               isLoggedIn={isLoggedIn}
+              showAllSessionButtons={showAllSessionButtons}
             />
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 };

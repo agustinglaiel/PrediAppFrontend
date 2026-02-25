@@ -42,7 +42,7 @@ export const signUp = async (userData) => {
     setAuthToken(token);
 
     // Devolver la info pública (sin token)
-    const { id, first_name, last_name, username, email, role, score, created_at } =
+    const { id, first_name, last_name, username, email, role, score, season_year, created_at } =
       data;
     return {
       token,
@@ -53,6 +53,7 @@ export const signUp = async (userData) => {
       email,
       role,
       score,
+      season_year,
       created_at,
     };
   } catch (err) {
@@ -75,6 +76,7 @@ export const login = async (userData) => {
       email,
       role,
       score,
+      season_year,
       created_at,
     } = data;
     if (!token) throw new Error("No se recibió token en login");
@@ -93,6 +95,7 @@ export const login = async (userData) => {
       email,
       role,
       score,
+      season_year,
       created_at,
     };
   } catch (err) {
@@ -150,17 +153,19 @@ export const deleteUserById = async (id) => {
   }
 };
 
-export const getUserScoreByUserId = async (userId) => {
+export const getUserScoreByUserId = async (userId, seasonYear) => {
   try {
-    const res = await axios.get(`/users/${userId}/score`, {
+    const params = seasonYear ? { season_year: seasonYear } : {};
+    const res = await axios.get(`/users/${userId}/season-score`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
+      params,
     });
     return { status: res.status, data: res.data };
   } catch (error) {
     if (error.response?.status === 404) {
       return { status: 404, data: null };
     }
-    console.error("Error fetching user score:", error);
+    console.error("Error fetching user season score:", error);
     const err = new Error(
       error.response?.data?.message ||
         "Error al obtener el puntaje del usuario. Intenta nuevamente."
@@ -240,6 +245,7 @@ export function getUserFromToken() {
       email,
       role,
       score,
+      season_year,
       exp,
     } = jwtDecode(token);
     return {
@@ -250,6 +256,7 @@ export function getUserFromToken() {
       email,
       role,
       score,
+      seasonYear: season_year ?? null,
       exp,
     };
   } catch {

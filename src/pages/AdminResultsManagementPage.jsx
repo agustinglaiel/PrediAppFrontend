@@ -3,6 +3,7 @@ import React from "react";
 import Header from "../components/Header";
 import EventCard from "../components/EventCard";
 import UpdateResults from "../components/admin/UpdateResults";
+import YearSelector from "../components/YearSelector";
 import useAdminResultsManagement from "../hooks/useAdminResultsManagement";
 
 const AdminResultsManagementPage = () => {
@@ -16,45 +17,42 @@ const AdminResultsManagementPage = () => {
     drivers,
     handleYearChange,
     handleEditClick,
-    handleGetResults,
     handleSaveResults,
     handleCancel,
   } = useAdminResultsManagement();
 
+  const currentYear = new Date().getFullYear();
+  const allowedYears = [...Array(10).keys()].map((i) => currentYear - i);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <main className="flex-grow pt-24 px-4">
-        <h1 className="text-3xl font-bold mb-6">Gestión de Resultados</h1>
+      <main className="flex-grow pt-20 pb-24">
+        {/* Header row: Title + Year dropdown */}
+        <div className="max-w-6xl mx-auto px-4 mb-6">
+          <div className="flex items-center justify-between max-w-lg mx-auto">
+            <h1 className="text-xl font-bold text-gray-800">Gestión de Resultados</h1>
+            <YearSelector
+              selectedYear={selectedYear}
+              years={allowedYears}
+              onChange={(year) => handleYearChange(year)}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            <span>{error}</span>
+          <div className="max-w-6xl mx-auto px-4 mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative">
+              <span>{error}</span>
+            </div>
           </div>
         )}
-        <div className="mb-4">
-          <label className="mr-2 text-gray-700">Seleccionar Año:</label>
-          <select
-            value={selectedYear}
-            onChange={(e) => handleYearChange(e.target.value)}
-            className="p-2 border rounded"
-            disabled={loading}
-          >
-            {[...Array(10).keys()].map((i) => {
-              const year = new Date().getFullYear() - i;
-              return (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-        <div className="px-4 mt-12">
-          <h2 className="text-2xl font-bold mb-4">
-            Sesiones Pasadas: {selectedYear}
-          </h2>
+
+        {/* Events */}
+        <div className="px-4 mt-4">
           {loading ? (
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center py-12">
               <svg
                 className="animate-spin h-8 w-8 text-gray-600"
                 xmlns="http://www.w3.org/2000/svg"
@@ -77,11 +75,29 @@ const AdminResultsManagementPage = () => {
               </svg>
             </div>
           ) : events.length === 0 ? (
-            <p className="text-gray-600">
-              No hay sesiones pasadas para este año.
-            </p>
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-100 to-gray-50 px-4 py-1.5 rounded-full mb-4 border border-gray-200/50">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    {selectedYear}
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  No hay sesiones
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  No hay sesiones pasadas para este año
+                </p>
+                <div className="mt-6 flex items-center justify-center gap-2">
+                  <span className="w-8 h-0.5 bg-gradient-to-r from-transparent to-red-200 rounded-full"></span>
+                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                  <span className="w-8 h-0.5 bg-gradient-to-l from-transparent to-red-200 rounded-full"></span>
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="space-y-6">
               {events.map((event, index) => (
                 <EventCard
                   key={index}
@@ -94,15 +110,14 @@ const AdminResultsManagementPage = () => {
                   weekendId={event.weekendId}
                   isAdmin={true}
                   onEditClick={handleEditClick}
-                  onGetResults={handleGetResults}
-                  editButtonText="Actualizar resultado"
-                  showGetResultsButton={true}
+                  editButtonText="Actualizar"
                 />
               ))}
             </div>
           )}
         </div>
       </main>
+
       {isModalOpen && selectedSession && (
         <UpdateResults
           session={selectedSession}
@@ -111,9 +126,6 @@ const AdminResultsManagementPage = () => {
           onCancel={handleCancel}
         />
       )}
-      <footer className="bg-gray-200 text-gray-700 text-center py-3 text-sm">
-        <p>© 2026 PrediApp</p>
-      </footer>
     </div>
   );
 };

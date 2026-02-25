@@ -12,34 +12,34 @@ const DriverDisplay = ({ driver, onEdit }) => {
   const teamName = driver.current_team?.team_name || driver.team_name || "";
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 w-full max-w-xs mx-auto">
-      <div className="w-full h-40 overflow-hidden">
+    <div
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center gap-4 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      onClick={() => onEdit(driver)}
+    >
+      {/* Headshot */}
+      <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
         <img
           src={highResUrl}
           alt={`${fullName} headshot`}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           onError={(e) => {
             e.target.src = headshotUrl;
           }}
         />
       </div>
-      <div className="p-3 text-center">
-        <h3 className="font-bold text-lg mb-1">{fullName}</h3>
-        <p className="text-gray-600 text-sm mb-1">
-          <span className="font-semibold">Nº:</span> {driver.driver_number}
-        </p>
-        <p className="text-gray-600 text-sm mb-1">
-          <span className="font-semibold">País:</span> {driver.country_code}
-        </p>
-        <p className="text-gray-600 text-sm">
-          <span className="font-semibold">Equipo:</span> {teamName}
-        </p>
-        <button
-          onClick={() => onEdit(driver)}
-          className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-        >
-          Editar
-        </button>
+
+      {/* Info */}
+      <div className="flex-grow min-w-0">
+        <h3 className="font-semibold text-sm text-gray-900 truncate">{fullName}</h3>
+        <p className="text-xs text-gray-500 truncate">{teamName}</p>
+      </div>
+
+      {/* Number + Country */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <span className="text-xs text-gray-400 font-medium">{driver.country_code}</span>
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-sm font-bold text-gray-700">
+          {driver.driver_number}
+        </span>
       </div>
     </div>
   );

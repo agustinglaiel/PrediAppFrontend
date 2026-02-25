@@ -3,6 +3,7 @@ import { FiPlus } from "react-icons/fi";
 import Header from "../components/Header";
 import EventCard from "../components/EventCard";
 import SessionForm from "../components/admin/SessionForm";
+import YearSelector from "../components/YearSelector";
 import {
   getSessionById,
   updateSession,
@@ -111,7 +112,7 @@ const AdminSessionManagementPage = () => {
       <Header />
 
       {/* Floating "+" button */}
-      <div className="fixed bottom-20 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => {
             setIsEditing(false);
@@ -126,69 +127,48 @@ const AdminSessionManagementPage = () => {
       </div>
 
       <main className="flex-grow pt-20 pb-24">
-        {/* Year selector — underline style */}
-        <div className="max-w-6xl mx-auto px-4 mb-4">
-          <div className="max-w-xs mx-auto">
-            <div className="flex items-center gap-3">
-              {allowedYears.map((year) => {
-                const isActive = selectedYear === year;
-                return (
-                  <button
-                    key={year}
-                    onClick={() => setSelectedYear(year)}
-                    className={`relative flex-1 py-2 text-center text-sm font-semibold tracking-wide transition-all duration-300 ease-in-out ${
-                      isActive
-                        ? "text-red-600"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}
-                  >
-                    <span className="relative z-10">{year}</span>
-                    <span
-                      className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-full transition-all duration-300 ease-in-out ${
-                        isActive
-                          ? "w-8 opacity-100"
-                          : "w-0 opacity-0"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Tab selector — upcoming / past */}
+        {/* Combined: Tab selector + Year dropdown */}
         <div className="max-w-6xl mx-auto px-4 mb-6">
-          <div className="relative bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm border border-white/20 shadow-xl rounded-xl p-1.5 overflow-hidden max-w-md mx-auto">
-            <div
-              className={`absolute top-1.5 bottom-1.5 bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-lg transition-all duration-300 ease-in-out ${
-                activeTab === "upcoming"
-                  ? "left-1.5 right-1/2 mr-0.75"
-                  : "left-1/2 right-1.5 ml-0.75"
-              }`}
-            />
-            <div className="relative flex">
-              <button
-                onClick={() => setActiveTab("upcoming")}
-                className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
+          <div className="flex items-center gap-3 max-w-lg mx-auto">
+            {/* Tab selector */}
+            <div className="relative flex-1 bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm border border-white/20 shadow-xl rounded-xl p-1.5 overflow-hidden">
+              <div
+                className={`absolute top-1.5 bottom-1.5 bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-lg transition-all duration-300 ease-in-out ${
                   activeTab === "upcoming"
-                    ? "text-white"
-                    : "text-gray-700 hover:text-red-600"
+                    ? "left-1.5 right-1/2 mr-0.75"
+                    : "left-1/2 right-1.5 ml-0.75"
                 }`}
-              >
-                <span className="relative z-10">Próximas sesiones</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("past")}
-                className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
-                  activeTab === "past"
-                    ? "text-white"
-                    : "text-gray-700 hover:text-red-600"
-                }`}
-              >
-                <span className="relative z-10">Sesiones pasadas</span>
-              </button>
+              />
+              <div className="relative flex">
+                <button
+                  onClick={() => setActiveTab("upcoming")}
+                  className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
+                    activeTab === "upcoming"
+                      ? "text-white"
+                      : "text-gray-700 hover:text-red-600"
+                  }`}
+                >
+                  <span className="relative z-10">Próximas</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("past")}
+                  className={`relative flex-1 py-2.5 px-4 text-center font-semibold text-sm transition-all duration-300 ease-in-out rounded-lg ${
+                    activeTab === "past"
+                      ? "text-white"
+                      : "text-gray-700 hover:text-red-600"
+                  }`}
+                >
+                  <span className="relative z-10">Pasadas</span>
+                </button>
+              </div>
             </div>
+
+            {/* Year dropdown */}
+            <YearSelector
+              selectedYear={selectedYear}
+              years={allowedYears}
+              onChange={(year) => setSelectedYear(year)}
+            />
           </div>
         </div>
 

@@ -73,8 +73,22 @@ const ClassificationBoard = () => {
     );
   }, [driversDirectory]);
 
+  // Filtrar la clasificación para mostrar solo pilotos activos
+  const activeDriversData = useMemo(() => {
+    // Si no tenemos el directorio de pilotos, mostramos todos (fallback)
+    if (!driversDirectory.length) return driversData;
+
+    return driversData.filter((driver) => {
+      const driverId = driver.driver_id ?? driver.id;
+      const directoryDriver = driversById.get(driverId);
+      // Solo incluir si el piloto está marcado como activo en el directorio
+      // Si no se encuentra en el directorio, lo excluimos por precaución
+      return directoryDriver?.active === true;
+    });
+  }, [driversData, driversDirectory, driversById]);
+
   const renderDriversContent = () => {
-    if (!driversData.length) {
+    if (!activeDriversData.length) {
       return (
         <ClassificationEmptyState
           year={currentYear}
@@ -86,7 +100,7 @@ const ClassificationBoard = () => {
 
     return (
       <DriversClassificationTable
-        drivers={driversData}
+        drivers={activeDriversData}
         driversById={driversById}
       />
     );

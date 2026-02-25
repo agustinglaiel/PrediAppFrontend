@@ -5,11 +5,13 @@ import {
   logout as apiLogout,
   setAuthToken,
   getUserById,
+  getUserScoreByUserId,
 } from "../api/users";
 import {
   setStoredScore,
   clearStoredScore,
   getStoredScore,
+  getStoredSeasonYear,
   SCORE_UPDATED_EVENT,
   SCORE_KEY,
 } from "../utils/scoreStorage";
@@ -24,6 +26,7 @@ const normalizeUser = (data) => ({
   email: data.email,
   role: data.role,
   score: data.score,
+  seasonYear: data.season_year ?? data.seasonYear ?? null,
   avatarUrl: data.avatar_url || null,
 });
 
@@ -50,14 +53,26 @@ export const AuthProvider = ({ children }) => {
     if (!user?.id) return;
     try {
       const fresh = await getUserById(user.id);
-      setUser(normalizeUser(fresh));
+      const normalized = normalizeUser(fresh);
+
+      // Fetch current season score from the new endpoint
+      try {
+        const scoreRes = await getUserScoreByUserId(user.id);
+        if (scoreRes.status === 200 && scoreRes.data) {
+          normalized.score = scoreRes.data.total_score ?? scoreRes.data.score ?? 0;
+          normalized.seasonYear = scoreRes.data.season_year ?? normalized.seasonYear;
+        }
+      } catch {
+        // If season score fetch fails, keep whatever we had
+      }
+
+      setUser(normalized);
       setIsAuthenticated(true);
-      if (typeof fresh?.score === "number") {
-        setStoredScore(fresh.score);
+      if (typeof normalized.score === "number") {
+        setStoredScore(normalized.score, normalized.seasonYear);
       }
     } catch (err) {
       console.warn("Error refrescando user:", err);
-      // opcional: si 401, hacer logout automático
     }
   }, [user?.id]);
 
@@ -75,6 +90,7 @@ export const AuthProvider = ({ children }) => {
           email,
           role,
           score,
+          season_year,
         } = payload;
 
         // 1) Seteamos el usuario del JWT
@@ -86,13 +102,14 @@ export const AuthProvider = ({ children }) => {
           email,
           role,
           score,
+          seasonYear: season_year ?? getStoredSeasonYear(),
         });
         setIsAuthenticated(true);
 
         // 2) Semilla de score en storage SOLO si no hay uno ya persistido
         const already = localStorage.getItem(SCORE_KEY);
         if (already === null) {
-          setStoredScore(score ?? 0);
+          setStoredScore(score ?? 0, season_year);
         }
 
         // 3) Alinear user.score en memoria al valor del storage si difiere
@@ -108,7 +125,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    const { token, score: responseScore } = userData;
+    const { token, score: responseScore, season_year: responseSeasonYear } = userData;
     localStorage.setItem("jwtToken", token);
     setAuthToken(token);
     const payload = parseJwt(token);
@@ -121,11 +138,14 @@ export const AuthProvider = ({ children }) => {
         email,
         role,
         score,
+        season_year,
       } = payload;
 
-      const resolvedScore = typeof score === "number" ? score : responseScore;
+      // Priorizamos el score y season_year del body de la respuesta sobre el JWT
+      const resolvedScore = typeof responseScore === "number" ? responseScore : (typeof score === "number" ? score : 0);
+      const resolvedSeasonYear = responseSeasonYear ?? season_year ?? null;
 
-      // 1) Seteamos el usuario del JWT
+      // 1) Seteamos el usuario
       setUser({
         id: user_id,
         firstName: first_name,
@@ -134,20 +154,12 @@ export const AuthProvider = ({ children }) => {
         email,
         role,
         score: resolvedScore,
+        seasonYear: resolvedSeasonYear,
       });
       setIsAuthenticated(true);
 
-      // 2) Semilla en storage SOLO si no existe aún
-      const already = localStorage.getItem(SCORE_KEY);
-      if (already === null) {
-        setStoredScore(resolvedScore ?? 0);
-      }
-
-      // 3) Alinear user.score en memoria al valor del storage si difiere
-      const stored = getStoredScore();
-      if (typeof stored === "number" && stored !== (resolvedScore ?? 0)) {
-        setUser((prev) => (prev ? { ...prev, score: stored } : prev));
-      }
+      // 2) Siempre actualizar el score en storage con el valor fresco del login/signup
+      setStoredScore(resolvedScore, resolvedSeasonYear);
     }
   };
 
