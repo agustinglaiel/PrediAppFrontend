@@ -26,12 +26,14 @@ import ScoreboardPage from "./pages/ScoreboardPage";
 import RankingPage from "./pages/RankingPage";
 import ClasificationPage from "./pages/ClasificationPage";
 import HistoricalWinnersPage from "./pages/HistoricalWinnersPage";
+import HomePageAux from "./pages/HomePageAux";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        {/* <Route path="/" element={<HomePage />} /> */}
+        <Route path="/" element={<HomePageAux />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/ranking" element={<RankingPage />} />
