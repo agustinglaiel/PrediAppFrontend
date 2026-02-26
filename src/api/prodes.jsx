@@ -2,8 +2,8 @@ import axios from "axios";
 import { getUserFromToken, getUserScoreByUserId, getUserById } from "../api/users";
 import { setStoredScore } from "../utils/scoreStorage";
 
-axios.defaults.baseURL = "http://localhost:8080/api";
-// axios.defaults.baseURL = "/api";
+// axios.defaults.baseURL = "http://localhost:8080/api";
+axios.defaults.baseURL = "/api";
 
 // Crear un prode de carrera
 export const createProdeCarrera = async (userId, prodeData) => {
