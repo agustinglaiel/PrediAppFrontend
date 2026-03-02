@@ -58,7 +58,19 @@ export const signUp = async (userData) => {
     };
   } catch (err) {
     console.error("Signup error:", err.response?.data || err.message);
-    throw new Error(err.response?.data?.error || "Error al registrarse");
+  const backendMessage = err.response?.data?.message;
+  const backendError = err.response?.data?.error;
+  const normalizedMessage = backendMessage?.toLowerCase();
+
+    if (backendError === "bad_request") {
+      throw new Error(
+        backendMessage || "Datos inválidos. Revisá los campos e intentá de nuevo."
+      );
+    }
+
+    throw new Error(
+      backendMessage || "Error al registrarse. Intentá de nuevo más tarde."
+    );
   }
 };
 
@@ -100,7 +112,24 @@ export const login = async (userData) => {
     };
   } catch (err) {
     console.error("Login error:", err.response?.data || err.message);
-    throw new Error(err.response?.data?.error || "Error al iniciar sesión");
+    const status = err.response?.status;
+    const backendMessage = err.response?.data?.message;
+    const backendError = err.response?.data?.error;
+
+    // Mapear errores del backend a mensajes amigables
+    if (status === 400 || backendError === "bad_request") {
+      throw new Error("El mail o la contraseña son incorrectos. Por favor, intentá de nuevo.");
+    }
+    if (status === 404 || backendError === "not_found") {
+      throw new Error("No se encontró una cuenta con ese email.");
+    }
+    if (status === 500 || backendError === "internal_server_error") {
+      throw new Error("Error interno del servidor. Intentá de nuevo más tarde.");
+    }
+
+    throw new Error(
+      "Error al iniciar sesión. Verificá tus credenciales o contactá al soporte."
+    );
   }
 };
 

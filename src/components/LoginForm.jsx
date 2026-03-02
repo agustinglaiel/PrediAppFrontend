@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { login as apiLogin } from "../api/users";
@@ -8,6 +8,25 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const errorTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (!error) return;
+
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
+
+    errorTimeoutRef.current = setTimeout(() => {
+      setError(null);
+    }, 5000);
+
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, [error]);
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -16,6 +35,9 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
       setError(null);
       // 1) Llamamos al API, que retorna { token, id, first_name, … }
       const userData = await apiLogin(credentials);
@@ -28,9 +50,20 @@ const LoginForm = () => {
         navigate("/", { replace: true });
       }
     } catch (err) {
+      const rawMessage = err?.message || "";
+      const normalizedMessage = rawMessage.toLowerCase();
+
+      if (
+        normalizedMessage.includes("bad_request") ||
+        normalizedMessage.includes("invalid credentials")
+      ) {
+        setError("El mail o la contraseña son incorrectos. Por favor, intentá de nuevo.");
+        return;
+      }
+
       setError(
-        err.message ||
-          "Error al iniciar sesión. Verifica tus credenciales o contacta al soporte."
+        rawMessage ||
+          "Error al iniciar sesión. Verificá tus credenciales o contactá al soporte."
       );
     }
   };
