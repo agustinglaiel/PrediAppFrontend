@@ -1,99 +1,111 @@
 // src/pages/MyProfilePage.jsx
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams }     from "react-router-dom";
-import Header                          from "../components/Header";
-import NavigationBar                   from "../components/NavigationBar";
-import MessageStatus                   from "../components/MessageStatus";
-import { AuthContext }                 from "../contexts/AuthContext";
-import useUser                         from "../hooks/useUser";
-import UserCardInfo                    from "../components/UserCardInfo";
-import { updateUserById, uploadProfilePicture } from "../api/users";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import NavigationBar from "../components/NavigationBar";
+import MessageStatus from "../components/MessageStatus";
+import UserCardInfo from "../components/UserCardInfo";
+import { AuthContext } from "../contexts/AuthContext";
+import useUser from "../hooks/useUser";
+import { updateUserById } from "../api/users";
 
 const MyProfilePage = () => {
-  const { user: authUser, isAuthenticated, loading: authLoading } =
-    useContext(AuthContext);
-  const { userId: paramId } = useParams();
-  const userId = Number(paramId);
-  const sameUser = isAuthenticated && authUser?.id === userId;
+  const {
+    user: authUser,
+    isAuthenticated,
+    loading: authLoading,
+    refreshUser,
+  } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Estados para mensajes
-  const [msgText, setMsgText]     = useState("");
+  // Mensajes de estado
+  const [msgText, setMsgText] = useState("");
   const [msgStatus, setMsgStatus] = useState(200);
 
-  // redirecciones seguras
+  // Redirigir si no esta autenticado
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
       navigate("/login", { replace: true });
-    } else if (!sameUser) {
-      navigate(`/profile/${authUser.id}`, { replace: true });
     }
-  }, [authLoading, isAuthenticated, sameUser, authUser, navigate]);
+  }, [authLoading, isAuthenticated, navigate]);
 
-  // datos de usuario
-  const { user, loading: userLoading, error: userError } =
-    useUser(sameUser ? userId : null);
+  // Traer datos completos del usuario (incluye phoneNumber, etc.)
+  const {
+    user: fullUser,
+    loading: userLoading,
+    error: userError,
+  } = useUser(authUser?.id ?? null);
 
+  // Mergear datos del AuthContext (score actualizado) con datos completos
   const [profile, setProfile] = useState(null);
   useEffect(() => {
-    if (user) setProfile(user);
-  }, [user]);
-
-  // SUBIDA DE IMAGEN: sólo actualiza preview tras éxito, y muestra error
-  const handleImageUpload = async file => {
-    try {
-      const res = await uploadProfilePicture(authUser.id, file);
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = () => reject(new Error("Reader error"));
-        reader.readAsDataURL(file);
+    if (fullUser && authUser) {
+      setProfile({
+        ...fullUser,
+        score: authUser.score ?? fullUser.score,
       });
-      setProfile(p => ({ ...p, profileImageUrl: dataUrl }));
-    } catch (err) {
-      setMsgStatus(err.status || 500);
-      setMsgText(err.message || "Error subiendo la imagen");
     }
-  };
+  }, [fullUser, authUser]);
 
-  // GUARDAR CAMBIOS (texto): muestra mensaje en verde/rojo
-  const handleSave = async updated => {
+  // Guardar cambios del perfil
+  const handleSave = async (updated) => {
     try {
       await updateUserById(authUser.id, {
-        first_name:   updated.firstName,
-        last_name:    updated.lastName,
-        username:     updated.username,
-        email:        updated.email,
+        first_name: updated.firstName,
+        last_name: updated.lastName,
+        username: updated.username,
+        email: updated.email,
         phone_number: updated.phoneNumber,
       });
-      setProfile(p => ({ ...p, ...updated }));
+      setProfile((p) => ({ ...p, ...updated }));
+      setMsgStatus(200);
+      setMsgText("Perfil actualizado correctamente");
+      // Refrescar los datos del contexto global
+      refreshUser();
     } catch (err) {
       console.error("Error al guardar perfil:", err);
       setMsgStatus(err.status || 500);
-      setMsgText(err.message);
+      setMsgText(err.message || "Error al guardar los cambios");
     }
   };
 
-  if (authLoading || !sameUser) return null;
+  if (authLoading || !isAuthenticated) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
       <NavigationBar />
 
-      <main className="flex-grow pt-16 pb-24 px-4 text-center">
-        {userLoading && <p>Cargando perfil…</p>}
-        {userError && (
-          <p className="text-red-600">Error: {userError.message}</p>
-        )}
-        {!userLoading && profile && (
-          <UserCardInfo
-            user={profile}
-            onSave={handleSave}
-            onImageUpload={handleImageUpload}
-          />
-        )}
+      <main className="flex-grow pt-20 pb-24">
+        <div className="max-w-2xl mx-auto px-4">
+          {/* Loading */}
+          {userLoading && (
+            <div className="flex flex-col justify-center items-center gap-3 py-20">
+              <div className="w-10 h-10 border-4 border-red-200 border-t-red-500 rounded-full animate-spin" />
+              <p className="text-gray-500 text-sm font-medium">
+                Cargando perfil...
+              </p>
+            </div>
+          )}
+
+          {/* Error */}
+          {userError && !userLoading && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+              <p className="text-red-600 font-medium">
+                Error al cargar el perfil
+              </p>
+              <p className="text-red-500 text-sm mt-1">
+                {userError.message}
+              </p>
+            </div>
+          )}
+
+          {/* Perfil */}
+          {!userLoading && profile && (
+            <UserCardInfo user={profile} onSave={handleSave} />
+          )}
+        </div>
       </main>
 
       {/* Mensaje de estado */}

@@ -1,27 +1,25 @@
 // src/components/UserCardInfo.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import {
+  IoPersonOutline,
+  IoMailOutline,
+  IoCallOutline,
+  IoTrophyOutline,
+  IoCreateOutline,
+  IoCheckmarkOutline,
+  IoCloseOutline,
+} from "react-icons/io5";
 
 /**
  * Props:
- * - user: { firstName, lastName, username, email, score, phoneNumber, profileImageUrl }
- * - onSave(updatedUser): se llama al pulsar “Guardar cambios”
- * - onImageUpload(file): se llama en cuanto se elige un nuevo archivo
+ * - user: { firstName, lastName, username, email, score, phoneNumber }
+ * - onSave(updatedUser): se llama al pulsar "Guardar cambios"
  */
-const UserCardInfo = ({ user, onSave, onImageUpload }) => {
+const UserCardInfo = ({ user, onSave }) => {
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ ...user });
 
-  // Preview inmediato: se muestra al instante sin esperar al backend
-  const [previewImage, setPreviewImage] = useState(user.profileImageUrl);
-  const fileInputRef = useRef(null);
-
-  // Mantener el preview sincronizado si cambia lo que viene del padre
-  useEffect(() => {
-    setPreviewImage(user.profileImageUrl || null);
-  }, [user.profileImageUrl]);
-
-  // Mantener formulario sincronizado si cambia el usuario desde arriba
   useEffect(() => {
     setForm({ ...user });
   }, [user]);
@@ -29,32 +27,9 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) {
-      alert("Selecciona una imagen válida.");
-      return;
-    }
-
-    // URL local para preview inmediato
-    const localUrl = URL.createObjectURL(file);
-    setPreviewImage(localUrl);
-
-    try {
-      await onImageUpload(file); // El padre hace la subida real
-      // Si querés liberar el objeto local para evitar fugas:
-      // URL.revokeObjectURL(localUrl); // (hacerlo después de que el <img> haya renderizado)
-    } catch (err) {
-      // Si falla la subida, volvemos al valor previo
-      setPreviewImage(user.profileImageUrl || null);
-    }
-  };
-
   const toggleEdit = () => {
     if (editMode) {
       setForm({ ...user });
-      setPreviewImage(user.profileImageUrl || null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
     setEditMode((e) => !e);
   };
@@ -66,196 +41,172 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
 
   if (!user) return null;
 
+  const initials =
+    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "U";
+
   return (
-    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-6 overflow-hidden">
-      {/* cabecera roja + avatar */}
-      <div className="bg-red-700 px-6 pt-6 pb-4">
-        <div className="flex justify-center">
-          <div className="relative">
-            {previewImage ? (
-              <img
-                src={previewImage}
-                alt={`${user.firstName} avatar`}
-                className={`w-24 h-24 rounded-full object-cover ${
-                  editMode
-                    ? "cursor-pointer hover:opacity-80 transition-opacity"
-                    : ""
-                }`}
-                onClick={() => editMode && fileInputRef.current?.click()}
-              />
-            ) : (
-              <div
-                className={`w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center ${
-                  editMode
-                    ? "cursor-pointer hover:bg-gray-300 transition-colors"
-                    : ""
-                }`}
-                onClick={() => editMode && fileInputRef.current?.click()}
-              >
-                <span className="text-gray-400 text-xl">👤</span>
-              </div>
-            )}
-            {editMode && (
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            )}
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      {/* Cabecera con gradiente + avatar de iniciales */}
+      <div className="relative bg-gradient-to-r from-red-500 to-red-600 px-6 pt-8 pb-14">
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+          <div className="w-20 h-20 rounded-2xl bg-white shadow-lg shadow-red-500/20 flex items-center justify-center border-4 border-white">
+            <span className="text-red-600 font-bold text-2xl tracking-wide">
+              {initials}
+            </span>
           </div>
         </div>
-        {editMode && (
-          <p className="text-white text-xs text-center mt-2 opacity-90">
-            Haz clic en la imagen para cambiarla
-          </p>
-        )}
       </div>
 
-      {/* cuerpo, edición o vista */}
+      {/* Nombre y username debajo del avatar */}
+      <div className="pt-14 pb-2 px-6 text-center">
+        <h2 className="text-xl font-bold text-gray-900">
+          {user.firstName} {user.lastName}
+        </h2>
+        <p className="text-sm text-gray-500 mt-0.5">@{user.username}</p>
+      </div>
+
+      {/* Score destacado */}
+      <div className="px-6 pb-4">
+        <div className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-xl mx-auto max-w-xs">
+          <IoTrophyOutline className="text-red-500 text-xl" />
+          <span className="text-sm font-semibold text-gray-600">Puntos:</span>
+          <span className="text-lg font-bold text-red-600">{user.score ?? 0}</span>
+        </div>
+      </div>
+
+      {/* Campos del perfil */}
       <div className="px-6 pb-6">
         {editMode ? (
-          <div className="space-y-4 mt-4">
-            {/* Nombre */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Nombre:
-              </span>
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <IoPersonOutline className="text-sm" />
+                Nombre
+              </label>
               <input
                 name="firstName"
                 value={form.firstName}
                 onChange={handleChange}
-                className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all duration-200"
               />
             </div>
-            {/* Apellido */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Apellido:
-              </span>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <IoPersonOutline className="text-sm" />
+                Apellido
+              </label>
               <input
                 name="lastName"
                 value={form.lastName}
                 onChange={handleChange}
-                className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all duration-200"
               />
             </div>
-            {/* Username */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Usuario:
-              </span>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <IoPersonOutline className="text-sm" />
+                Usuario
+              </label>
               <input
                 name="username"
                 value={form.username}
                 onChange={handleChange}
-                className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all duration-200"
               />
             </div>
-            {/* Email */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Email:
-              </span>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <IoMailOutline className="text-sm" />
+                Email
+              </label>
               <input
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all duration-200"
               />
             </div>
-            {/* Score solo lectura */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Puntos:
-              </span>
-              <span className="text-gray-800 text-lg font-semibold text-red-700">
-                {user.score}
-              </span>
-            </div>
-            {/* Teléfono */}
-            <div className="flex items-center">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide w-32">
-                Teléfono:
-              </span>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                <IoCallOutline className="text-sm" />
+                Telefono
+              </label>
               <input
                 name="phoneNumber"
                 value={form.phoneNumber || ""}
                 onChange={handleChange}
-                className="flex-1 border-b border-gray-300 focus:outline-none focus:border-blue-500 text-gray-800 text-lg bg-transparent py-1"
-                placeholder="-"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all duration-200"
+                placeholder="Sin telefono registrado"
               />
             </div>
           </div>
         ) : (
-          <div className="space-y-3 text-sm mt-4">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                  Nombre:
-                </span>
-                <span className="text-gray-800 text-lg">{user.firstName}</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors duration-150">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <IoPersonOutline className="text-gray-500 text-lg" />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                  Apellido:
-                </span>
-                <span className="text-gray-800 text-lg">{user.lastName}</span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Nombre completo</p>
+                <p className="text-sm font-medium text-gray-800 truncate">{user.firstName} {user.lastName}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Usuario:
-              </span>
-              <span className="text-gray-800 text-lg">{user.username}</span>
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors duration-150">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <IoPersonOutline className="text-gray-500 text-lg" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Usuario</p>
+                <p className="text-sm font-medium text-gray-800 truncate">@{user.username}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Email:
-              </span>
-              <span className="text-gray-800 text-lg">{user.email}</span>
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors duration-150">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <IoMailOutline className="text-gray-500 text-lg" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Email</p>
+                <p className="text-sm font-medium text-gray-800 truncate">{user.email}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Puntos:
-              </span>
-              <span className="text-gray-800 text-lg font-semibold text-red-700">
-                {user.score}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-600 text-xs uppercase tracking-wide">
-                Teléfono:
-              </span>
-              <span className="text-gray-800 text-lg">{user.phoneNumber}</span>
+            <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors duration-150">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <IoCallOutline className="text-gray-500 text-lg" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Telefono</p>
+                <p className="text-sm font-medium text-gray-800 truncate">{user.phoneNumber || "Sin registrar"}</p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* botones */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
+        {/* Botones */}
+        <div className="mt-6 pt-4 border-t border-gray-100">
           {editMode ? (
             <div className="flex gap-3">
               <button
                 onClick={handleSaveClick}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm"
+                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-green-500/25 hover:shadow-green-500/40 active:scale-[0.97] transition-all duration-200 text-sm"
               >
-                Guardar cambios
+                <IoCheckmarkOutline className="text-base" />
+                Guardar
               </button>
               <button
                 onClick={toggleEdit}
-                className="flex-1 bg-red-700 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 text-sm"
+                className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-xl active:scale-[0.97] transition-all duration-200 text-sm"
               >
+                <IoCloseOutline className="text-base" />
                 Cancelar
               </button>
             </div>
           ) : (
             <button
               onClick={toggleEdit}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 active:scale-[0.97] transition-all duration-200 text-sm"
             >
+              <IoCreateOutline className="text-base" />
               Editar Perfil
             </button>
           )}
@@ -267,16 +218,14 @@ const UserCardInfo = ({ user, onSave, onImageUpload }) => {
 
 UserCardInfo.propTypes = {
   user: PropTypes.shape({
-    profileImageUrl: PropTypes.string,
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
-    score: PropTypes.number.isRequired,
+    score: PropTypes.number,
     phoneNumber: PropTypes.string,
   }).isRequired,
   onSave: PropTypes.func.isRequired,
-  onImageUpload: PropTypes.func.isRequired,
 };
 
 export default UserCardInfo;

@@ -32,11 +32,6 @@ export default function useUser(userId) {
           createdAt:      data.created_at,
           isActive:       data.is_active,
           phoneNumber:    data.phone_number,
-          // aquí usamos directamente lo que devolvió el backend
-          profileImageUrl:
-            data.imagen_perfil && data.imagen_mime_type
-              ? `data:${data.imagen_mime_type};base64,${data.imagen_perfil}`
-              : null,
         };
 
         setUser(mapped);
