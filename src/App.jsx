@@ -32,8 +32,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<HomePage />} /> */}
-        <Route path="/" element={<HomePageAux />} />
+        <Route path="/" element={<HomePage />} />
+        {/* <Route path="/" element={<HomePageAux />} /> */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/ranking" element={<RankingPage />} />
