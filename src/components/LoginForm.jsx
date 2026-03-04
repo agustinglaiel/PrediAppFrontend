@@ -130,6 +130,11 @@ const LoginForm = () => {
           Registrarse aquí
         </Link>
       </p>
+      <p className="text-center mt-2 text-sm text-gray-600">
+        <Link to="/forgot-password" className="text-red-600 hover:underline">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
     </div>
   );
 };

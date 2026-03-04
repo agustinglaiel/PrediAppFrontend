@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProdeDispatcher from "./pages/ProdeDispatcher";
 import ProdeSessionResultPage from "./pages/ProdeSessionResultPage";
 import ProdeRaceResultPage from "./pages/ProdeRaceResultPage";
@@ -36,6 +38,8 @@ function App() {
         {/* <Route path="/" element={<HomePageAux />} /> */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/ganadores-historicos" element={<HistoricalWinnersPage />} />
         <Route path="/clasificacion" element={<ClasificationPage />} />

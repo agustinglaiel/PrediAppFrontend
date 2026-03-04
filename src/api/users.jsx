@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
 
-// axios.defaults.baseURL = "http://localhost:8080/api";
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
+// axios.defaults.baseURL = "/api";
 
 // Función para establecer el token JWT en el encabezado de autorización
 export const setAuthToken = (token) => {
@@ -304,6 +304,65 @@ axios.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+// ==================== PASSWORD RESET ====================
+
+/**
+ * Solicita un email de recuperación de contraseña.
+ * NOTA: El backend siempre responde 200 OK por seguridad (no revela si el email existe).
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const { data } = await axios.post('/forgot-password', { email });
+    return data;
+  } catch (err) {
+    console.error("Forgot password error:", err.response?.data || err.message);
+    const backendMessage = err.response?.data?.error;
+    throw new Error(
+      backendMessage || "Error al enviar la solicitud. Intentá de nuevo más tarde."
+    );
+  }
+};
+
+/**
+ * Valida si un token de reset es válido antes de mostrar el formulario.
+ */
+export const validateResetToken = async (token) => {
+  try {
+    const { data } = await axios.post('/validate-reset-token', { token });
+    return data; // { valid: boolean, message: string }
+  } catch (err) {
+    console.error("Validate token error:", err.response?.data || err.message);
+    return { valid: false, message: "Error al validar el token" };
+  }
+};
+
+/**
+ * Establece una nueva contraseña usando el token de reset.
+ */
+export const resetPassword = async (token, newPassword) => {
+  try {
+    const { data } = await axios.post('/reset-password', {
+      token,
+      new_password: newPassword,
+    });
+    return data;
+  } catch (err) {
+    console.error("Reset password error:", err.response?.data || err.message);
+    const backendError = err.response?.data?.error;
+    
+    if (backendError?.includes("invalid or expired")) {
+      throw new Error("El link ha expirado o es inválido. Solicitá uno nuevo.");
+    }
+    if (backendError?.includes("at least 8 characters")) {
+      throw new Error("La contraseña debe tener al menos 8 caracteres.");
+    }
+    
+    throw new Error(
+      backendError || "Error al restablecer la contraseña. Intentá de nuevo."
+    );
+  }
+};
 
 // Verificar si hay un token almacenado al cargar la aplicación
 const token = localStorage.getItem("jwtToken");

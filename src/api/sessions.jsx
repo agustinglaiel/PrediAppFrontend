@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// axios.defaults.baseURL = "http://localhost:8080/api";
-axios.defaults.baseURL = "/api";
+axios.defaults.baseURL = "http://localhost:8080/api";
+// axios.defaults.baseURL = "/api";
 
 // Función para obtener las próximas sesiones (ahora pública, sin token)
 export const getUpcomingSessions = async () => {
